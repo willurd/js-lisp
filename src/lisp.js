@@ -93,10 +93,33 @@ var lisp = (function () {
 		};
 	}
 	
+	function Request (url, successCallback) {
+		var request;
+		if (window.XMLHttpRequest) {
+			request = new XMLHttpRequest();
+		} else if (window.ActiveXObject) {
+			request = new ActiveXObject("Msxml2.XMLHTTP");
+		} else {
+			throw new Error("Ajax request not supported in this browser");
+		}
+		
+		request.onreadystatechange = function () {
+			if (request.readyState == 4 && request.status == 200) {
+				successCallback(request.responseText);
+			}
+		};
+		
+		request.open("GET", url, true);
+		request.send(null);
+	}
+	
 	function Env (parent, symbols) {
 		this.parent = parent || null;
 		this.symbols = symbols || {};
 		this.get = function (symbol) {
+			if (symbol instanceof Symbol)
+				symbol = symbol.value;
+			
 			if (this.symbols.hasOwnProperty(symbol)) {
 				return this.symbols[symbol];
 			} else if (!this.parent) {
@@ -106,8 +129,15 @@ var lisp = (function () {
 			}
 		};
 		this.set = function (symbol, value) {
+			if (symbol instanceof Symbol)
+				symbol = symbol.value;
+			
 			this.symbols[symbol] = value;
 		};
+	}
+	
+	function Symbol (value) {
+		this.value = value;
 	}
 
 	function argsToArray (args) {
@@ -123,7 +153,7 @@ var lisp = (function () {
 			var env = new Env(env, {});
 			var letset = args[0];
 			var args = args.slice(1);
-
+			
 			for (var i = 0; i < letset.length; i++) {
 				var symbol = letset[i][0];
 				var value = letset[i][1];
@@ -132,7 +162,7 @@ var lisp = (function () {
 				}
 				env.set(symbol, value);
 			}
-
+			
 			var ret = null;
 			for (var i = 0; i < args.length; i++) {
 				ret = doSExp(args[i], env);
@@ -142,7 +172,7 @@ var lisp = (function () {
 		},
 
 		"setq": function (env, args) {
-			var parts = args[0].split('.');
+			var parts = args[0].value.split('.');
 			var value = args[1];
 			var obj = env.get(parts[0]);
 			var i;
@@ -153,7 +183,17 @@ var lisp = (function () {
 		},
 
 		"puts": function (env, args) {
-			console.log(env.get(args[0]));
+			var value;
+			var arg;
+			for (var i = 0; i < args.length; i++) {
+				arg = args[i];
+				if (arg instanceof Symbol) {
+					value = env.get(arg);
+				} else {
+					value = arg;
+				}
+			}
+			console.log(value);
 		}
 	});
 	
@@ -163,7 +203,7 @@ var lisp = (function () {
 		var func = env.get(symbol);
 		var parent = null;
 		if (!func) {
-			var parts = symbol.split('.');
+			var parts = symbol.value.split('.');
 			var object = window;
 			for (var i = 0; i < parts.length; i++) {
 				parent = object;
@@ -266,7 +306,7 @@ var lisp = (function () {
 			while (badChars.indexOf(stream.peek()) == -1 && !stream.eof()) {
 				symbol += stream.next();
 			}
-			return symbol;
+			return new Symbol(symbol);
 		},
 		
 		string: function (stream) {
@@ -308,9 +348,17 @@ var lisp = (function () {
 		
 		run: function () {
 			var scripts = document.getElementsByTagName("script");
+			var script;
 			for (var i = 0; i < scripts.length; i++) {
-				if (scripts[i].type == "text/lisp") {
-					runScript(scripts[i].innerText);
+				script = scripts[i];
+				if (script.type == "text/lisp") {
+					if (script.src) {
+						new Request(script.src, function (script) {
+							runScript(script);
+						});
+					} else {
+						runScript(scripts[i].innerText);
+					}
 				}
 			}
 		}
