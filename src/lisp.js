@@ -156,11 +156,7 @@ var lisp = (function () {
 			console.log(env.get(args[0]));
 		}
 	});
-
-	function ParserError (message) {
-		this.toString("ParserError: " + message);
-	}
-
+	
 	function doSExp (sexp, env) {
 		env = env || ENV;
 		var symbol = sexp[0];
@@ -181,16 +177,51 @@ var lisp = (function () {
 	}
 	
 	function runScript (script) {
-		var expressions = [];
-		var p = 0;
-
-		stripWhitespace();
-		expressions.push(getSExp());
-		doSExp(expressions[0]);
+		var expressions = parse.script(script);
+		
+		for (var i = 0; i < expressions.length; i++) {
+			doSExp(expressions[i]);
+		}
+	}
+	
+	function validateInput (input) {
+		if (typeof(input) != "string" &&
+			!(input instanceof StringStream)) {
+			throw new parse.ParserException("Invalid input: " + input);
+		}
+		if (input instanceof StringStream)
+			return input;
+		return new StringStream(input);
 	}
 	
 	var parse = {
+		ParserException: function (message) {
+			this.toString = function () {
+				return "ParserException: " + message;
+			};
+		},
+		
+		script: function (stream) {
+			stream = validateInput(stream);
+			
+			var expressions = [];
+			
+			try {
+				while (!stream.eof()) {
+					stream.swallowWhitespace();
+					var sexp = parse.sexp(stream);
+					expressions.push(sexp);
+				}
+			} catch (e) {
+				// There aren't any sexps left, or the rest is invalid
+			}
+			
+			return expressions;
+		},
+		
 		any: function (stream) {
+			stream = validateInput(stream);
+			
 			stream.swallowWhitespace();
 			switch (stream.peek())
 			{
@@ -204,10 +235,12 @@ var lisp = (function () {
 		},
 		
 		sexp: function (stream) {
+			stream = validateInput(stream);
+			
 			stream.swallowWhitespace();
 			if (stream.peek() != '(') {
-				throw new ParserError("Invalid sexp at position " + stream.position +
-					" (" + stream.peek() + ")");
+				throw new parse.ParserException("Invalid sexp at position " +
+					stream.position + " (starting with: '" + stream.peek() + "')");
 			}
 			stream.next()
 			stream.swallowWhitespace();
@@ -221,9 +254,15 @@ var lisp = (function () {
 		},
 		
 		symbol: function (stream) {
+			stream = validateInput(stream);
+			
 			stream.swallowWhitespace();
-			var symbol = "";
 			var badChars = WHITESPACE + '()';
+			if (badChars.indexOf(stream.peek()) != -1) {
+				throw new parse.ParserException("Invalid symbol at position " +
+					stream.position + " (starting with: '" + stream.peek() + "')");
+			}
+			var symbol = "";
 			while (badChars.indexOf(stream.peek()) == -1 && !stream.eof()) {
 				symbol += stream.next();
 			}
@@ -231,8 +270,15 @@ var lisp = (function () {
 		},
 		
 		string: function (stream) {
+			stream = validateInput(stream);
+			
 			stream.swallowWhitespace();
+			if (stream.peek() != '"') {
+				throw new parse.ParserException("Invalid string at position " +
+					stream.position + " (starting with: '" + stream.peek() + "')");
+			}
 			var string = "";
+			stream.next();
 			while (stream.peek() != '"' && !stream.eof()) {
 				var c = stream.next();
 				switch (c)
@@ -250,28 +296,15 @@ var lisp = (function () {
 		},
 		
 		stringEscape: function (stream) {
+			stream = validateInput(stream);
+			
 			var c = stream.next();
 			return ESCAPES[c];
 		}
 	};
 
 	return {
-		parse: function (string) {
-			var expressions = [];
-			var stream = new StringStream(string);
-			try {
-				while (!stream.eof()) {
-					stream.swallowWhitespace();
-					var sexp = parse.sexp(stream);
-					expressions.push(sexp);
-				}
-			} catch (e) {
-				// There aren't any sexps left, or the rest is invalid
-				console.log("lisp.parse error:", e);
-			}
-			
-			return expressions;
-		},
+		parse: parse,
 		
 		run: function () {
 			var scripts = document.getElementsByTagName("script");
@@ -283,3 +316,5 @@ var lisp = (function () {
 		}
 	};
 })();
+
+lisp.run();

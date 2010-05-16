@@ -1,16 +1,23 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Lisp scripting test</title>
+		<title>js-lisp DOM Test</title>
+		<link href="/vendor/JSTest/src/themes/default/style.css"
+			type="text/css" rel="stylesheet" media="screen" />
 		<script type="text/lisp">
 		(let ((div (document.getElementById "thediv")))
 		  (puts div)
 		  (setq div.innerText "it works!"))
 		</script>
+		<script type="text/javascript" src="/lisp.js"></script>
 	</head>
 	<body>
 		
-		<div id="thediv">it didn't work :(</div>
+		<h1>js-lisp DOM Test</h1>
+		
+		<div id="test-results">
+			<div id="thediv">it didn't work :(</div>
+		</div>
 		
 	</body>
 </html>
