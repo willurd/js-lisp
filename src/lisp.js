@@ -316,5 +316,3 @@ var lisp = (function () {
 		}
 	};
 })();
-
-lisp.run();
