@@ -20,12 +20,12 @@ JSTest.TestCase({
 	// symbol
 	
 	testParseSymbol: function () {
-		this.assertEqual(lisp.parse.symbol("abcd"), "abcd");
-		this.assertEqual(lisp.parse.symbol("document.getElementById"),
+		this.assertEqual(lisp.parse.symbol("abcd").value, "abcd");
+		this.assertEqual(lisp.parse.symbol("document.getElementById").value,
 		 	"document.getElementById");
-		this.assertEqual(lisp.parse.symbol("MyClass/myvar"), "MyClass/myvar");	
-		this.assertEqual(lisp.parse.symbol("  space-before"), "space-before");
-		this.assertEqual(lisp.parse.symbol("space-after  \t\n "), "space-after");
+		this.assertEqual(lisp.parse.symbol("MyClass/myvar").value, "MyClass/myvar");	
+		this.assertEqual(lisp.parse.symbol("  space-before").value, "space-before");
+		this.assertEqual(lisp.parse.symbol("space-after  \t\n ").value, "space-after");
 	},
 	
 	// sexp

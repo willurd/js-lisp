@@ -138,6 +138,9 @@ var lisp = (function () {
 	
 	function Symbol (value) {
 		this.value = value;
+		this.toString = function () {
+			return this.value;
+		};
 	}
 
 	function argsToArray (args) {
