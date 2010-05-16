@@ -241,6 +241,8 @@ var lisp = (function () {
 				object = object[parts[i]];
 			}
 			func = object;
+			if (func === null || func === undefined)
+				throw new Error("Access of undefined symbol: " + symbol.value);
 			return func.apply(parent, sexp.slice(1));
 		}
 	}
