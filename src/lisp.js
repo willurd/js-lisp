@@ -189,6 +189,8 @@ var lisp = (function () {
 				arg = args[i];
 				if (arg instanceof Symbol) {
 					value = env.get(arg);
+				} else if (arg instanceof Array) {
+					value = doSExp(arg);
 				} else {
 					value = arg;
 				}
