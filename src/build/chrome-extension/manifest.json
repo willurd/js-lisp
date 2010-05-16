@@ -1,0 +1,11 @@
+{
+  "name": "Lisp Scripting",
+  "version": "0.0.1",
+  "description": "A Lisp interpreter for the browser.",
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*", "file:///*"],
+      "js": ["lisp.js"]
+    }
+  ]
+}

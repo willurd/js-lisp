@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>js-lisp Test Runner</title>
+		<link href="/vendor/JSTest/src/themes/default/style.css" type="text/css" rel="stylesheet" media="screen" />
+		<script type="text/javascript" src="/vendor/JSTest/src/jstest.js"></script>
+		<script type="text/javascript" src="/lisp.js"></script>
+		<script type="text/javascript" src="/tests/tests.js"></script>
+		<script type="text/javascript">
+		window.onload = function () {
+			var resultsDiv = document.getElementById('test-results');
+			JSTest.run(true, JSTest.handlers.HTMLHandler, resultsDiv);
+		};
+		</script>
+		<style type="text/css">
+		.testerror {
+			background-image: url("/vendor/JSTest/src/themes/default/cancel.png") !important;
+			}
+		
+		.testmessage {
+			background-image: url("/vendor/JSTest/src/themes/default/tick.png") !important;
+			}
+		</style>
+	</head>
+	<body>
+		
+		<h1>JSTest Test Runner</h1>
+		
+		<div id="test-results"></div>
+		
+	</body>
+</html>

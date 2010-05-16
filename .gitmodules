@@ -1,0 +1,3 @@
+[submodule "src/vendor/JSTest"]
+	path = src/vendor/JSTest
+	url = git@ssh.github.com:willurd/JSTest.git

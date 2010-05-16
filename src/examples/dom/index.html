@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Lisp scripting test</title>
+		<script type="text/lisp">
+		(let ((div (document.getElementById "thediv")))
+		  (puts div)
+		  (setq div.innerText "it works!"))
+		</script>
+	</head>
+	<body>
+		
+		<div id="thediv">it didn't work :(</div>
+		
+	</body>
+</html>
