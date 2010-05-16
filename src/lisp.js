@@ -1,5 +1,5 @@
 // ================================================================================
-// js-lisp: A lisp interpreter for browser scripting.
+// js-lisp: A lisp interpreter for browser scripting
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -109,7 +109,7 @@ var lisp = (function () {
 			}
 		};
 		
-		request.open("GET", url, true);
+		request.open("GET", url, false); // Load the script synchronously
 		request.send(null);
 	}
 	
@@ -123,7 +123,7 @@ var lisp = (function () {
 			if (this.symbols.hasOwnProperty(symbol)) {
 				return this.symbols[symbol];
 			} else if (!this.parent) {
-				return null;
+				throw new Error("Symbol '" + symbol + "' not found");
 			} else {
 				return this.parent.get(symbol);
 			}
@@ -152,6 +152,19 @@ var lisp = (function () {
 	}
 
 	var ENV = new Env(new Env(null, window), {
+		"lambda": function (env, args) {
+			var arglist = args[0];
+			var expressions = args.slice(1);
+			return function () {
+				for (var i = 0; i < arglist.length; i++) {
+					env.set(arglist[i], arguments[i]);
+				}
+				for (var i = 0; i < expressions.length; i++) {
+					doSExp(expressions[i], env);
+				}
+			};
+		},
+		
 		"let": function (env, args) {
 			var env = new Env(env, {});
 			var letset = args[0];
@@ -161,7 +174,7 @@ var lisp = (function () {
 				var symbol = letset[i][0];
 				var value = letset[i][1];
 				if (value instanceof Array) {
-					value = doSExp(value);
+					value = doSExp(value, env);
 				}
 				env.set(symbol, value);
 			}
@@ -173,7 +186,7 @@ var lisp = (function () {
 
 			return ret;
 		},
-
+		
 		"setq": function (env, args) {
 			var parts = args[0].value.split('.');
 			var value = args[1];
@@ -182,32 +195,45 @@ var lisp = (function () {
 			for (i = 1; i < parts.length-1; i++) {
 				obj = obj[parts[i]];
 			}
-			obj[parts[i]] = value;
+			if (value instanceof Symbol) {
+				throw new Error("Not Implemented - Symbol values in setq");
+			} else if (value instanceof Array) {
+				obj[parts[i]] = doSExp(value, env);
+			} else if (["string", "number"].indexOf(typeof(value)) >= 0) {
+				obj[parts[i]] = value;
+			} else {
+				throw new Error("Unknown value type");
+			}
 		},
-
+		
 		"puts": function (env, args) {
-			var value;
 			var arg;
 			for (var i = 0; i < args.length; i++) {
 				arg = args[i];
 				if (arg instanceof Symbol) {
-					value = env.get(arg);
+					args[i] = env.get(arg);
 				} else if (arg instanceof Array) {
-					value = doSExp(arg);
+					args[i] = doSExp(arg, env);
 				} else {
-					value = arg;
+					// No need to modify the arg.
 				}
 			}
-			console.log(value);
+			// Do not remove this. This is not a debug statement.
+			console.log.apply(console, args);
 		}
 	});
 	
 	function doSExp (sexp, env) {
 		env = env || ENV;
 		var symbol = sexp[0];
-		var func = env.get(symbol);
 		var parent = null;
-		if (!func) {
+		var func;
+		try {
+			func = env.get(symbol);
+			return func.apply(parent, [env, sexp.slice(1)]);
+		} catch (e) {
+			// Symbol probably not found.
+			// TODO: Make a new error class for this so we know for sure.
 			var parts = symbol.value.split('.');
 			var object = window;
 			for (var i = 0; i < parts.length; i++) {
@@ -216,16 +242,14 @@ var lisp = (function () {
 			}
 			func = object;
 			return func.apply(parent, sexp.slice(1));
-		} else {
-			return func.apply(parent, [env, sexp.slice(1)]);
 		}
 	}
 	
-	function runScript (script) {
+	function runScript (script, env) {
 		var expressions = parse.script(script);
 		
 		for (var i = 0; i < expressions.length; i++) {
-			doSExp(expressions[i]);
+			doSExp(expressions[i], env);
 		}
 	}
 	
