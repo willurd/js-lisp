@@ -298,15 +298,15 @@ var lisp = (function (global) {
 			var args = argsToArray(arguments);
 			return (function (env, args) {
 				var arglist = args[0];
-				var expressions = args.slice(1);
+				var body = args.slice(1);
 				return function () {
 					var tempEnv = lisp.env;
 					lisp.env = env;
 					for (var i = 0; i < arglist.length; i++) {
 						lisp.env.set(arglist[i], arguments[i]);
 					}
-					for (var i = 0; i < expressions.length; i++) {
-						doSExp(expressions[i]);
+					for (var i = 0; i < body.length; i++) {
+						doSExp(body[i]);
 					}
 					lisp.env = tempEnv;
 				}
@@ -353,6 +353,24 @@ var lisp = (function (global) {
 			}
 			
 			lisp.env.set(symbol, value);
+		}),
+		
+		"defun": new Macro(function () {
+			var args = argsToArray(arguments);
+			var name = args[0];
+			var arglist = args[1];
+			var body = args.slice(2);
+			
+			lisp.env.set(name, function () {
+				lisp.env = new Env(lisp.env);
+				for (var i = 0; i < arglist.length; i++) {
+					lisp.env.set(arglist[i], arguments[i]);
+				}
+				for (var i = 0; i < body.length; i++) {
+					doSExp(body[i]);
+				}
+				lisp.env = lisp.env.parent;
+			})
 		})
 	};
 	

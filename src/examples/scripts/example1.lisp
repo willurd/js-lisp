@@ -1,5 +1,4 @@
-(setq window.onload
-	(lambda (e)
-		(puts "hello")
-		(puts (document.getElementsByTagName "h1"))
-		(puts "success")))
+(defun window.onload (e)
+	(puts "hello")
+	(puts (document.getElementsByTagName "h1"))
+	(puts "success"))

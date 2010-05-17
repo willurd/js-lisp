@@ -1,6 +1,5 @@
 # TODO
 
-* Write (defun)
 * Write macros: (if), (when), (or), (and)
 * Do lambda unit tests
 * Make a Cons class for sexp's (instead of using Array)
