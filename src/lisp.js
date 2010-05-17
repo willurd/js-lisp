@@ -391,11 +391,14 @@ var lisp = (function (global) {
 		return func.apply(thisObject, args);
 	}
 	
-	function lispEval (string) {
+	function lispEval (string, env) {
+		var tempEnv = lisp.env;
+		lisp.env = env || lisp.env;
 		var expressions = parse.script(string);
 		for (var i = 0; i < expressions.length; i++) {
-			doSExp(expressions[i], lisp.env);
+			doSExp(expressions[i]);
 		}
+		lisp.env = tempEnv;
 	}
 	
 	function validateInput (input) {
