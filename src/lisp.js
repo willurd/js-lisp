@@ -262,13 +262,26 @@ var lisp = (function (global) {
 		} else {
 			throw new Error("Ajax request not supported in this browser");
 		}
-
+		
+		request.overrideMimeType("text/plain");
+		
 		request.onreadystatechange = function () {
-			if (request.readyState == 4 && request.status == 200) {
-				successCallback(request.responseText);
+			switch (request.readyState)
+			{
+			case 4:
+				switch (request.status)
+				{
+				case 200:
+					successCallback(request.responseText);
+					break;
+				case 404:
+					throw new Error("Trying to load lisp script that does not exist: " + url);
+					break;
+				}
+				break;
 			}
 		};
-
+		
 		request.open("GET", url, false); // Load the script synchronously
 		request.send(null);
 	}
@@ -344,6 +357,10 @@ var lisp = (function (global) {
 	};
 	
 	var ENV = new Env(new Env(null, global), {
+		"list": function () {
+			return argsToArray(arguments);
+		},
+		
 		"puts": function () {
 			// Do not remove this. This is not a debug statement.
 			console.info.apply(console, arguments);
@@ -351,6 +368,29 @@ var lisp = (function (global) {
 		
 		"concat": function () {
 			return argsToArray(arguments).join("");
+		},
+		
+		"join": function () {
+			var args = argsToArray(arguments);
+			var sep  = args[0];
+			var list = args.slice(1).reduce(function (a, b) { return a.concat(b) });
+			return list.join(sep);
+		},
+		
+		"to-string": function (value) {
+			if (arguments.length == 0)
+				return "";
+			if (arguments.length > 1)
+				throw new Error("(to-string) only accepts 1 argument");
+			return String(value);
+		},
+		
+		"to-number": function (value) {
+			if (arguments.length == 0)
+				return 0;
+			if (arguments.length > 1)
+				throw new Error("(to-number) only accepts 1 argument");
+			return Number(value);
 		},
 		
 		"/": function () {
@@ -376,6 +416,14 @@ var lisp = (function (global) {
 				return a - b;
 			});
 		},
+		
+		"1+": function (value) {
+			if (arguments.length == 0)
+				return 1;
+			if (arguments.length > 1)
+				throw new Error("(1+) only accepts 1 argument");
+			return Number(value) + 1;
+		}
 	});
 	
 	function resolve (value) {
