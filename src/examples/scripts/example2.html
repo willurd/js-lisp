@@ -6,7 +6,9 @@
 			type="text/css" rel="stylesheet" media="screen" />
 		<script type="text/javascript" src="/lisp.js"></script>
 		<script type="text/lisp" src="/examples/scripts/example2.lisp">
-
+		(setq window.onload
+			(lambda ()
+				(say-hi "test-results")))
 		</script>
 		<script type="text/javascript">
 		lisp.run();

@@ -168,6 +168,9 @@ var lisp = (function (global) {
 	var Env = Class.extend({
 		init: function (parent, symbols) {
 			this.parent = parent || null;
+			if (symbols != window)
+				for (var key in symbols)
+					symbols[key]['isMacro'] = true;
 			this.symbols = symbols || {};
 		},
 		
@@ -278,115 +281,121 @@ var lisp = (function (global) {
 	}
 	
 	var ENV = new Env(new Env(null, global), {
-		"lambda": function (env, args) {
-			env = new Env(env);
-			var arglist = args[0];
-			var expressions = args.slice(1);
-			return function () {
-				for (var i = 0; i < arglist.length; i++) {
-					env.set(arglist[i], arguments[i]);
+		"lambda": function () {
+			lisp.env = new Env(lisp.env);
+			var args = argsToArray(arguments);
+			var ret = (function (env, args) {
+				var arglist = args[0];
+				var expressions = args.slice(1);
+				return function () {
+					var tempEnv = lisp.env;
+					lisp.env = env;
+					for (var i = 0; i < arglist.length; i++) {
+						lisp.env.set(arglist[i], arguments[i]);
+					}
+					for (var i = 0; i < expressions.length; i++) {
+						doSExp(expressions[i]);
+					}
+					lisp.env = tempEnv;
 				}
-				for (var i = 0; i < expressions.length; i++) {
-					doSExp(expressions[i], env);
-				}
-			};
+			})(lisp.env, args);
+			lisp.env = lisp.env.parent;
+			return ret;
 		},
 		
-		"let": function (env, args) {
-			var env = new Env(env);
+		"let": function () {
+			lisp.env = new Env(lisp.env);
+			var args = argsToArray(arguments);
 			var letset = args[0];
-			var args = args.slice(1);
+			args = args.slice(1);
 			
 			for (var i = 0; i < letset.length; i++) {
 				var symbol = letset[i][0];
 				var value = letset[i][1];
-				if (value instanceof Array) {
-					value = doSExp(value, env);
-				}
-				env.set(symbol, value);
+				if (value instanceof Array)
+					value = doSExp(value);
+				lisp.env.set(symbol, value);
 			}
 			
 			var ret = null;
 			for (var i = 0; i < args.length; i++) {
-				ret = doSExp(args[i], env);
+				ret = doSExp(args[i]);
 			}
+			
+			lisp.env = lisp.env.parent;
 			
 			return ret;
 		},
 		
-		"setq": function (env, args) {
+		"setq": function () {
+			var args = argsToArray(arguments);
 			var symbol = args[0];
 			var value  = args[1];
 			
 			if (value instanceof Symbol) {
 				throw new Error("Not Implemented - Symbol values in setq");
 			} else if (value instanceof Array) {
-				value = doSExp(value, env);
+				value = doSExp(value);
 			} else if (["string", "number"].indexOf(typeof(value)) >= 0) {
-				console.info(3, value);
 				value = value;
 			} else {
 				throw new Error("Unknown value type");
 			}
 			
-			env.set(symbol, value);
+			lisp.env.set(symbol, value);
 		},
 		
-		"puts": function (env, args) {
+		"puts": function () {
+			var args = argsToArray(arguments);
 			var arg;
 			for (var i = 0; i < args.length; i++) {
 				arg = args[i];
 				if (arg instanceof Symbol) {
-					args[i] = env.get(arg);
+					args[i] = lisp.env.get(arg);
 				} else if (arg instanceof Array) {
-					args[i] = doSExp(arg, env);
+					args[i] = doSExp(arg);
 				} else {
 					// No need to modify the arg.
 				}
 			}
 			// Do not remove this. This is not a debug statement.
-			console.log.apply(console, args);
+			console.info.apply(console, args);
 		}
 	});
 	
-	function doSExp (sexp, env) {
-		env = env || ENV;
-		var symbol = sexp[0];
-		var parent = null;
-		var func;
-		
-		if (env.has(symbol)) {
-			func = env.get(symbol);
-			return func.apply(parent, [env, sexp.slice(1)]);
+	function resolve (value) {
+		if (value instanceof Symbol) {
+			return lisp.env.get(value);
+		} else if (value instanceof Array) {
+			return doSExp(value);
 		} else {
-			var parts = symbol.value.split('.');
-			var object;
-			var i = 0;
-			
-			if (env.has(parts[0])) {
-				object = env.get(parts[0]);
-				i = 1;
-			} else {
-				object = global;
-			}
-			
-			for (; i < parts.length; i++) {
-				parent = object;
-				object = object[parts[i]];
-			}
-			
-			func = object;
-			if (func === null || func === undefined)
-				throw new Error("Access of undefined symbol: " + symbol.value);
-			return func.apply(parent, sexp.slice(1));
+			return value;
 		}
 	}
 	
-	function runScript (script, env) {
+	function doSExp (sexp) {
+		var symbol = sexp[0];
+		
+		var func = lisp.env.get(symbol);
+		if (typeof(func) != "function")
+			throw new Error(symbol.value + " is not a function");
+		
+		var thisObjectPath = symbol.value.split(".").slice(0,-1).join(".");
+		var thisObject = lisp.env.get(thisObjectPath);
+		var args = sexp.slice(1);
+		
+		if (!func.isMacro) {
+			args = args.map(resolve);
+		}
+		
+		return func.apply(thisObject, args);
+	}
+	
+	function runScript (script) {
 		var expressions = parse.script(script);
 		
 		for (var i = 0; i < expressions.length; i++) {
-			doSExp(expressions[i], env);
+			doSExp(expressions[i], lisp.env);
 		}
 	}
 	
@@ -512,6 +521,8 @@ var lisp = (function (global) {
 	return {
 		Env: Env,
 		parse: parse,
+		
+		env: ENV,
 		
 		run: function () {
 			var scripts = document.getElementsByTagName("script");
