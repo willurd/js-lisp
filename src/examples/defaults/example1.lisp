@@ -1,0 +1,7 @@
+(defun window.onload (e)
+	(puts "t:" t)
+	(puts "true:" true)
+	(puts "false:" false)
+	(puts "nil:" nil)
+	(puts "null:" null)
+	(puts "undefined:" undefined))
