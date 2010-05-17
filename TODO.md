@@ -1,5 +1,6 @@
 # TODO
 
+* Write some predicates: (is-string), (is-number), (is-null), (is-undefined), etc
 * Write macros: (if), (when), (or), (and)
 * Do lambda unit tests
 * Make a Cons class for sexp's (instead of using Array)
