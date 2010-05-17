@@ -1,0 +1,10 @@
+(setq window.onload
+	(lambda (e)
+		(let ((list   (document.getElementById "list"))
+			  (add-li (lambda (text)
+						(let ((li (document.createElement "li")))
+							(li.appendChild (document.createTextNode text))
+							(list.appendChild li)))))
+			(add-li (concat "(/ 10 2) = " (/ 10 2)) list)
+			(add-li (concat "(/ 20 2 3) = " (/ 20 2 3)) list)				
+			(add-li (concat "(+ (* 2 3) (* 4 5)) = " (+ (* 2 3) (* 4 5))) list))))
