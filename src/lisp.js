@@ -22,10 +22,6 @@ var lisp = (function (global) {
 	// Constants
 	// ----------------------------------------------------------------------------
 	
-	const ESCAPES = {
-		"n": "\n"
-	};
-	
 	const WHITESPACE = " \t\n\r";
 	
 	// ----------------------------------------------------------------------------
@@ -168,9 +164,6 @@ var lisp = (function (global) {
 	var Env = Class.extend({
 		init: function (parent, symbols) {
 			this.parent = parent || null;
-			if (symbols != window)
-				for (var key in symbols)
-					symbols[key]['isMacro'] = true;
 			this.symbols = symbols || {};
 		},
 		
@@ -203,7 +196,7 @@ var lisp = (function (global) {
 			if (this.symbols.hasOwnProperty(symbol)) {
 				value = this.symbols[symbol];
 			} else if (!this.parent) {
-				value = undefined;
+				value = lisp.MACROS[symbol]; // This will be undefined if MACROS doesn't have the value
 			} else {
 				if (this.parent instanceof Env) {
 					value = this.parent.get(symbol);
@@ -280,11 +273,17 @@ var lisp = (function (global) {
 		request.send(null);
 	}
 	
-	var ENV = new Env(new Env(null, global), {
-		"lambda": function () {
-			lisp.env = new Env(lisp.env);
+	var Macro = Class.extend({
+		init: function (callable) {
+			this.callable = callable;
+		}
+	});
+	
+	var MACROS = {
+		"lambda": new Macro(function () {
+			var env  = new Env(lisp.env);
 			var args = argsToArray(arguments);
-			var ret = (function (env, args) {
+			return (function (env, args) {
 				var arglist = args[0];
 				var expressions = args.slice(1);
 				return function () {
@@ -298,12 +297,10 @@ var lisp = (function (global) {
 					}
 					lisp.env = tempEnv;
 				}
-			})(lisp.env, args);
-			lisp.env = lisp.env.parent;
-			return ret;
-		},
+			})(env, args);
+		}),
 		
-		"let": function () {
+		"let": new Macro(function () {
 			lisp.env = new Env(lisp.env);
 			var args = argsToArray(arguments);
 			var letset = args[0];
@@ -325,9 +322,9 @@ var lisp = (function (global) {
 			lisp.env = lisp.env.parent;
 			
 			return ret;
-		},
+		}),
 		
-		"setq": function () {
+		"setq": new Macro(function () {
 			var args = argsToArray(arguments);
 			var symbol = args[0];
 			var value  = args[1];
@@ -343,24 +340,42 @@ var lisp = (function (global) {
 			}
 			
 			lisp.env.set(symbol, value);
+		})
+	};
+	
+	var ENV = new Env(new Env(null, global), {
+		"puts": function () {
+			// Do not remove this. This is not a debug statement.
+			console.info.apply(console, arguments);
 		},
 		
-		"puts": function () {
-			var args = argsToArray(arguments);
-			var arg;
-			for (var i = 0; i < args.length; i++) {
-				arg = args[i];
-				if (arg instanceof Symbol) {
-					args[i] = lisp.env.get(arg);
-				} else if (arg instanceof Array) {
-					args[i] = doSExp(arg);
-				} else {
-					// No need to modify the arg.
-				}
-			}
-			// Do not remove this. This is not a debug statement.
-			console.info.apply(console, args);
-		}
+		"concat": function () {
+			return argsToArray(arguments).join("");
+		},
+		
+		"/": function () {
+			return argsToArray(arguments).reduce(function (a, b) {
+				return a / b;
+			});
+		},
+		
+		"*": function () {
+			return argsToArray(arguments).reduce(function (a, b) {
+				return a * b;
+			});
+		},
+		
+		"+": function () {
+			return argsToArray(arguments).reduce(function (a, b) {
+				return a + b;
+			});
+		},
+		
+		"-": function () {
+			return argsToArray(arguments).reduce(function (a, b) {
+				return a - b;
+			});
+		},
 	});
 	
 	function resolve (value) {
@@ -376,19 +391,19 @@ var lisp = (function (global) {
 	function doSExp (sexp) {
 		var symbol = sexp[0];
 		
-		var func = lisp.env.get(symbol);
-		if (typeof(func) != "function")
+		var object = lisp.env.get(symbol);
+		if (typeof(object) != "function" && !(object instanceof Macro))
 			throw new Error(symbol.value + " is not a function");
 		
 		var thisObjectPath = symbol.value.split(".").slice(0,-1).join(".");
 		var thisObject = lisp.env.get(thisObjectPath);
 		var args = sexp.slice(1);
 		
-		if (!func.isMacro) {
-			args = args.map(resolve);
+		if (object instanceof lisp.Macro) {
+			return object.callable.apply(thisObject, args);
+		} else {
+			return object.apply(thisObject, args.map(resolve));
 		}
-		
-		return func.apply(thisObject, args);
 	}
 	
 	function lispEval (string, env) {
@@ -412,6 +427,11 @@ var lisp = (function (global) {
 	}
 	
 	var parse = {
+		NUMBER_FORMATS: [
+			/^([0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/,
+			/^(0x(?:[0-9a-fA-F]+))(?:\s+|\)|$)/,
+		],
+		
 		ParserException: function (message) {
 			this.toString = function () {
 				return "ParserException: " + message;
@@ -420,7 +440,6 @@ var lisp = (function (global) {
 		
 		script: function (stream) {
 			stream = validateInput(stream);
-			
 			var expressions = [];
 			
 			try {
@@ -438,7 +457,6 @@ var lisp = (function (global) {
 		
 		any: function (stream) {
 			stream = validateInput(stream);
-			
 			stream.swallowWhitespace();
 			switch (stream.peek())
 			{
@@ -447,13 +465,20 @@ var lisp = (function (global) {
 			case '"':
 				return parse.string(stream);
 			default:
+				var rest = stream.rest();
+				for (var i = 0; i < lisp.parse.NUMBER_FORMATS.length; i++) {
+					var format = lisp.parse.NUMBER_FORMATS[i];
+					var match = rest.match(format);
+					if (match) {
+						return parse.number(stream, match[1]);
+					}
+				}
 				return parse.symbol(stream);
 			}
 		},
 		
 		sexp: function (stream) {
 			stream = validateInput(stream);
-			
 			stream.swallowWhitespace();
 			if (stream.peek() != '(') {
 				throw new parse.ParserException("Invalid sexp at position " +
@@ -472,7 +497,6 @@ var lisp = (function (global) {
 		
 		symbol: function (stream) {
 			stream = validateInput(stream);
-			
 			stream.swallowWhitespace();
 			var badChars = WHITESPACE + '()';
 			if (badChars.indexOf(stream.peek()) != -1) {
@@ -488,7 +512,6 @@ var lisp = (function (global) {
 		
 		string: function (stream) {
 			stream = validateInput(stream);
-			
 			stream.swallowWhitespace();
 			if (stream.peek() != '"') {
 				throw new parse.ParserException("Invalid string at position " +
@@ -512,16 +535,43 @@ var lisp = (function (global) {
 			return string;
 		},
 		
+		number: function (stream, match) {
+			if (!match) {
+				stream = validateInput(stream);
+				stream.swallowWhitespace();
+				var rest = stream.rest();
+				for (var i = 0; i < lisp.parse.NUMBER_FORMATS.length; i++) {
+					var format = lisp.parse.NUMBER_FORMATS[i];
+					match = rest.match(format);
+					if (match) {
+						match = match[1];
+						break;
+					}
+				}
+			}
+			
+			if (!match) {
+				throw new ParseException("Invalid number at position " + stream.position +
+					" (starting with: '" + stream.peek() + "')");
+			}
+			
+			stream.position += match.length;
+			return eval(match);
+		},
+		
 		stringEscape: function (stream) {
 			stream = validateInput(stream);
-			
 			var c = stream.next();
-			return ESCAPES[c];
+			return eval("\\" + c);
 		}
 	};
 	
 	return {
+		MACROS: MACROS,
+		
 		Env: Env,
+		Macro: Macro,
+		Symbol: Symbol,
 		
 		parse: parse,
 		env: ENV,

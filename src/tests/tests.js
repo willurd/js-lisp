@@ -17,13 +17,22 @@ JSTest.TestCase({
 		this.assertRaises(lisp.parse.ParserException, lisp.parse.string, null);
 	},
 	
+	// number
+	
+	testParseNumber: function () {
+		this.assertEqual(lisp.parse.number("345"), 345);
+		this.assertEqual(lisp.parse.number("34.5"), 34.5);
+		this.assertEqual(lisp.parse.number("  3.45e2   "), 3.45e2);
+		this.assertEqual(lisp.parse.number("0377\n\r"), 0377);
+		this.assertEqual(lisp.parse.number("\t0xFF\n"), 0xFF);
+	},
+	
 	// symbol
 	
 	testParseSymbol: function () {
 		this.assertEqual(lisp.parse.symbol("abcd").value, "abcd");
 		this.assertEqual(lisp.parse.symbol("document.getElementById").value,
 		 	"document.getElementById");
-		this.assertEqual(lisp.parse.symbol("MyClass/myvar").value, "MyClass/myvar");	
 		this.assertEqual(lisp.parse.symbol("  space-before").value, "space-before");
 		this.assertEqual(lisp.parse.symbol("space-after  \t\n ").value, "space-after");
 	},
