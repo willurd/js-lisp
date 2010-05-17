@@ -9,9 +9,9 @@
 		(setq window.onload
 			(lambda (e)
 				(let ((div (document.getElementById "thediv")))
-				  (puts div)
+				  (puts "before:" div.innerText)
 				  (setq div.innerText "it works!")
-				  (puts div))))
+				  (puts "after:" div.innerText))))
 		</script>
 		<script type="text/javascript">
 		lisp.run();

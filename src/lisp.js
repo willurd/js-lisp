@@ -391,9 +391,8 @@ var lisp = (function (global) {
 		return func.apply(thisObject, args);
 	}
 	
-	function runScript (script) {
-		var expressions = parse.script(script);
-		
+	function lispEval (string) {
+		var expressions = parse.script(string);
 		for (var i = 0; i < expressions.length; i++) {
 			doSExp(expressions[i], lisp.env);
 		}
@@ -517,12 +516,13 @@ var lisp = (function (global) {
 			return ESCAPES[c];
 		}
 	};
-
+	
 	return {
 		Env: Env,
-		parse: parse,
 		
+		parse: parse,
 		env: ENV,
+		eval: lispEval,
 		
 		run: function () {
 			var scripts = document.getElementsByTagName("script");
@@ -532,11 +532,11 @@ var lisp = (function (global) {
 				if (script.type == "text/lisp") {
 					if (script.src) {
 						makeRequest(script.src, function (script) {
-							runScript(script);
-							runScript(scripts[i].innerText);
+							lisp.eval(script);
+							lisp.eval(scripts[i].innerText);
 						});
 					} else {
-						runScript(scripts[i].innerText);
+						lisp.eval(scripts[i].innerText);
 					}
 				}
 			}
