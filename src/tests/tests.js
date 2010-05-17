@@ -40,3 +40,45 @@ JSTest.TestCase({
 		this.assertEqual(lisp.parse.any('"hello"'), "hello");
 	},
 });
+
+JSTest.TestCase({
+	name: 'Environment Tests : Env class',
+	
+	setup: function () {
+		this.env = new lisp.Env(new lisp.Env(null, window), {});
+	},
+	
+	testBasicGet: function () {
+		this.assertUndefined(this.env.get("bob"));
+	},
+	
+	testBasicSet: function () {
+		this.env.set("name", "Bill");
+		this.assertEqual(this.env.get("name"), "Bill");
+	},
+	
+	testGlobalGet: function () {
+		this.assertTrue(this.env.get("window") == window);
+		this.assertTrue(this.env.get("document") == document);
+	},
+	
+	testHas: function () {
+		this.assertFalse(this.env.has("bob"));
+		this.assertTrue(this.env.has("window"));
+		this.assertTrue(this.env.has("document"));
+		
+		this.env.set("bob", false);
+		this.assertTrue(this.env.has("bob"));
+	},
+	
+	testGetDotPath: function () {
+		this.assertEqual(this.env.get("document.getElementById"), document.getElementById);
+		this.assertEqual(this.env.get("window.Array.prototype"), window.Array.prototype);
+	},
+	
+	testSetDotPath: function () {
+		this.assertNotEqual(window.firstName, "Bill");
+		this.env.set("window.firstName", "Bill");
+		this.assertEqual(firstName, "Bill");
+	}
+});

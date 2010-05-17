@@ -17,7 +17,7 @@
 // Author: William Bowers <william.bowers@gmail.com>
 // ================================================================================
 
-var lisp = (function () {
+var lisp = (function (global) {
 	// ----------------------------------------------------------------------------
 	// Constants
 	// ----------------------------------------------------------------------------
@@ -29,44 +29,116 @@ var lisp = (function () {
 	const WHITESPACE = " \t\n\r";
 	
 	// ----------------------------------------------------------------------------
+	// Vendor
+	// ----------------------------------------------------------------------------
+	
+	// From: http://ejohn.org/blog/simple-javascript-inheritance/
+	// Inspired by base2 and Prototype
+	(function(){
+	  var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
+	  // The base Class implementation (does nothing)
+	  this.Class = function(){};
+
+	  // Create a new Class that inherits from this class
+	  Class.extend = function (classNameOrProp, prop) {
+	    var _super = this.prototype;
+
+		var className = prop ? classNameOrProp : "Class";
+		prop = prop || classNameOrProp;
+
+	    // Instantiate a base class (but only create the instance,
+	    // don't run the init constructor)
+	    initializing = true;
+	    var prototype = new this();
+	    initializing = false;
+
+	    // Copy the properties over onto the new prototype
+	    for (var name in prop) {
+	      // Check if we're overwriting an existing function
+	      prototype[name] = typeof prop[name] == "function" && 
+	        typeof _super[name] == "function" && fnTest.test(prop[name]) ?
+	        (function(name, fn){
+	          return function() {
+	            var tmp = this._super;
+
+	            // Add a new ._super() method that is the same method
+	            // but on the super-class
+	            this._super = _super[name];
+
+	            // The method only need to be bound temporarily, so we
+	            // remove it when we're done executing
+	            var ret = fn.apply(this, arguments);        
+	            this._super = tmp;
+
+	            return ret;
+	          };
+	        })(name, prop[name]) :
+	        prop[name];
+	    }
+
+	    // The dummy class constructor
+	    function Class() {
+	      // All construction is actually done in the init method
+	      if ( !initializing && this.init )
+	        this.init.apply(this, arguments);
+	    }
+
+		Class.className = className;
+
+	    // Populate our constructed prototype object
+	    Class.prototype = prototype;
+
+	    // Enforce the constructor to be what we expect
+	    Class.constructor = Class;
+
+	    // And make this class extendable
+	    Class.extend = arguments.callee;
+
+	    return Class;
+	  };
+	})();
+	
+	// ----------------------------------------------------------------------------
 	// Implementation
 	// ----------------------------------------------------------------------------
 	
-	function StringStream (data) {
-		if (typeof(data) != "string")
-			throw new Error("Invalid object as StringStream input: " + data);
+	var StringStream = Class.extend({
+		init: function (data) {
+			if (typeof(data) != "string")
+				throw new Error("Invalid object as StringStream input: " + data);
+
+			this.data = data;
+			this.length = data.length;
+			this.position = 0;
+		},
 		
-		this.data = data;
-		this.length = data.length;
-		this.position = 0;
-		
-		this.slice = function () {
+		slice: function () {
 			return this.data.slice.apply(this.data, arguments);
-		};
+		},
 		
-		this.rest = function (from) {
+		rest: function (from) {
 			from = from || this.position;
 			return this.slice(from, this.data.length);
-		};
+		},
 		
-		this.bof = function () {
+		bof: function () {
 			return this.position < 0;
-		};
+		},
 		
-		this.eof = function () {
+		eof: function () {
 			return this.position >= this.length;
-		};
+		},
 		
-		this.peek = function (distance) {
+		peek: function (distance) {
 			distance = distance || 0;
 			return this.charAt(this.position + distance);
-		};
+		},
 		
-		this.charAt = function (index) {
+		charAt: function (index) {
 			return this.data.charAt(index);
-		};
+		},
 		
-		this.next = function (count) {
+		next: function (count) {
 			if (this.eof())
 				throw new Error("EOF reached in StringStream");
 
@@ -74,9 +146,9 @@ var lisp = (function () {
 			var c = this.charAt(this.position);
 			this.position += 1;
 			return c;
-		};
+		},
 		
-		this.prev = function (count) {
+		prev: function (count) {
 			count = count || 1;
 			this.position -= count;
 
@@ -85,64 +157,97 @@ var lisp = (function () {
 					" of StringStream");
 			
 			return this.charAt(this.position);
-		};
+		},
 		
-		this.swallowWhitespace = function () {
+		swallowWhitespace: function () {
 			while (WHITESPACE.indexOf(this.peek()) != -1 && !this.eof())
 				this.position++;
-		};
-	}
-	
-	function Request (url, successCallback) {
-		var request;
-		if (window.XMLHttpRequest) {
-			request = new XMLHttpRequest();
-		} else if (window.ActiveXObject) {
-			request = new ActiveXObject("Msxml2.XMLHTTP");
-		} else {
-			throw new Error("Ajax request not supported in this browser");
 		}
-		
-		request.onreadystatechange = function () {
-			if (request.readyState == 4 && request.status == 200) {
-				successCallback(request.responseText);
-			}
-		};
-		
-		request.open("GET", url, false); // Load the script synchronously
-		request.send(null);
-	}
+	});
 	
-	function Env (parent, symbols) {
-		this.parent = parent || null;
-		this.symbols = symbols || {};
-		this.get = function (symbol) {
+	var Env = Class.extend({
+		init: function (parent, symbols) {
+			this.parent = parent || null;
+			this.symbols = symbols || {};
+		},
+		
+		has: function (symbol) {
 			if (symbol instanceof Symbol)
 				symbol = symbol.value;
 			
 			if (this.symbols.hasOwnProperty(symbol)) {
-				return this.symbols[symbol];
+				return true;
 			} else if (!this.parent) {
-				throw new Error("Symbol '" + symbol + "' not found");
+				return false;
 			} else {
-				return this.parent.get(symbol);
+				if (this.parent instanceof Env) {
+					return this.parent.has(symbol);
+				} else {
+					return this.parent[symbol] != undefined;
+				}
 			}
-		};
-		this.set = function (symbol, value) {
+		},
+		
+		get: function (symbol) {
 			if (symbol instanceof Symbol)
 				symbol = symbol.value;
 			
-			this.symbols[symbol] = value;
-		};
-	}
-	
-	function Symbol (value) {
-		this.value = value;
-		this.toString = function () {
-			return this.value;
-		};
-	}
+			var parts = symbol.split(".");
+			var value;
+			symbol = parts[0];
+			parts = parts.slice(1);
+			
+			if (this.symbols.hasOwnProperty(symbol)) {
+				value = this.symbols[symbol];
+			} else if (!this.parent) {
+				value = undefined;
+			} else {
+				if (this.parent instanceof Env) {
+					value = this.parent.get(symbol);
+				} else {
+					value = this.parent[symbol];
+				}
+			}
+			
+			if (value && parts.length > 0) {
+				for (var i = 0; i < parts.length; i++) {
+					value = value[parts[i]];
+				}
+			}
+			
+			return value;
+		},
+		
+		set: function (symbol, value) {
+			if (symbol instanceof Symbol)
+				symbol = symbol.value;
+			
+			var parts = symbol.split(".");
+			
+			if (parts.length > 1) {
+				var name = parts.slice(0,parts.length-1).join(".");
+				object = this.get(name);
 
+				if (!(object instanceof Object))
+					throw new Error(name + " is unsubscriptable");
+
+				object[parts[parts.length-1]] = value;
+			} else {
+				this.symbols[symbol] = value;
+			}
+		}
+	});
+	
+	var Symbol = Class.extend({
+		init: function (value) {
+			this.value = value;
+		},
+		
+		toString: function () {
+			return this.value;
+		}
+	});
+	
 	function argsToArray (args) {
 		var a = [];
 		for (var i = 0; i < args.length; i++) {
@@ -150,9 +255,31 @@ var lisp = (function () {
 		}
 		return a;
 	}
+	
+	function makeRequest (url, successCallback) {
+		var request;
+		
+		if (window.XMLHttpRequest) {
+			request = new XMLHttpRequest();
+		} else if (window.ActiveXObject) {
+			request = new ActiveXObject("Msxml2.XMLHTTP");
+		} else {
+			throw new Error("Ajax request not supported in this browser");
+		}
 
-	var ENV = new Env(new Env(null, window), {
+		request.onreadystatechange = function () {
+			if (request.readyState == 4 && request.status == 200) {
+				successCallback(request.responseText);
+			}
+		};
+
+		request.open("GET", url, false); // Load the script synchronously
+		request.send(null);
+	}
+	
+	var ENV = new Env(new Env(null, global), {
 		"lambda": function (env, args) {
+			env = new Env(env);
 			var arglist = args[0];
 			var expressions = args.slice(1);
 			return function () {
@@ -166,7 +293,7 @@ var lisp = (function () {
 		},
 		
 		"let": function (env, args) {
-			var env = new Env(env, {});
+			var env = new Env(env);
 			var letset = args[0];
 			var args = args.slice(1);
 			
@@ -183,27 +310,26 @@ var lisp = (function () {
 			for (var i = 0; i < args.length; i++) {
 				ret = doSExp(args[i], env);
 			}
-
+			
 			return ret;
 		},
 		
 		"setq": function (env, args) {
-			var parts = args[0].value.split('.');
-			var value = args[1];
-			var obj = env.get(parts[0]);
-			var i;
-			for (i = 1; i < parts.length-1; i++) {
-				obj = obj[parts[i]];
-			}
+			var symbol = args[0];
+			var value  = args[1];
+			
 			if (value instanceof Symbol) {
 				throw new Error("Not Implemented - Symbol values in setq");
 			} else if (value instanceof Array) {
-				obj[parts[i]] = doSExp(value, env);
+				value = doSExp(value, env);
 			} else if (["string", "number"].indexOf(typeof(value)) >= 0) {
-				obj[parts[i]] = value;
+				console.info(3, value);
+				value = value;
 			} else {
 				throw new Error("Unknown value type");
 			}
+			
+			env.set(symbol, value);
 		},
 		
 		"puts": function (env, args) {
@@ -228,18 +354,27 @@ var lisp = (function () {
 		var symbol = sexp[0];
 		var parent = null;
 		var func;
-		try {
+		
+		if (env.has(symbol)) {
 			func = env.get(symbol);
 			return func.apply(parent, [env, sexp.slice(1)]);
-		} catch (e) {
-			// Symbol probably not found.
-			// TODO: Make a new error class for this so we know for sure.
+		} else {
 			var parts = symbol.value.split('.');
-			var object = window;
-			for (var i = 0; i < parts.length; i++) {
+			var object;
+			var i = 0;
+			
+			if (env.has(parts[0])) {
+				object = env.get(parts[0]);
+				i = 1;
+			} else {
+				object = global;
+			}
+			
+			for (; i < parts.length; i++) {
 				parent = object;
 				object = object[parts[i]];
 			}
+			
 			func = object;
 			if (func === null || func === undefined)
 				throw new Error("Access of undefined symbol: " + symbol.value);
@@ -375,6 +510,7 @@ var lisp = (function () {
 	};
 
 	return {
+		Env: Env,
 		parse: parse,
 		
 		run: function () {
@@ -384,8 +520,9 @@ var lisp = (function () {
 				script = scripts[i];
 				if (script.type == "text/lisp") {
 					if (script.src) {
-						new Request(script.src, function (script) {
+						makeRequest(script.src, function (script) {
 							runScript(script);
+							runScript(scripts[i].innerText);
 						});
 					} else {
 						runScript(scripts[i].innerText);
@@ -394,4 +531,4 @@ var lisp = (function () {
 			}
 		}
 	};
-})();
+})(this);
