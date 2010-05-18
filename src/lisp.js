@@ -774,20 +774,25 @@ var lisp = (function (global) {
 		env: ENV,
 		eval: lispEval,
 		
+		dotag: function (tag) {
+			if (tag.src) {
+				makeRequest(tag.src, function (script) {
+					lisp.eval(script);
+					lisp.eval(tag.innerText);
+					tag.parentElement.removeChild(tag);
+				});
+			} else {
+				lisp.eval(tag.innerText);
+				tag.parentElement.removeChild(tag);
+			}
+		},
+		
 		run: function () {
-			var scripts = document.getElementsByTagName("script");
-			var script;
-			for (var i = 0; i < scripts.length; i++) {
-				script = scripts[i];
-				if (script.type == "text/lisp") {
-					if (script.src) {
-						makeRequest(script.src, function (script) {
-							lisp.eval(script);
-							lisp.eval(scripts[i].innerText);
-						});
-					} else {
-						lisp.eval(scripts[i].innerText);
-					}
+			var tags = document.getElementsByTagName("script");
+			for (var i = 0; i < tags.length; i++) {
+				var tag = tags[i];
+				if (tag.type == "text/lisp") {
+					lisp.dotag(tag);
 				}
 			}
 		}

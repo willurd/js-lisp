@@ -13,3 +13,4 @@
 	* As a demonstration, all the interactions of this page should be written in lisp
 * Update the README big time
 * Think about how to get line numbers for lisp scripts for debugging
+* Take a look at the CL, scheme, elisp, and closure specs for ideas. OR just conform to one language. OR make an implementation per language.
