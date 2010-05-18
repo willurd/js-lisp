@@ -9,6 +9,7 @@
 	* Possibly use one of these implementations (or use them for reference):
 		* http://www.diveintojavascript.com/projects/sprintf-for-javascript
 		* http://phpjs.org/functions/sprintf:522
+* Write functions: (to-upper), (to-lower)
 * Think about the fact that 'nil' is actually the empty list (right now it's 'null')
 * Test return values of sexps (including null when there is no return)
 * Write tests for any lisp functions that have not been tested yet
