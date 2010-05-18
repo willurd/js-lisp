@@ -11,6 +11,12 @@ task :test do
   "
 end
 
+task :lint do
+  sh "
+    ./bin/jsl -conf ./src/jsl.conf -process ./src/lisp.js | less
+  "
+end
+
 task :nodetest do
   sh "
     cd src/tests

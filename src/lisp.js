@@ -28,10 +28,11 @@ var lisp = (function (global) {
 	// Vendor
 	// ----------------------------------------------------------------------------
 	
+	/*jsl:ignore*/
 	// From: http://ejohn.org/blog/simple-javascript-inheritance/
 	// Inspired by base2 and Prototype
 	(function(){
-	  var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
+	  var initializing = false, fnTest = (/xyz/).test(function(){xyz;}) ? (/\b_super\b/) : /.*/;
 	  // The base Class implementation (does nothing)
 	  this.Class = function(){};
 
@@ -93,7 +94,9 @@ var lisp = (function (global) {
 	    return Class;
 	  };
 	})();
+	/*jsl:end*/
 	
+	/*jsl:ignore*/
 	// From: http://phpjs.org/functions/sprintf:522
 	// More info: http://php.net/manual/en/function.sprintf.php
 	function sprintf () {
@@ -244,6 +247,7 @@ var lisp = (function (global) {
 
 	    return format.replace(regex, doFormat);
 	}
+	/*jsl:end*/
 	
 	// ----------------------------------------------------------------------------
 	// Implementation
@@ -471,18 +475,19 @@ var lisp = (function (global) {
 				var body = args.slice(1);
 				return function () {
 					var tempEnv = lisp.env;
+					var i;
 					lisp.env = env;
 					lisp.env.let("this", this);
-					for (var i = 0; i < arglist.length; i++) {
+					for (i = 0; i < arglist.length; i++) {
 						lisp.env.let(arglist[i], arguments[i]);
 					}
 					var ret = null;
-					for (var i = 0; i < body.length; i++) {
+					for (i = 0; i < body.length; i++) {
 						ret = resolve(body[i]);
 					}
 					lisp.env = tempEnv;
 					return ret;
-				}
+				};
 			})(env, args);
 		}),
 		
@@ -493,33 +498,35 @@ var lisp = (function (global) {
 			var body = args.slice(2);
 			
 			lisp.env.set(name, function () {
+				var i;
 				lisp.env = new Env(lisp.env);
-				for (var i = 0; i < arglist.length; i++) {
+				for (i = 0; i < arglist.length; i++) {
 					lisp.env.set(arglist[i], arguments[i]);
 				}
 				var ret = null;
-				for (var i = 0; i < body.length; i++) {
+				for (i = 0; i < body.length; i++) {
 					ret = resolve(body[i]);
 				}
 				lisp.env = lisp.env.parent;
 				return ret;
-			})
+			});
 		}),
 		
 		"let": new Macro(function () {
-			lisp.env = new Env(lisp.env);
 			var args = argsToArray(arguments);
 			var letset = args[0];
+			var i;
+			lisp.env = new Env(lisp.env);
 			args = args.slice(1);
 			
-			for (var i = 0; i < letset.length; i++) {
+			for (i = 0; i < letset.length; i++) {
 				var symbol = letset[i][0];
 				var value = resolve(letset[i][1]);
 				lisp.env.let(symbol, value);
 			}
 			
 			var ret = null;
-			for (var i = 0; i < args.length; i++) {
+			for (i = 0; i < args.length; i++) {
 				ret = resolve(args[i]);
 			}
 			lisp.env = lisp.env.parent;
@@ -534,7 +541,7 @@ var lisp = (function (global) {
 		}),
 		
 		"or": new Macro(function () {
-			if (arguments.length == 0)
+			if (arguments.length === 0)
 				return false;
 			for (var i = 0; i < arguments.length; i++) {
 				if (resolve(arguments[i])) {
@@ -545,7 +552,7 @@ var lisp = (function (global) {
 		}),
 		
 		"and": new Macro(function () {
-			if (arguments.length == 0)
+			if (arguments.length === 0)
 				return false;
 			for (var i = 0; i < arguments.length; i++) {
 				if (!resolve(arguments[i])) {
@@ -556,52 +563,60 @@ var lisp = (function (global) {
 		}),
 		
 		"==": new Macro(function () {
-			if (arguments.length < 2)
+			if (arguments.length < 2) {
 				throw new Error("Macro '==' requires at least to arguments");
+			}
 			var last = resolve(arguments[0]);
 			for (var i = 1; i < arguments.length; i++) {
-				var arg = resolve(arguments[i])
-				if (!(arg == last))
+				var arg = resolve(arguments[i]);
+				if (!(arg == last)) {
 					return false;
+				}
 				last = arg;
 			}
 			return true;
 		}),
 		
 		"===": new Macro(function () {
-			if (arguments.length < 2)
+			if (arguments.length < 2) {
 				throw new Error("Macro '===' requires at least to arguments");
+			}
 			var last = resolve(arguments[0]);
 			for (var i = 1; i < arguments.length; i++) {
 				var arg = resolve(arguments[i]);
-				if (!(arg === last))
+				if (!(arg === last)) {
 					return false;
+				}
 				last = arg;
 			}
 			return true;
 		}),
 		
 		"!=": new Macro(function () {
-			if (arguments.length < 2)
+			if (arguments.length < 2) {
 				throw new Error("Macro '!=' requires at least to arguments");
+			}
 			var last = resolve(arguments[0]);
 			for (var i = 1; i < arguments.length; i++) {
-				var arg = resolve(arguments[i])
-				if (!(arg != last))
+				var arg = resolve(arguments[i]);
+				if (!(arg != last)) {
 					return false;
+				}
 				last = arg;
 			}
 			return true;
 		}),
 		
 		"!==": new Macro(function () {
-			if (arguments.length < 2)
+			if (arguments.length < 2) {
 				throw new Error("Macro '!==' requires at least to arguments");
+			}
 			var last = resolve(arguments[0]);
 			for (var i = 1; i < arguments.length; i++) {
-				var arg = resolve(arguments[i])
-				if (!(arg !== last))
+				var arg = resolve(arguments[i]);
+				if (!(arg !== last)) {
 					return false;
+				}
 				last = arg;
 			}
 			return true;
@@ -686,11 +701,11 @@ var lisp = (function (global) {
 			return predicate(arguments, function (value) {
 				return typeof(value) == "object";
 			});
-		}),
+		})
 	};
 	
 	function predicate (args, testFunc) {
-		if (args.length == 0)
+		if (args.length === 0)
 			return false;
 		for (var i = 0; i < args.length; i++) {
 			if (!testFunc(resolve(args[i]))) {
@@ -698,7 +713,7 @@ var lisp = (function (global) {
 			}
 		}
 		return true;
-	};
+	}
 	
 	var ENV = new Env(new Env(null, global), {
 		"t": true,
@@ -733,7 +748,7 @@ var lisp = (function (global) {
 			var args = argsToArray(arguments);
 			var object = {};
 			
-			if (args.length % 2 != 0)
+			if (args.length % 2 !== 0)
 				throw new Error("Invalid number of arguments to (object): " + args.length);
 			
 			for (var i = 0; i < args.length; i += 2) {
@@ -813,7 +828,7 @@ var lisp = (function (global) {
 		"join": function () {
 			var args = argsToArray(arguments);
 			var sep  = args[0];
-			var list = args.slice(1).reduce(function (a, b) { return a.concat(b) });
+			var list = args.slice(1).reduce(function (a, b) { return a.concat(b); });
 			return list.join(sep);
 		},
 		
@@ -821,7 +836,7 @@ var lisp = (function (global) {
 		 * Returns the type of the given value.
 		 */
 		"typeof": function (value) {
-			if (arguments.length == 0)
+			if (arguments.length === 0)
 				return undefined;
 			if (arguments.length > 1)
 				throw new Error("(typeof) only accepts 1 argument");
@@ -832,7 +847,7 @@ var lisp = (function (global) {
 		 * Converts the given value to a string.
 		 */
 		"to-string": function (value) {
-			if (arguments.length == 0)
+			if (arguments.length === 0)
 				return "";
 			if (arguments.length > 1)
 				throw new Error("(to-string) only accepts 1 argument");
@@ -843,7 +858,7 @@ var lisp = (function (global) {
 		 * Converts the given value to a number.
 		 */
 		"to-number": function (value) {
-			if (arguments.length == 0)
+			if (arguments.length === 0)
 				return 0;
 			if (arguments.length > 1)
 				throw new Error("(to-number) only accepts 1 argument");
@@ -890,7 +905,7 @@ var lisp = (function (global) {
 		 * Adds 1 to the given value.
 		 */
 		"1+": function (value) {
-			if (arguments.length == 0)
+			if (arguments.length === 0)
 				return 1;
 			if (arguments.length > 1)
 				throw new Error("(1+) only accepts 1 argument");
@@ -966,8 +981,8 @@ var lisp = (function (global) {
 	
 	var parse = {
 		NUMBER_FORMATS: [
-			/^([0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/,
-			/^(0x(?:[0-9a-fA-F]+))(?:\s+|\)|$)/,
+			(/^([0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/),
+			(/^(0x(?:[0-9a-fA-F]+))(?:\s+|\)|$)/)
 		],
 		
 		ParserException: function (message) {
@@ -1026,7 +1041,7 @@ var lisp = (function (global) {
 				throw new parse.ParserException("Invalid sexp at position " +
 					stream.position + " (starting with: '" + stream.peek() + "')");
 			}
-			stream.next()
+			stream.next();
 			stream.swallowWhitespace();
 			var parts = [];
 			while (stream.peek() != ')' && !stream.eof()) {
