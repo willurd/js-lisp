@@ -385,6 +385,17 @@ var lisp = (function (global) {
 		})
 	};
 	
+	function predicate (args, testFunc) {
+		if (args.length == 0)
+			return false;
+		for (var i = 0; i < args.length; i++) {
+			if (!testFunc(args[i])) {
+				return false;
+			}
+		}
+		return true;
+	};
+	
 	var ENV = new Env(new Env(null, global), {
 		"t": true,
 		"true": true,
@@ -445,6 +456,42 @@ var lisp = (function (global) {
 			if (arguments.length > 1)
 				throw new Error("(to-number) only accepts 1 argument");
 			return Number(value);
+		},
+		
+		"is-true": function (value) {
+			return predicate(arguments, function (value) {
+				return value === true;
+			});
+		},
+		
+		"is-false": function (value) {
+			return predicate(arguments, function (value) {
+				return value === false;
+			});
+		},
+		
+		"is-null": function (value) {
+			return predicate(arguments, function (value) {
+				return value === null;
+			});
+		},
+		
+		"is-undefined": function (value) {
+			return predicate(arguments, function (value) {
+				return value === undefined;
+			});
+		},
+		
+		"is-string": function (value) {
+			return predicate(arguments, function (value) {
+				return typeof(value) == "string";
+			});
+		},
+		
+		"is-number": function (value) {
+			return predicate(arguments, function (value) {
+				return typeof(value) == "number";
+			});
 		},
 		
 		"/": function () {
@@ -668,6 +715,12 @@ var lisp = (function (global) {
 			return string;
 		},
 		
+		stringEscape: function (stream) {
+			stream = validateInput(stream);
+			var c = stream.next();
+			return eval('"' + '\\' + c + '"');
+		},
+		
 		number: function (stream, match) {
 			if (!match) {
 				stream = validateInput(stream);
@@ -690,12 +743,6 @@ var lisp = (function (global) {
 			
 			stream.position += match.length;
 			return eval(match);
-		},
-		
-		stringEscape: function (stream) {
-			stream = validateInput(stream);
-			var c = stream.next();
-			return eval("\\" + c);
 		}
 	};
 	
