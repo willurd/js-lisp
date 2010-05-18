@@ -2,6 +2,7 @@
 
 * Write some predicates: (is-string), (is-number), (is-null), (is-undefined), etc
 * Write macros: (if), (when), (or), (and)
+* Figure out a better place to put all the library functions and macros
 * Do lambda unit tests
 * Make a Cons class for sexp's (instead of using Array)
 	* Write related functions: (first), (rest), (second), (third), (last)

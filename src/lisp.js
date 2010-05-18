@@ -244,6 +244,16 @@ var lisp = (function (global) {
 		}
 	});
 	
+	var Keyword = Class.extend({
+		init: function (value) {
+			this.value = value;
+		},
+		
+		toString: function () {
+			return this.value;
+		}
+	});
+	
 	function argsToArray (args) {
 		var a = [];
 		for (var i = 0; i < args.length; i++) {
@@ -302,6 +312,7 @@ var lisp = (function (global) {
 				return function () {
 					var tempEnv = lisp.env;
 					lisp.env = env;
+					lisp.env.set('this', this);
 					for (var i = 0; i < arglist.length; i++) {
 						lisp.env.set(arglist[i], arguments[i]);
 					}
@@ -384,6 +395,24 @@ var lisp = (function (global) {
 		
 		"list": function () {
 			return argsToArray(arguments);
+		},
+		
+		"object": function () {
+			var args = argsToArray(arguments);
+			var object = {};
+			
+			if (args.length % 2 != 0)
+				throw new Error("Invalid number of arguments to (object): " + args.length);
+			
+			for (var i = 0; i < args.length; i += 2) {
+				var keyword = args[i];
+				if (!(keyword instanceof Keyword))
+					throw new Error("An object key must be a keyword");
+				var value = args[i+1];
+				object[keyword.value] = value;
+			}
+			
+			return object;
 		},
 		
 		"puts": function () {
@@ -537,6 +566,10 @@ var lisp = (function (global) {
 				return parse.sexp(stream);
 			case '"':
 				return parse.string(stream);
+			case ':':
+				return parse.keyword(stream);
+			// case '{':
+			// 	return parse.object(stream);
 			default:
 				var rest = stream.rest();
 				for (var i = 0; i < lisp.parse.NUMBER_FORMATS.length; i++) {
@@ -568,6 +601,22 @@ var lisp = (function (global) {
 			return parts;
 		},
 		
+		// Do we want object literals?
+		// object: function (stream) {
+		// 	stream = validateInput(stream);
+		// 	stream.swallowWhitespace();
+		// 	if (stream.peek() != '{') {
+		// 		throw new parse.ParserException("Invalid object at position " +
+		// 			stream.position + " (starting with: '" + stream.peek() + "')");
+		// 	}
+		// 	stream.next()
+		// 	stream.swallowWhitespace();
+		// 	while (stream.peek() != '}') {
+		// 		stream.swallowWhitespace();
+		// 		var key = 
+		// 	}
+		// },
+		
 		symbol: function (stream) {
 			stream = validateInput(stream);
 			stream.swallowWhitespace();
@@ -581,6 +630,17 @@ var lisp = (function (global) {
 				symbol += stream.next();
 			}
 			return new Symbol(symbol);
+		},
+		
+		keyword: function (stream) {
+			stream = validateInput(stream);
+			stream.swallowWhitespace();
+			if (stream.peek() != ':') {
+				throw new parse.ParserException("Invalid keyword at position " +
+					stream.position + " (starting with: '" + stream.peek() + "')");
+			}
+			stream.next();
+			return new Keyword(parse.symbol(stream).value);
 		},
 		
 		string: function (stream) {

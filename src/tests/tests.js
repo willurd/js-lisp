@@ -37,6 +37,14 @@ JSTest.TestCase({
 		this.assertEqual(lisp.parse.symbol("space-after  \t\n ").value, "space-after");
 	},
 	
+	// keyword
+	
+	testParseKeyword: function () {
+		this.assertEqual(lisp.parse.keyword(":hello").value, "hello");
+		this.assertEqual(lisp.parse.keyword(":good-bye").value, "good-bye");
+		this.assertEqual(lisp.parse.keyword(" \t :sayonara \n").value, "sayonara");
+	},
+	
 	// sexp
 	
 	testParseSexp: function () {
