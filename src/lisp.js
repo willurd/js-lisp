@@ -459,7 +459,7 @@ var lisp = (function (global) {
 		/**
 		 * Returns true if the given values === true.
 		 */
-		"is-true": new Macro(function (value) {
+		"is-true": new Macro(function () {
 			return predicate(arguments, function (value) {
 				return value === true;
 			});
@@ -468,7 +468,7 @@ var lisp = (function (global) {
 		/**
 		 * Returns true if the given values === false.
 		 */
-		"is-false": new Macro(function (value) {
+		"is-false": new Macro(function () {
 			return predicate(arguments, function (value) {
 				return value === false;
 			});
@@ -477,7 +477,7 @@ var lisp = (function (global) {
 		/**
 		 * Returns true if the given values === null.
 		 */
-		"is-null": new Macro(function (value) {
+		"is-null": new Macro(function () {
 			return predicate(arguments, function (value) {
 				return value === null;
 			});
@@ -486,7 +486,7 @@ var lisp = (function (global) {
 		/**
 		 * Returns true if the given values === undefined.
 		 */
-		"is-undefined": new Macro(function (value) {
+		"is-undefined": new Macro(function () {
 			return predicate(arguments, function (value) {
 				return value === undefined;
 			});
@@ -495,7 +495,7 @@ var lisp = (function (global) {
 		/**
 		 * Returns true if the given values are strings.
 		 */
-		"is-string": new Macro(function (value) {
+		"is-string": new Macro(function () {
 			return predicate(arguments, function (value) {
 				return typeof(value) == "string";
 			});
@@ -504,7 +504,7 @@ var lisp = (function (global) {
 		/**
 		 * Returns true if the given values are numbers.
 		 */
-		"is-number": new Macro(function (value) {
+		"is-number": new Macro(function () {
 			return predicate(arguments, function (value) {
 				return typeof(value) == "number";
 			});
@@ -513,7 +513,7 @@ var lisp = (function (global) {
 		/**
 		 * Returns true if the given values are booleans.
 		 */
-		"is-boolean": new Macro(function (value) {
+		"is-boolean": new Macro(function () {
 			return predicate(arguments, function (value) {
 				return typeof(value) == "boolean";
 			});
@@ -522,7 +522,7 @@ var lisp = (function (global) {
 		/**
 		 * Returns true if the given values are functions.
 		 */
-		"is-function": new Macro(function (value) {
+		"is-function": new Macro(function () {
 			return predicate(arguments, function (value) {
 				return typeof(value) == "function";
 			});
@@ -531,7 +531,7 @@ var lisp = (function (global) {
 		/**
 		 * Returns true if the given values are objects.
 		 */
-		"is-object": new Macro(function (value) {
+		"is-object": new Macro(function () {
 			return predicate(arguments, function (value) {
 				return typeof(value) == "object";
 			});
