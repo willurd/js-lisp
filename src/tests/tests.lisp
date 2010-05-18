@@ -32,7 +32,19 @@
 		(this.assertTrue (is-null nil null)))
 	:testIsUndefined (lambda ()
 		(this.assertTrue (is-undefined undefined))
-		(this.assertTrue (is-undefined undefined undefined)))))
+		(this.assertTrue (is-undefined undefined undefined)))
+	:testIsBoolean (lambda ()
+		(this.assertTrue (is-boolean false))
+		(this.assertTrue (is-boolean true))
+		(this.assertTrue (is-boolean false true)))
+	:testIsFunction (lambda ()
+		(this.assertTrue (is-function this.assertTrue))
+		(this.assertTrue (is-function /))
+		(this.assertTrue (is-function (lambda ()))))
+	:testIsObject (lambda ()
+		(this.assertTrue (is-object window))
+		(this.assertTrue (is-object this))
+		(this.assertTrue (is-object (object))))))
 
 (JSTest.TestCase (object
 	:name "Numbers"

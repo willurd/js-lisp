@@ -1,6 +1,7 @@
 # TODO
 
 * Write macros: (if), (when), (cond)
+* Write function: (to-boolean)
 * Figure out a better place to put all the library functions and macros
 * Do lambda unit tests
 * Make a Cons class for sexp's (instead of using Array)
