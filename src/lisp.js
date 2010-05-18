@@ -425,14 +425,21 @@ var lisp = (function (global) {
 				throw new Error("Invalid number of arguments to (object): " + args.length);
 			
 			for (var i = 0; i < args.length; i += 2) {
-				var keyword = args[i];
-				if (!(keyword instanceof Keyword))
-					throw new Error("An object key must be a keyword");
-				var value = args[i+1];
-				object[keyword.value] = value;
+				object[args[i]] = args[i+1];
 			}
 			
 			return object;
+		},
+		
+		"key": function (key, object) {
+			if (arguments.length < 2) {
+				throw new Error("(key) requires 2 arguments (got " +
+					arguments.length + ")");
+			} else if (arguments.length > 2) {
+				throw new Error("(key) expects only 2 arguments (got " +
+					arguments.length + ")");
+			}
+			return object[key];
 		},
 		
 		"puts": function () {

@@ -77,3 +77,29 @@ string" "a\nstring"))
 	        (test x)
 	        (test x)
 	        (this.assertEqual x 3)))))
+
+(JSTest.TestCase (object
+    :name "Objects"
+    :testKeyTypes (lambda ()
+        (let ((Class Object)
+              (obj   (object))
+              (func  (lambda ()))
+              (o (object
+                    :keyword   1
+                    "string"   2
+                    t          3
+                    false      4
+                    nil        5
+                    undefined  6
+                    Class      7
+                    obj        8
+                    func       9)))
+            (this.assertEqual (key :keyword  o) 1)        
+            (this.assertEqual (key "string"  o) 2)
+            (this.assertEqual (key t         o) 3)
+            (this.assertEqual (key false     o) 4)
+            (this.assertEqual (key nil       o) 5)
+            (this.assertEqual (key undefined o) 6)
+            (this.assertEqual (key Class     o) 7)
+            (this.assertEqual (key obj       o) 8)
+            (this.assertEqual (key func      o) 9)))))
