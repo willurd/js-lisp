@@ -431,15 +431,26 @@ var lisp = (function (global) {
 			return object;
 		},
 		
-		"key": function (key, object) {
+		"getkey": function (key, object) {
 			if (arguments.length < 2) {
-				throw new Error("(key) requires 2 arguments (got " +
+				throw new Error("(getkey) requires 2 arguments (got " +
 					arguments.length + ")");
 			} else if (arguments.length > 2) {
-				throw new Error("(key) expects only 2 arguments (got " +
+				throw new Error("(getkey) expects only 2 arguments (got " +
 					arguments.length + ")");
 			}
 			return object[key];
+		},
+		
+		"setkey": function (key, object, value) {
+			if (arguments.length < 3) {
+				throw new Error("(setkey) requires 3 arguments (got " +
+					arguments.length + ")");
+			} else if (arguments.length > 3) {
+				throw new Error("(setkey) expects only 3 arguments (got " +
+					arguments.length + ")");
+			}
+			return object[key] = value;
 		},
 		
 		"puts": function () {
