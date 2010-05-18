@@ -455,13 +455,94 @@ var lisp = (function (global) {
 			}
 			return true;
 		}),
+		
+		/**
+		 * Returns true if the given values === true.
+		 */
+		"is-true": new Macro(function (value) {
+			return predicate(arguments, function (value) {
+				return value === true;
+			});
+		}),
+		
+		/**
+		 * Returns true if the given values === false.
+		 */
+		"is-false": new Macro(function (value) {
+			return predicate(arguments, function (value) {
+				return value === false;
+			});
+		}),
+		
+		/**
+		 * Returns true if the given values === null.
+		 */
+		"is-null": new Macro(function (value) {
+			return predicate(arguments, function (value) {
+				return value === null;
+			});
+		}),
+		
+		/**
+		 * Returns true if the given values === undefined.
+		 */
+		"is-undefined": new Macro(function (value) {
+			return predicate(arguments, function (value) {
+				return value === undefined;
+			});
+		}),
+		
+		/**
+		 * Returns true if the given values are strings.
+		 */
+		"is-string": new Macro(function (value) {
+			return predicate(arguments, function (value) {
+				return typeof(value) == "string";
+			});
+		}),
+		
+		/**
+		 * Returns true if the given values are numbers.
+		 */
+		"is-number": new Macro(function (value) {
+			return predicate(arguments, function (value) {
+				return typeof(value) == "number";
+			});
+		}),
+		
+		/**
+		 * Returns true if the given values are booleans.
+		 */
+		"is-boolean": new Macro(function (value) {
+			return predicate(arguments, function (value) {
+				return typeof(value) == "boolean";
+			});
+		}),
+		
+		/**
+		 * Returns true if the given values are functions.
+		 */
+		"is-function": new Macro(function (value) {
+			return predicate(arguments, function (value) {
+				return typeof(value) == "function";
+			});
+		}),
+		
+		/**
+		 * Returns true if the given values are objects.
+		 */
+		"is-object": new Macro(function (value) {
+			return predicate(arguments, function (value) {
+				return typeof(value) == "object";
+			});
+		}),
 	};
 	
 	function predicate (args, testFunc) {
 		if (args.length == 0)
 			return false;
 		for (var i = 0; i < args.length; i++) {
-			if (!testFunc(args[i])) {
+			if (!testFunc(resolve(args[i]))) {
 				return false;
 			}
 		}
@@ -616,87 +697,6 @@ var lisp = (function (global) {
 			if (arguments.length > 1)
 				throw new Error("(to-number) only accepts 1 argument");
 			return Number(value);
-		},
-		
-		/**
-		 * Returns true if the given value === true.
-		 */
-		"is-true": function (value) {
-			return predicate(arguments, function (value) {
-				return value === true;
-			});
-		},
-		
-		/**
-		 * Returns true if the given value === false.
-		 */
-		"is-false": function (value) {
-			return predicate(arguments, function (value) {
-				return value === false;
-			});
-		},
-		
-		/**
-		 * Returns true if the given value === null.
-		 */
-		"is-null": function (value) {
-			return predicate(arguments, function (value) {
-				return value === null;
-			});
-		},
-		
-		/**
-		 * Returns true if the given value === undefined.
-		 */
-		"is-undefined": function (value) {
-			return predicate(arguments, function (value) {
-				return value === undefined;
-			});
-		},
-		
-		/**
-		 * Returns true if the given value is a string.
-		 */
-		"is-string": function (value) {
-			return predicate(arguments, function (value) {
-				return typeof(value) == "string";
-			});
-		},
-		
-		/**
-		 * Returns true if the given value is a number.
-		 */
-		"is-number": function (value) {
-			return predicate(arguments, function (value) {
-				return typeof(value) == "number";
-			});
-		},
-		
-		/**
-		 * Returns true if the given value is a boolean.
-		 */
-		"is-boolean": function (value) {
-			return predicate(arguments, function (value) {
-				return typeof(value) == "boolean";
-			});
-		},
-		
-		/**
-		 * Returns true if the given value is a function.
-		 */
-		"is-function": function (value) {
-			return predicate(arguments, function (value) {
-				return typeof(value) == "function";
-			});
-		},
-		
-		/**
-		 * Returns true if the given value is an object.
-		 */
-		"is-object": function (value) {
-			return predicate(arguments, function (value) {
-				return typeof(value) == "object";
-			});
 		},
 		
 		/**

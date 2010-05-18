@@ -3,7 +3,6 @@
 * Look through Practical Common Lisp for ideas on what to implement next
 	* On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
 
-* Make all predicates short-circuiting macros (add tests)
 * Write tests for function calls as first arg to a function call ((func1 arg) arg arg2)
 * Write tests for lambdas as first arg to a function call ((lambda (x) (1+ x)) 10)
 * Write function: (format)
@@ -12,6 +11,7 @@
 	* Possibly use one of these implementations (or use them for reference):
 		* http://www.diveintojavascript.com/projects/sprintf-for-javascript
 		* http://phpjs.org/functions/sprintf:522
+* Think about the fact that 'nil' is actually the empty list (right now it's 'null')
 * Test return values of sexps (including null when there is no return)
 * Write tests for any lisp functions that have not been tested yet
 * Write macros: (if), (when), (cond)
@@ -24,6 +24,7 @@
 * Make a Cons class for sexp's (instead of using Array)
 	* Write related functions: (first), (rest), (second), (third), (last)
 	* OR: (car), (cdr), (caar), (cadr), (caaar), etc
+* Write macro: (is-list) (for Cons')
 * Parse comments
 * Make a webpage at the root of /src that runs on `rake run`
 	* This webpage should link off to the test runner(s) and all examples
