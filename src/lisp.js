@@ -431,6 +431,19 @@ var lisp = (function (global) {
 			return object;
 		},
 		
+		"new": function (Class) {
+			if (arguments.length < 1) {
+				throw new Error("(new) requires at least 1 argument");
+			}
+			var argnames = [];
+			for (var i = 1; i < arguments.length; i++) {
+				var argname = "arg" + i;
+				eval("var " + argname + " = " + arguments[i]);
+				argnames.push(argname);
+			}
+			return eval("new Class(" + argnames.join(",") + ")");
+		},
+		
 		"getkey": function (key, object) {
 			if (arguments.length < 2) {
 				throw new Error("(getkey) requires 2 arguments (got " +
