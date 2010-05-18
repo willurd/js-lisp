@@ -1,5 +1,5 @@
 JSTest.TestCase({
-	name: 'Parser Tests',
+	name: 'Parser',
 	
 	// string
 	
@@ -59,7 +59,7 @@ JSTest.TestCase({
 });
 
 JSTest.TestCase({
-	name: 'Environment Tests : Env class',
+	name: 'Environment (Env class)',
 	
 	setup: function () {
 		this.env = new lisp.Env(new lisp.Env(null, window), {});

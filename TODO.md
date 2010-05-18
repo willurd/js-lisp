@@ -1,5 +1,6 @@
 # TODO
 
+* Update (object) to accept keys of any type (that can actually be a JavaScript object key)
 * Write macros: (if), (when), (or), (and)
 * Figure out a better place to put all the library functions and macros
 * Do lambda unit tests

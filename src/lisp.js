@@ -196,7 +196,8 @@ var lisp = (function (global) {
 			if (this.symbols.hasOwnProperty(symbol)) {
 				value = this.symbols[symbol];
 			} else if (!this.parent) {
-				value = lisp.MACROS[symbol]; // This will be undefined if MACROS doesn't have the value
+				// This will be undefined if MACROS doesn't have the value
+				value = lisp.MACROS[symbol];
 			} else {
 				if (this.parent instanceof Env) {
 					value = this.parent.get(symbol);
@@ -223,14 +224,30 @@ var lisp = (function (global) {
 			if (parts.length > 1) {
 				var name = parts.slice(0,parts.length-1).join(".");
 				object = this.get(name);
-
+				
 				if (!(object instanceof Object))
 					throw new Error(name + " is unsubscriptable");
-
+				
 				object[parts[parts.length-1]] = value;
 			} else {
-				this.symbols[symbol] = value;
+				if (this.has(symbol)) {
+					if (this.symbols.hasOwnProperty(symbol)) {
+						this.symbols[symbol] = value;
+					} else if (this.parent instanceof Env) {
+						this.parent.set(symbol, value);
+					} else {
+						this.parent[symbol] = value;
+					}
+				} else {
+					this.symbols[symbol] = value;
+				}
 			}
+		},
+		
+		let: function (symbol, value) {
+			if (symbol instanceof Symbol)
+				symbol = symbol.value;
+			this.symbols[symbol] = value;
 		}
 	});
 	
@@ -273,22 +290,14 @@ var lisp = (function (global) {
 			throw new Error("Ajax request not supported in this browser");
 		}
 		
-		request.overrideMimeType("text/plain");
-		
 		request.onreadystatechange = function () {
-			switch (request.readyState)
-			{
-			case 4:
-				switch (request.status)
-				{
-				case 200:
+			if (request.readyState == 4) {
+				if (request.status == 200) {
 					successCallback(request.responseText);
-					break;
-				case 404:
-					throw new Error("Trying to load lisp script that does not exist: " + url);
-					break;
+				} else if (request.status == 404) {
+					throw new Error("Trying to load lisp script that does not exist: " +
+					 	url);
 				}
-				break;
 			}
 		};
 		
@@ -312,9 +321,9 @@ var lisp = (function (global) {
 				return function () {
 					var tempEnv = lisp.env;
 					lisp.env = env;
-					lisp.env.set('this', this);
+					lisp.env.let("this", this);
 					for (var i = 0; i < arglist.length; i++) {
-						lisp.env.set(arglist[i], arguments[i]);
+						lisp.env.let(arglist[i], arguments[i]);
 					}
 					for (var i = 0; i < body.length; i++) {
 						doSExp(body[i]);
@@ -335,7 +344,7 @@ var lisp = (function (global) {
 				var value = letset[i][1];
 				if (value instanceof Array)
 					value = doSExp(value);
-				lisp.env.set(symbol, value);
+				lisp.env.let(symbol, value);
 			}
 			
 			var ret = null;
@@ -440,6 +449,14 @@ var lisp = (function (global) {
 			var sep  = args[0];
 			var list = args.slice(1).reduce(function (a, b) { return a.concat(b) });
 			return list.join(sep);
+		},
+		
+		"typeof": function (value) {
+			if (arguments.length == 0)
+				return undefined;
+			if (arguments.length > 1)
+				throw new Error("(typeof) only accepts 1 argument");
+			return typeof(value);
 		},
 		
 		"to-string": function (value) {

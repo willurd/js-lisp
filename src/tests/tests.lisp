@@ -1,10 +1,10 @@
 (JSTest.TestCase (object
-	:name "Lisp Tests > this Object in Lambdas (written in lisp)"
+	:name "this Object in Lambdas"
 	:testThisWorks (lambda ()
 		(this.message "It works!"))))
 
 (JSTest.TestCase (object
-	:name "Lisp Tests > Predicates (written in lisp)"
+	:name "Predicates"
 	:testIsString (lambda ()
 		(this.assertTrue (is-string "hello"))
 		(this.assertTrue (is-string "these" "are" "strings"))
@@ -35,16 +35,45 @@
 		(this.assertTrue (is-undefined undefined undefined)))))
 
 (JSTest.TestCase (object
-	:name "Lisp Tests > Numbers (written in lisp)"
+	:name "Numbers"
 	:testOctals (lambda ()
 		(this.assertEqual 0100 64))
 	:testHex (lambda ()
 		(this.assertEqual 0x40 64))))
 
 (JSTest.TestCase (object
-	:name "Lisp Tests > Strings (written in lisp)"
+	:name "Strings"
 	:testHardNewline (lambda ()
 		(this.assertEqual "a
 string" "a\nstring"))
 	:testHardTab (lambda ()
 		(this.assertEqual "a	string" "a\tstring"))))
+
+(JSTest.TestCase (object
+	:name "Scope"
+	:testLetScoping (lambda ()
+		(this.assertUndefined somevar)
+		(let ((somevar t))
+			(this.assertNotUndefined somevar))
+		(this.assertUndefined somevar))
+	:testLetMultipleLevels (lambda ()
+		(this.assertUndefined somevar)
+		(let ((somevar "first value"))
+			(this.assertEqual somevar "first value")
+			(let ((somevar "second value"))
+				(this.assertEqual somevar "second value"))
+			(this.assertEqual somevar "first value"))
+		(this.assertUndefined somevar))
+	:testClosures (lambda ()
+	    (let ((x 3)
+	          (test (lambda () (setq x (1+ x)))))
+	        (this.assertEqual x 3)
+	        (test)
+	        (test)
+	        (this.assertEqual x 5))
+	    (let ((x 3)
+	          (test (lambda (x) (setq x (1+ x)))))
+	        (this.assertEqual x 3)
+	        (test x)
+	        (test x)
+	        (this.assertEqual x 3)))))

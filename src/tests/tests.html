@@ -2,8 +2,8 @@
 <html>
 	<head>
 		<title>js-lisp Test Runner</title>
-		<link href="/vendor/JSTest/src/themes/default/style.css"
-			type="text/css" rel="stylesheet" media="screen" />
+		<link href="/vendor/JSTest/src/themes/default/style.css" type="text/css"
+			rel="stylesheet" media="screen" />
 		<script type="text/javascript" src="/vendor/JSTest/src/jstest.js"></script>
 		<script type="text/javascript" src="/lisp.js"></script>
 		<script type="text/javascript" src="/tests/tests.js"></script>
@@ -13,15 +13,6 @@
 			JSTest.run(true, JSTest.handlers.HTMLHandler, resultsDiv);
 		};
 		</script>
-		<style type="text/css">
-		.testerror {
-			background-image: url("/vendor/JSTest/src/themes/default/cancel.png") !important;
-			}
-		
-		.testmessage {
-			background-image: url("/vendor/JSTest/src/themes/default/tick.png") !important;
-			}
-		</style>
 		<script type="text/lisp" src="/tests/tests.lisp"></script>
 		<script type="text/javascript">
 		lisp.run();
