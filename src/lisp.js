@@ -391,7 +391,29 @@ var lisp = (function (global) {
 				}
 				lisp.env = lisp.env.parent;
 			})
-		})
+		}),
+		
+		"or": new Macro(function () {
+			if (arguments.length == 0)
+				return false;
+			for (var i = 0; i < arguments.length; i++) {
+				if (resolve(arguments[i])) {
+					return true;
+				}
+			}
+			return false;
+		}),
+		
+		"and": new Macro(function () {
+			if (arguments.length == 0)
+				return false;
+			for (var i = 0; i < arguments.length; i++) {
+				if (!resolve(arguments[i])) {
+					return false;
+				}
+			}
+			return true;
+		}),
 	};
 	
 	function predicate (args, testFunc) {
@@ -412,6 +434,13 @@ var lisp = (function (global) {
 		"nil": null,
 		"null": null,
 		"undefined": undefined,
+		
+		"not": function (value) {
+			if (arguments.length != 1) {
+				throw new Error("(not) requires 1 argument");
+			}
+			return !value;
+		},
 		
 		"list": function () {
 			return argsToArray(arguments);

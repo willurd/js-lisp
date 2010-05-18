@@ -50,6 +50,29 @@ string" "a\nstring"))
 		(this.assertEqual "a	string" "a\tstring"))))
 
 (JSTest.TestCase (object
+    :name "Logical Operators"
+    :testNot (lambda ()
+        (this.assertFalse (not true))
+        (this.assertFalse (not "string"))
+        (this.assertFalse (not :keyword))
+        (this.assertFalse (not (not nil)))
+        (this.assertFalse (not (not false))))
+    :testOr (lambda ()
+        (this.assertTrue (or nil t))
+        (this.assertTrue (not (or nil false))))
+    :testOrShortCircuit (lambda ()
+        (let ((x 5))
+            (or true (setq x 10))
+            (this.assertEqual x 5)))
+    :testAnd (lambda ()
+        (this.assertTrue (and t true "hi"))
+        (this.assertTrue (not (and t true nil))))
+    :testAndShortCircuit (lambda ()
+        (let ((x 5))
+            (and nil (setq x 10))
+            (this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
 	:name "Scope"
 	:testLetScoping (lambda ()
 		(this.assertUndefined somevar)
