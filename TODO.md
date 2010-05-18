@@ -3,13 +3,9 @@
 * Look through Practical Common Lisp for ideas on what to implement next
 	* On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
 
-* Write function: (format)
-	* (format t) writes to the console
-	* (format nil) returns the value
-	* Possibly use one of these implementations (or use them for reference):
-		* http://www.diveintojavascript.com/projects/sprintf-for-javascript
-		* http://phpjs.org/functions/sprintf:522
-* Write functions: (to-upper), (to-lower)
+* Break the project up into multiple files that are compiled into one
+* Think about how users can specify their own macros and library functions in javascript
+* Start putting together a library of lisp methods and macros
 * Think about the fact that 'nil' is actually the empty list (right now it's 'null')
 * Test return values of sexps (including null when there is no return)
 * Write tests for any lisp functions that have not been tested yet

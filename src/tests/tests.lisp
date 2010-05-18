@@ -86,7 +86,11 @@
 		(this.assertEqual "a
 string" "a\nstring"))
 	:testHardTab (lambda ()
-		(this.assertEqual "a	string" "a\tstring"))))
+		(this.assertEqual "a	string" "a\tstring"))
+	:testToUpper (lambda ()
+		(this.assertEqual (to-upper "hello") "HELLO"))
+	:testToLower (lambda ()
+		(this.assertEqual (to-lower "HELLO") "hello"))))
 
 (JSTest.TestCase (object
     :name "Logical Operators"
@@ -243,4 +247,4 @@ string" "a\nstring")))
 		(this.assertEqual (format nil "I like %s; %1$s are good." "apples")
 									  "I like apples; apples are good.")
 		(this.assertEqual (format nil "I like %1$s; %1$s are good." "apples")
-									  "I like apples; apples are good.")))))
+									  "I like apples; apples are good."))))

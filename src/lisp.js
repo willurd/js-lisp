@@ -28,7 +28,7 @@ var lisp = (function (global) {
 	// Vendor
 	// ----------------------------------------------------------------------------
 	
-	/*jsl:ignore*/
+	/*jsl:ignore*/ // Suppress jsl warnings
 	// From: http://ejohn.org/blog/simple-javascript-inheritance/
 	// Inspired by base2 and Prototype
 	(function(){
@@ -96,7 +96,7 @@ var lisp = (function (global) {
 	})();
 	/*jsl:end*/
 	
-	/*jsl:ignore*/
+	/*jsl:ignore*/ // Suppress jsl warnings
 	// From: http://phpjs.org/functions/sprintf:522
 	// More info: http://php.net/manual/en/function.sprintf.php
 	function sprintf () {
@@ -255,8 +255,9 @@ var lisp = (function (global) {
 	
 	var StringStream = Class.extend({
 		init: function (data) {
-			if (typeof(data) != "string")
+			if (typeof(data) != "string") {
 				throw new Error("Invalid object as StringStream input: " + data);
+			}
 
 			this.data = data;
 			this.length = data.length;
@@ -290,8 +291,9 @@ var lisp = (function (global) {
 		},
 		
 		next: function (count) {
-			if (this.eof())
+			if (this.eof()) {
 				throw new Error("EOF reached in StringStream");
+			}
 
 			count = count || 1;
 			var c = this.charAt(this.position);
@@ -303,9 +305,10 @@ var lisp = (function (global) {
 			count = count || 1;
 			this.position -= count;
 
-			if (this.bof())
+			if (this.bof()) {
 				throw new Error("Cannot access character at position " + this.position +
 					" of StringStream");
+			}
 			
 			return this.charAt(this.position);
 		},
@@ -323,8 +326,9 @@ var lisp = (function (global) {
 		},
 		
 		has: function (symbol) {
-			if (symbol instanceof Symbol)
+			if (symbol instanceof Symbol) {
 				symbol = symbol.value;
+			}
 			
 			if (this.symbols.hasOwnProperty(symbol)) {
 				return true;
@@ -340,8 +344,9 @@ var lisp = (function (global) {
 		},
 		
 		get: function (symbol) {
-			if (symbol instanceof Symbol)
+			if (symbol instanceof Symbol) {
 				symbol = symbol.value;
+			}
 			
 			var parts = symbol.split(".");
 			var value;
@@ -371,8 +376,9 @@ var lisp = (function (global) {
 		},
 		
 		set: function (symbol, value) {
-			if (symbol instanceof Symbol)
+			if (symbol instanceof Symbol) {
 				symbol = symbol.value;
+			}
 			
 			var parts = symbol.split(".");
 			
@@ -380,8 +386,9 @@ var lisp = (function (global) {
 				var name = parts.slice(0,parts.length-1).join(".");
 				object = this.get(name);
 				
-				if (!(object instanceof Object))
+				if (!(object instanceof Object)) {
 					throw new Error(name + " is unsubscriptable");
+				}
 				
 				object[parts[parts.length-1]] = value;
 			} else {
@@ -400,8 +407,9 @@ var lisp = (function (global) {
 		},
 		
 		let: function (symbol, value) {
-			if (symbol instanceof Symbol)
+			if (symbol instanceof Symbol) {
 				symbol = symbol.value;
+			}
 			this.symbols[symbol] = value;
 		}
 	});
@@ -541,8 +549,9 @@ var lisp = (function (global) {
 		}),
 		
 		"or": new Macro(function () {
-			if (arguments.length === 0)
+			if (arguments.length === 0) {
 				return false;
+			}
 			for (var i = 0; i < arguments.length; i++) {
 				if (resolve(arguments[i])) {
 					return true;
@@ -552,8 +561,9 @@ var lisp = (function (global) {
 		}),
 		
 		"and": new Macro(function () {
-			if (arguments.length === 0)
+			if (arguments.length === 0) {
 				return false;
+			}
 			for (var i = 0; i < arguments.length; i++) {
 				if (!resolve(arguments[i])) {
 					return false;
@@ -705,8 +715,9 @@ var lisp = (function (global) {
 	};
 	
 	function predicate (args, testFunc) {
-		if (args.length === 0)
+		if (args.length === 0) {
 			return false;
+		}
 		for (var i = 0; i < args.length; i++) {
 			if (!testFunc(resolve(args[i]))) {
 				return false;
@@ -748,8 +759,9 @@ var lisp = (function (global) {
 			var args = argsToArray(arguments);
 			var object = {};
 			
-			if (args.length % 2 !== 0)
+			if (args.length % 2 !== 0) {
 				throw new Error("Invalid number of arguments to (object): " + args.length);
+			}
 			
 			for (var i = 0; i < args.length; i += 2) {
 				object[args[i]] = args[i+1];
@@ -782,11 +794,8 @@ var lisp = (function (global) {
 		 * array indices as well).
 		 */
 		"getkey": function (key, object) {
-			if (arguments.length < 2) {
+			if (arguments.length !== 2) {
 				throw new Error("(getkey) requires 2 arguments (got " +
-					arguments.length + ")");
-			} else if (arguments.length > 2) {
-				throw new Error("(getkey) expects only 2 arguments (got " +
 					arguments.length + ")");
 			}
 			return object[key];
@@ -796,11 +805,8 @@ var lisp = (function (global) {
 		 * Sets a value on the given object using the given key.
 		 */
 		"setkey": function (key, object, value) {
-			if (arguments.length < 3) {
+			if (arguments.length !== 3) {
 				throw new Error("(setkey) requires 3 arguments (got " +
-					arguments.length + ")");
-			} else if (arguments.length > 3) {
-				throw new Error("(setkey) expects only 3 arguments (got " +
 					arguments.length + ")");
 			}
 			return object[key] = value;
@@ -836,10 +842,10 @@ var lisp = (function (global) {
 		 * Returns the type of the given value.
 		 */
 		"typeof": function (value) {
-			if (arguments.length === 0)
-				return undefined;
-			if (arguments.length > 1)
-				throw new Error("(typeof) only accepts 1 argument");
+			if (arguments.length !== 1) {
+				throw new Error("(typeof) requires 1 argument (got " +
+					arguments.length + ")");
+			}
 			return typeof(value);
 		},
 		
@@ -847,10 +853,10 @@ var lisp = (function (global) {
 		 * Converts the given value to a string.
 		 */
 		"to-string": function (value) {
-			if (arguments.length === 0)
-				return "";
-			if (arguments.length > 1)
-				throw new Error("(to-string) only accepts 1 argument");
+			if (arguments.length !== 1) {
+				throw new Error("(to-string) requires 1 argument (got " +
+					arguments.length + ")");
+			}
 			return String(value);
 		},
 		
@@ -858,10 +864,10 @@ var lisp = (function (global) {
 		 * Converts the given value to a number.
 		 */
 		"to-number": function (value) {
-			if (arguments.length === 0)
-				return 0;
-			if (arguments.length > 1)
-				throw new Error("(to-number) only accepts 1 argument");
+			if (arguments.length !== 1) {
+				throw new Error("(to-number) requires 1 argument (got " +
+					arguments.length + ")");
+			}
 			return Number(value);
 		},
 		
@@ -905,17 +911,25 @@ var lisp = (function (global) {
 		 * Adds 1 to the given value.
 		 */
 		"1+": function (value) {
-			if (arguments.length === 0)
-				return 1;
-			if (arguments.length > 1)
-				throw new Error("(1+) only accepts 1 argument");
+			if (arguments.length > 1) {
+				throw new Error("(1+) requires 1 argument (got " +
+					arguments.length + ")");
+			}
 			return Number(value) + 1;
 		},
 		
-		"format": function () {
-			if (arguments.length < 2)
-				throw new Error("Function 'format' expects at least 2 arguments");
-			var print = !!arguments[0]; // Convert the first arg to a boolean
+		/**
+		 * Calls sprintf (found in the vendor section) with the
+		 * supplied arguments.
+		 */
+		"format": function (print, format) {
+			if (arguments.length < 2) {
+				throw new Error("(format) expects at least 2 arguments (got " +
+					arguments.length + ")");
+			}
+			if (typeof(format) != "string") {
+				throw new Error("(format) expects a string format");
+			}
 			var output = sprintf.apply(null, argsToArray(arguments).slice(1));
 			if (print) {
 				console.info(output);
@@ -923,6 +937,34 @@ var lisp = (function (global) {
 			} else {
 				return output;
 			}
+		},
+		
+		/**
+		 * Converts the given string to uppercase.
+		 */
+		"to-upper": function (value) {
+			if (arguments.length !== 1) {
+				throw new Error("(to-upper) requires 1 argument (got " +
+					arguments.length + ")");
+			}
+			if (typeof(value) != "string") {
+				throw new Error("(to-upper) requires a string argument");
+			}
+			return value.toUpperCase();
+		},
+		
+		/**
+		 * Converts the given string to uppercase.
+		 */
+		"to-lower": function (value) {
+			if (arguments.length !== 1) {
+				throw new Error("(to-lower) requires 1 argument (got " +
+					arguments.length + ")");
+			}
+			if (typeof(value) != "string") {
+				throw new Error("(to-lower) requires a string argument");
+			}
+			return value.toLowerCase();
 		}
 	});
 	
@@ -940,8 +982,9 @@ var lisp = (function (global) {
 		var first = sexp[0];
 		var object = resolve(first);
 		
-		if (typeof(object) != "function" && !(object instanceof Macro))
+		if (typeof(object) != "function" && !(object instanceof Macro)) {
 			throw new Error(first.value + " is not a function");
+		}
 		
 		var thisObject = null;
 		if (first instanceof Symbol) {
@@ -974,8 +1017,9 @@ var lisp = (function (global) {
 			!(input instanceof StringStream)) {
 			throw new parse.ParserException("Invalid input: " + input);
 		}
-		if (input instanceof StringStream)
+		if (input instanceof StringStream) {
 			return input;
+		}
 		return new StringStream(input);
 	}
 	
@@ -1000,9 +1044,12 @@ var lisp = (function (global) {
 					stream.swallowWhitespace();
 					var sexp = parse.sexp(stream);
 					expressions.push(sexp);
+					stream.swallowWhitespace();
 				}
 			} catch (e) {
 				// There aren't any sexps left, or the rest is invalid
+				// Should something else be done besides throwing an error?
+				throw e;
 			}
 			
 			return expressions;
@@ -1054,6 +1101,7 @@ var lisp = (function (global) {
 		
 		// Do we want object literals?
 		// object: function (stream) {
+		// 	throw new Error("Not impelemented");
 		// 	stream = validateInput(stream);
 		// 	stream.swallowWhitespace();
 		// 	if (stream.peek() != '{') {
@@ -1064,7 +1112,7 @@ var lisp = (function (global) {
 		// 	stream.swallowWhitespace();
 		// 	while (stream.peek() != '}') {
 		// 		stream.swallowWhitespace();
-		// 		var key = 
+		// 		var key /* grab the key */;
 		// 	}
 		// },
 		
