@@ -325,54 +325,14 @@ var lisp = (function (global) {
 					for (var i = 0; i < arglist.length; i++) {
 						lisp.env.let(arglist[i], arguments[i]);
 					}
+					var ret = null;
 					for (var i = 0; i < body.length; i++) {
-						doSExp(body[i]);
+						ret = resolve(body[i]);
 					}
 					lisp.env = tempEnv;
+					return ret;
 				}
 			})(env, args);
-		}),
-		
-		"let": new Macro(function () {
-			lisp.env = new Env(lisp.env);
-			var args = argsToArray(arguments);
-			var letset = args[0];
-			args = args.slice(1);
-			
-			for (var i = 0; i < letset.length; i++) {
-				var symbol = letset[i][0];
-				var value = letset[i][1];
-				if (value instanceof Array)
-					value = doSExp(value);
-				lisp.env.let(symbol, value);
-			}
-			
-			var ret = null;
-			for (var i = 0; i < args.length; i++) {
-				ret = doSExp(args[i]);
-			}
-			
-			lisp.env = lisp.env.parent;
-			
-			return ret;
-		}),
-		
-		"setq": new Macro(function () {
-			var args = argsToArray(arguments);
-			var symbol = args[0];
-			var value  = args[1];
-			
-			if (value instanceof Symbol) {
-				throw new Error("Not Implemented - Symbol values in setq");
-			} else if (value instanceof Array) {
-				value = doSExp(value);
-			} else if (["string", "number"].indexOf(typeof(value)) >= 0) {
-				value = value;
-			} else {
-				throw new Error("Unknown value type");
-			}
-			
-			lisp.env.set(symbol, value);
 		}),
 		
 		"defun": new Macro(function () {
@@ -386,11 +346,40 @@ var lisp = (function (global) {
 				for (var i = 0; i < arglist.length; i++) {
 					lisp.env.set(arglist[i], arguments[i]);
 				}
+				var ret = null;
 				for (var i = 0; i < body.length; i++) {
-					doSExp(body[i]);
+					ret = resolve(body[i]);
 				}
 				lisp.env = lisp.env.parent;
+				return ret;
 			})
+		}),
+		
+		"let": new Macro(function () {
+			lisp.env = new Env(lisp.env);
+			var args = argsToArray(arguments);
+			var letset = args[0];
+			args = args.slice(1);
+			
+			for (var i = 0; i < letset.length; i++) {
+				var symbol = letset[i][0];
+				var value = resolve(letset[i][1]);
+				lisp.env.let(symbol, value);
+			}
+			
+			var ret = null;
+			for (var i = 0; i < args.length; i++) {
+				ret = resolve(args[i]);
+			}
+			lisp.env = lisp.env.parent;
+			return ret;
+		}),
+		
+		"setq": new Macro(function () {
+			var args = argsToArray(arguments);
+			var symbol = args[0];
+			var value  = resolve(args[1]);
+			lisp.env.set(symbol, value);
 		}),
 		
 		"or": new Macro(function () {
@@ -636,10 +625,12 @@ var lisp = (function (global) {
 		var tempEnv = lisp.env;
 		lisp.env = env || lisp.env;
 		var expressions = parse.script(string);
+		var ret = null;
 		for (var i = 0; i < expressions.length; i++) {
-			doSExp(expressions[i]);
+			ret = resolve(expressions[i]);
 		}
 		lisp.env = tempEnv;
+		return ret;
 	}
 	
 	function validateInput (input) {

@@ -73,6 +73,9 @@ string" "a\nstring"))
             (this.assertEqual x 5)))))
 
 (JSTest.TestCase (object
+    :name "Conditions"))
+
+(JSTest.TestCase (object
 	:name "Scope"
 	:testLetScoping (lambda ()
 		(this.assertUndefined somevar)

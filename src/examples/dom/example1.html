@@ -7,6 +7,7 @@
 		<script type="text/javascript" src="/lisp.js"></script>
 		<script type="text/lisp">
 		(defun window.onload (e)
+			"Updates an HTML element using the DOM"
 			(let ((div (document.getElementById "thediv")))
 			  (puts "before:" div.innerText)
 			  (setq div.innerText "it works!")
@@ -17,7 +18,10 @@
 		</script>
 	</head>
 	<body>
-		<h1>js-lisp DOM Scripting - Example 1</h1>
+		<div id="header">
+			<h1>js-lisp DOM Scripting - Example 1</h1>
+			<div class="clear"></div>
+		</div>
 		<div id="test-results">
 			<div id="thediv">it didn't work :(</div>
 		</div>
