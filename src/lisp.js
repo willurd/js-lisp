@@ -403,6 +403,58 @@ var lisp = (function (global) {
 			}
 			return true;
 		}),
+		
+		"==": new Macro(function () {
+			if (arguments.length < 2)
+				throw new Error("Macro '==' requires at least to arguments");
+			var last = resolve(arguments[0]);
+			for (var i = 1; i < arguments.length; i++) {
+				var arg = resolve(arguments[i])
+				if (!(arg == last))
+					return false;
+				last = arg;
+			}
+			return true;
+		}),
+		
+		"===": new Macro(function () {
+			if (arguments.length < 2)
+				throw new Error("Macro '===' requires at least to arguments");
+			var last = resolve(arguments[0]);
+			for (var i = 1; i < arguments.length; i++) {
+				var arg = resolve(arguments[i]);
+				if (!(arg === last))
+					return false;
+				last = arg;
+			}
+			return true;
+		}),
+		
+		"!=": new Macro(function () {
+			if (arguments.length < 2)
+				throw new Error("Macro '!=' requires at least to arguments");
+			var last = resolve(arguments[0]);
+			for (var i = 1; i < arguments.length; i++) {
+				var arg = resolve(arguments[i])
+				if (!(arg != last))
+					return false;
+				last = arg;
+			}
+			return true;
+		}),
+		
+		"!==": new Macro(function () {
+			if (arguments.length < 2)
+				throw new Error("Macro '!==' requires at least to arguments");
+			var last = resolve(arguments[0]);
+			for (var i = 1; i < arguments.length; i++) {
+				var arg = resolve(arguments[i])
+				if (!(arg !== last))
+					return false;
+				last = arg;
+			}
+			return true;
+		}),
 	};
 	
 	function predicate (args, testFunc) {

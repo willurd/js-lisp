@@ -85,6 +85,40 @@ string" "a\nstring"))
             (this.assertEqual x 5)))))
 
 (JSTest.TestCase (object
+	:name "Equality Operators"
+	:testDoubleEquals (lambda ()
+		(this.assertTrue (== 2 2))
+		(this.assertTrue (== 2 "2"))
+		(this.assertTrue (== 2 "2" 2.0))
+		(this.assertFalse (== 2 3))
+		(this.assertFalse (== 2 "2" "a string"))
+		(let ((x 5))
+			(this.assertFalse (== 2 3 (setq x 10)))
+			(this.assertEqual x 5)))
+	:testTripleEquals (lambda ()
+		(this.assertTrue (=== 2 2))
+		(this.assertFalse (=== 2 "2"))
+		(this.assertTrue (=== 2 2.0 (/ 4 2))
+		(this.assertTrue (=== "a
+string" "a\nstring")))
+		(let ((x 5))
+			(this.assertFalse (=== 2 "2" (setq x 10)))
+			(this.assertEqual x 5)))
+	:testDoubleNotEquals (lambda ()
+		(this.assertTrue (!= 2 3))
+		(this.assertFalse (!= 2 "2"))
+		(this.assertFalse (!= 2 (/ 4 "2")))
+		(let ((x 5))
+			(this.assertFalse (!= 2 "2" (setq x 10)))
+			(this.assertEqual x 5)))
+	:testTripleNotEquals (lambda ()
+		(this.assertTrue (!== 2 "2"))
+		(this.assertFalse (!== 10 10.0))
+		(let ((x 5))
+			(this.assertFalse (!== 2 2 (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
     :name "Conditions"))
 
 (JSTest.TestCase (object

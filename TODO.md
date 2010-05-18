@@ -3,7 +3,6 @@
 * Look through Practical Common Lisp for ideas on what to implement next
 	* On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
 
-* Write macros: (==) and (===) (short-circuiting) (with tests)
 * Make all predicates short-circuiting macros (add tests)
 * Write tests for function calls as first arg to a function call ((func1 arg) arg arg2)
 * Write tests for lambdas as first arg to a function call ((lambda (x) (1+ x)) 10)
