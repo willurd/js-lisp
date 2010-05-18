@@ -1,7 +1,17 @@
 # TODO
 
+* Look through Practical Common Lisp for ideas on what to implement next
+	* On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
+
+* Write function: (format)
+	* (format t) writes to the console
+	* (format nil) returns the value
+	* Possibly use one of these implementations (or use them for reference):
+		* http://www.diveintojavascript.com/projects/sprintf-for-javascript
+		* http://phpjs.org/functions/sprintf:522
 * Write macros: (if), (when), (cond)
 * Write function: (to-boolean)
+* Write function: (load) (loads and evaluates a lisp file inline)
 * Figure out a better place to put all the library functions and macros
 * Do lambda unit tests
 * Make a Cons class for sexp's (instead of using Array)

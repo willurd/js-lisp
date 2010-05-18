@@ -633,7 +633,6 @@ var lisp = (function (global) {
 		 * Returns true if the given value is a function.
 		 */
 		"is-function": function (value) {
-			console.info(arguments);
 			return predicate(arguments, function (value) {
 				return typeof(value) == "function";
 			});
