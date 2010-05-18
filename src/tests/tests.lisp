@@ -219,3 +219,11 @@ string" "a\nstring")))
         (let ((d (new Date 1234567890000)))
             (this.assertNotUndefined d)
             (this.assertEqual (d.getTime) 1234567890000)))))
+
+(JSTest.TestCase (object
+	:name "Functions"
+	:testFunctionCallAsFirstArg (lambda ()
+		(let ((o (object :func (lambda (x) (1+ x)))))
+			(this.assertEqual 2 ((getkey :func o) 1))))
+	:testLambdaAsFirstArg (lambda ()
+		(this.assertEqual 2 ((lambda (x) (1+ x)) 1)))))

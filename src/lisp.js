@@ -758,14 +758,17 @@ var lisp = (function (global) {
 	}
 	
 	function doSExp (sexp) {
-		var symbol = sexp[0];
+		var first = sexp[0];
+		var object = resolve(first);
 		
-		var object = lisp.env.get(symbol);
 		if (typeof(object) != "function" && !(object instanceof Macro))
 			throw new Error(symbol.value + " is not a function");
 		
-		var thisObjectPath = symbol.value.split(".").slice(0,-1).join(".");
-		var thisObject = lisp.env.get(thisObjectPath);
+		var thisObject = null;
+		if (first instanceof Symbol) {
+			var thisObjectPath = first.value.split(".").slice(0,-1).join(".");
+			thisObject = lisp.env.get(thisObjectPath);
+		}
 		var args = sexp.slice(1);
 		
 		if (object instanceof lisp.Macro) {
