@@ -1,6 +1,5 @@
 lisp.js:
     - src/javascript/wrapper/_header.js
-    - src/javascript/config.js
     - support/vendor/Class.js
     - support/vendor/sprintf.js
     - src/javascript/utils/utils.js
@@ -12,6 +11,7 @@ lisp.js:
     - src/javascript/lisp/Macro.js
     - src/javascript/parse/utils.js
     - src/javascript/parse/parse.js
+    - src/javascript/config.js
     - src/javascript/macros.js
     - src/javascript/defuns.js
     - src/javascript/lisp.js

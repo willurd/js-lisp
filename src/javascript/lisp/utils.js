@@ -1,3 +1,13 @@
+function defun (name, func) {
+	var env = (lisp && lisp.env) || ROOT_ENV;
+	env.set(name, func);
+}
+
+function defmacro (name, func) {
+	var env = (lisp && lisp.env) || ROOT_ENV;
+	env.set(name, new Macro(func));
+}
+
 function resolve (value) {
 	if (value instanceof Symbol) {
 		return lisp.env.get(value);
@@ -13,7 +23,7 @@ function doSExp (sexp) {
 	var object = resolve(first);
 	
 	if (typeof(object) != "function" && !(object instanceof Macro)) {
-		throw new Error(first.value + " is not a function");
+		throw new Error(first.value + " is not callable");
 	}
 	
 	var thisObject = null;

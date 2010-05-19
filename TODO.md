@@ -3,7 +3,6 @@
 * Look through Practical Common Lisp for ideas on what to implement next
 	* On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
 
-* Think about how users can specify their own macros and library functions in javascript
 * Start putting together a library of lisp methods and macros
 * Think about the fact that 'nil' is actually the empty list (right now it's 'null')
 * Test return values of sexps (including null when there is no return)

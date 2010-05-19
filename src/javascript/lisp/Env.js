@@ -35,8 +35,7 @@ var Env = Class.extend({
 		if (this.symbols.hasOwnProperty(symbol)) {
 			value = this.symbols[symbol];
 		} else if (!this.parent) {
-			// This will be undefined if lisp.macros doesn't have the value
-			value = lisp.macros[symbol];
+			value = undefined;
 		} else {
 			if (this.parent instanceof Env) {
 				value = this.parent.get(symbol);

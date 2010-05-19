@@ -4,11 +4,13 @@ return {
 	Env: Env,
 	Macro: Macro,
 	Symbol: Symbol,
+	Keyword: Keyword,
 	
-	env: new Env(new Env(null, global), DEFUNS),
-	macros: MACROS,
+	env: ROOT_ENV,
 	
 	parse: parse,
+	defun: defun,
+	defmacro: defmacro,
 	
 	eval: function (string, env) {
 		var tempEnv = lisp.env;

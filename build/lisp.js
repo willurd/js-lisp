@@ -18,7 +18,6 @@
 // ================================================================================
 
 var lisp = (function (global) {
-const WHITESPACE = " \t\n\r";
 /*jsl:ignore*/ // Suppress jsl warnings
 // From: http://ejohn.org/blog/simple-javascript-inheritance/
 // Inspired by base2 and Prototype
@@ -336,6 +335,16 @@ var StringStream = Class.extend({
 			this.position++;
 	}
 });
+function defun (name, func) {
+	var env = (lisp && lisp.env) || ROOT_ENV;
+	env.set(name, func);
+}
+
+function defmacro (name, func) {
+	var env = (lisp && lisp.env) || ROOT_ENV;
+	env.set(name, new Macro(func));
+}
+
 function resolve (value) {
 	if (value instanceof Symbol) {
 		return lisp.env.get(value);
@@ -351,7 +360,7 @@ function doSExp (sexp) {
 	var object = resolve(first);
 	
 	if (typeof(object) != "function" && !(object instanceof Macro)) {
-		throw new Error(first.value + " is not a function");
+		throw new Error(first.value + " is not callable");
 	}
 	
 	var thisObject = null;
@@ -416,8 +425,7 @@ var Env = Class.extend({
 		if (this.symbols.hasOwnProperty(symbol)) {
 			value = this.symbols[symbol];
 		} else if (!this.parent) {
-			// This will be undefined if lisp.macros doesn't have the value
-			value = lisp.macros[symbol];
+			value = undefined;
 		} else {
 			if (this.parent instanceof Env) {
 				value = this.parent.get(symbol);
@@ -680,508 +688,539 @@ var parse = {
 		return eval(match);
 	}
 };
-var MACROS = {
-	"lambda": new Macro(function () {
-		var env  = new Env(lisp.env);
-		var args = argsToArray(arguments);
-		return (function (env, args) {
-			var arglist = args[0];
-			var body = args.slice(1);
-			return function () {
-				var tempEnv = lisp.env;
-				var i;
-				lisp.env = env;
-				lisp.env.let("this", this);
-				for (i = 0; i < arglist.length; i++) {
-					lisp.env.let(arglist[i], arguments[i]);
-				}
-				var ret = null;
-				for (i = 0; i < body.length; i++) {
-					ret = resolve(body[i]);
-				}
-				lisp.env = tempEnv;
-				return ret;
-			};
-		})(env, args);
-	}),
-	
-	"defun": new Macro(function () {
-		var args = argsToArray(arguments);
-		var name = args[0];
-		var arglist = args[1];
-		var body = args.slice(2);
-		
-		lisp.env.set(name, function () {
-			var i;
-			lisp.env = new Env(lisp.env);
-			for (i = 0; i < arglist.length; i++) {
-				lisp.env.set(arglist[i], arguments[i]);
-			}
-			var ret = null;
-			for (i = 0; i < body.length; i++) {
-				ret = resolve(body[i]);
-			}
-			lisp.env = lisp.env.parent;
-			return ret;
-		});
-	}),
-	
-	"let": new Macro(function () {
-		var args = argsToArray(arguments);
-		var letset = args[0];
-		var i;
-		lisp.env = new Env(lisp.env);
-		args = args.slice(1);
-		
-		for (i = 0; i < letset.length; i++) {
-			var symbol = letset[i][0];
-			var value = resolve(letset[i][1]);
-			lisp.env.let(symbol, value);
-		}
-		
-		var ret = null;
-		for (i = 0; i < args.length; i++) {
-			ret = resolve(args[i]);
-		}
-		lisp.env = lisp.env.parent;
-		return ret;
-	}),
-	
-	"setq": new Macro(function () {
-		var args = argsToArray(arguments);
-		var symbol = args[0];
-		var value  = resolve(args[1]);
-		lisp.env.set(symbol, value);
-	}),
-	
-	"or": new Macro(function () {
-		if (arguments.length === 0) {
-			return false;
-		}
-		for (var i = 0; i < arguments.length; i++) {
-			if (resolve(arguments[i])) {
-				return true;
-			}
-		}
-		return false;
-	}),
-	
-	"and": new Macro(function () {
-		if (arguments.length === 0) {
-			return false;
-		}
-		for (var i = 0; i < arguments.length; i++) {
-			if (!resolve(arguments[i])) {
-				return false;
-			}
-		}
-		return true;
-	}),
-	
-	"==": new Macro(function () {
-		if (arguments.length < 2) {
-			throw new Error("Macro '==' requires at least to arguments");
-		}
-		var last = resolve(arguments[0]);
-		for (var i = 1; i < arguments.length; i++) {
-			var arg = resolve(arguments[i]);
-			if (!(arg == last)) {
-				return false;
-			}
-			last = arg;
-		}
-		return true;
-	}),
-	
-	"===": new Macro(function () {
-		if (arguments.length < 2) {
-			throw new Error("Macro '===' requires at least to arguments");
-		}
-		var last = resolve(arguments[0]);
-		for (var i = 1; i < arguments.length; i++) {
-			var arg = resolve(arguments[i]);
-			if (!(arg === last)) {
-				return false;
-			}
-			last = arg;
-		}
-		return true;
-	}),
-	
-	"!=": new Macro(function () {
-		if (arguments.length < 2) {
-			throw new Error("Macro '!=' requires at least to arguments");
-		}
-		var last = resolve(arguments[0]);
-		for (var i = 1; i < arguments.length; i++) {
-			var arg = resolve(arguments[i]);
-			if (!(arg != last)) {
-				return false;
-			}
-			last = arg;
-		}
-		return true;
-	}),
-	
-	"!==": new Macro(function () {
-		if (arguments.length < 2) {
-			throw new Error("Macro '!==' requires at least to arguments");
-		}
-		var last = resolve(arguments[0]);
-		for (var i = 1; i < arguments.length; i++) {
-			var arg = resolve(arguments[i]);
-			if (!(arg !== last)) {
-				return false;
-			}
-			last = arg;
-		}
-		return true;
-	}),
-	
-	/**
-	 * Returns true if the given values === true.
-	 */
-	"is-true": new Macro(function () {
-		return predicate(arguments, function (value) {
-			return value === true;
-		});
-	}),
-	
-	/**
-	 * Returns true if the given values === false.
-	 */
-	"is-false": new Macro(function () {
-		return predicate(arguments, function (value) {
-			return value === false;
-		});
-	}),
-	
-	/**
-	 * Returns true if the given values === null.
-	 */
-	"is-null": new Macro(function () {
-		return predicate(arguments, function (value) {
-			return value === null;
-		});
-	}),
-	
-	/**
-	 * Returns true if the given values === undefined.
-	 */
-	"is-undefined": new Macro(function () {
-		return predicate(arguments, function (value) {
-			return value === undefined;
-		});
-	}),
-	
-	/**
-	 * Returns true if the given values are strings.
-	 */
-	"is-string": new Macro(function () {
-		return predicate(arguments, function (value) {
-			return typeof(value) == "string";
-		});
-	}),
-	
-	/**
-	 * Returns true if the given values are numbers.
-	 */
-	"is-number": new Macro(function () {
-		return predicate(arguments, function (value) {
-			return typeof(value) == "number";
-		});
-	}),
-	
-	/**
-	 * Returns true if the given values are booleans.
-	 */
-	"is-boolean": new Macro(function () {
-		return predicate(arguments, function (value) {
-			return typeof(value) == "boolean";
-		});
-	}),
-	
-	/**
-	 * Returns true if the given values are functions.
-	 */
-	"is-function": new Macro(function () {
-		return predicate(arguments, function (value) {
-			return typeof(value) == "function";
-		});
-	}),
-	
-	/**
-	 * Returns true if the given values are objects.
-	 */
-	"is-object": new Macro(function () {
-		return predicate(arguments, function (value) {
-			return typeof(value) == "object";
-		});
-	})
-};
-var DEFUNS = {
+const WHITESPACE = " \t\n\r";
+
+var ROOT_ENV = new Env(new Env(null, global), {
 	"t": true,
 	"true": true,
 	"false": false,
 	"nil": null,
 	"null": null,
-	"undefined": undefined,
+	"undefined": undefined
+});
+/**
+ * Returns an anonymous function.
+ */
+defmacro("lambda", function () {
+	var env  = new Env(lisp.env);
+	var args = argsToArray(arguments);
+	return (function (env, args) {
+		var arglist = args[0];
+		var body = args.slice(1);
+		return function () {
+			var tempEnv = lisp.env;
+			var i;
+			lisp.env = env;
+			lisp.env.let("this", this);
+			for (i = 0; i < arglist.length; i++) {
+				lisp.env.let(arglist[i], arguments[i]);
+			}
+			var ret = null;
+			for (i = 0; i < body.length; i++) {
+				ret = resolve(body[i]);
+			}
+			lisp.env = tempEnv;
+			return ret;
+		};
+	})(env, args);
+});
+
+/**
+ * Defines a function.
+ */
+defmacro("defun", function () {
+	var args = argsToArray(arguments);
+	var name = args[0];
+	var arglist = args[1];
+	var body = args.slice(2);
 	
-	/**
-	 * Performs a logical negation on the given value.
-	 */
-	"not": function (value) {
-		if (arguments.length != 1) {
-			throw new Error("(not) requires 1 argument");
+	lisp.env.set(name, function () {
+		var i;
+		lisp.env = new Env(lisp.env);
+		for (i = 0; i < arglist.length; i++) {
+			lisp.env.set(arglist[i], arguments[i]);
 		}
-		return !value;
-	},
-	
-	/**
-	 * Returns the given arguments as a list.
-	 */
-	"list": function () {
-		return argsToArray(arguments);
-	},
-	
-	/**
-	 * Creates a JavaScript object using the given arguments as an
-	 * association list.
-	 */
-	"object": function () {
-		var args = argsToArray(arguments);
-		var object = {};
-		
-		if (args.length % 2 !== 0) {
-			throw new Error("Invalid number of arguments to (object): " + args.length);
+		var ret = null;
+		for (i = 0; i < body.length; i++) {
+			ret = resolve(body[i]);
 		}
-		
-		for (var i = 0; i < args.length; i += 2) {
-			object[args[i]] = args[i+1];
-		}
-		
-		return object;
-	},
+		lisp.env = lisp.env.parent;
+		return ret;
+	});
+});
+
+/**
+ * 
+ */
+defmacro("let", function () {
+	var args = argsToArray(arguments);
+	var letset = args[0];
+	var i;
+	lisp.env = new Env(lisp.env);
+	args = args.slice(1);
 	
-	/**
-	 * Returns an instance of the given class, initialized with
-	 * the rest of the given arguments.
-	 */
-	"new": function (Class) {
-		if (arguments.length < 1) {
-			throw new Error("(new) requires at least 1 argument");
-		}
-		var argnames = [];
-		// This is the only way I could figure out how to make the
-		// passing of arguments to new Class(...) dynamic.
-		for (var i = 1; i < arguments.length; i++) {
-			var argname = "arg" + i;
-			eval("var " + argname + " = " + arguments[i]);
-			argnames.push(argname);
-		}
-		return eval("new Class(" + argnames.join(",") + ")");
-	},
-	
-	/**
-	 * Returns a value from an object given a key (will work with
-	 * array indices as well).
-	 */
-	"getkey": function (key, object) {
-		if (arguments.length !== 2) {
-			throw new Error("(getkey) requires 2 arguments (got " +
-				arguments.length + ")");
-		}
-		return object[key];
-	},
-	
-	/**
-	 * Sets a value on the given object using the given key.
-	 */
-	"setkey": function (key, object, value) {
-		if (arguments.length !== 3) {
-			throw new Error("(setkey) requires 3 arguments (got " +
-				arguments.length + ")");
-		}
-		return object[key] = value;
-	},
-	
-	/**
-	 * Prints the given arguments to the console.
-	 */
-	"puts": function () {
-		// Do not remove this. This is not a debug statement.
-		lisp.log.apply(null, arguments);
-	},
-	
-	/**
-	 * Joins the given arguments together into one string.
-	 */
-	"concat": function () {
-		return argsToArray(arguments).join("");
-	},
-	
-	/**
-	 * Joins the given arguments together into one string, using
-	 * the first argument as the separator.
-	 */
-	"join": function () {
-		var args = argsToArray(arguments);
-		var sep  = args[0];
-		var list = args.slice(1).reduce(function (a, b) { return a.concat(b); });
-		return list.join(sep);
-	},
-	
-	/**
-	 * Returns the type of the given value.
-	 */
-	"typeof": function (value) {
-		if (arguments.length !== 1) {
-			throw new Error("(typeof) requires 1 argument (got " +
-				arguments.length + ")");
-		}
-		return typeof(value);
-	},
-	
-	/**
-	 * Converts the given value to a string.
-	 */
-	"to-string": function (value) {
-		if (arguments.length !== 1) {
-			throw new Error("(to-string) requires 1 argument (got " +
-				arguments.length + ")");
-		}
-		return String(value);
-	},
-	
-	/**
-	 * Converts the given value to a number.
-	 */
-	"to-number": function (value) {
-		if (arguments.length !== 1) {
-			throw new Error("(to-number) requires 1 argument (got " +
-				arguments.length + ")");
-		}
-		return Number(value);
-	},
-	
-	/**
-	 * Converts the given value to a number.
-	 */
-	"to-boolean": function (value) {
-		if (arguments.length !== 1) {
-			throw new Error("(to-boolean) requires 1 argument (got " +
-				arguments.length + ")");
-		}
-		return Boolean(value);
-	},
-	
-	/**
-	 * Reduces the given arguments on the / operator.
-	 */
-	"/": function () {
-		return argsToArray(arguments).reduce(function (a, b) {
-			return a / b;
-		});
-	},
-	
-	/**
-	 * Reduces the given arguments on the * operator.
-	 */
-	"*": function () {
-		return argsToArray(arguments).reduce(function (a, b) {
-			return a * b;
-		});
-	},
-	
-	/**
-	 * Reduces the given arguments on the + operator.
-	 */
-	"+": function () {
-		return argsToArray(arguments).reduce(function (a, b) {
-			return a + b;
-		});
-	},
-	
-	/**
-	 * Reduces the given arguments on the - operator.
-	 */
-	"-": function () {
-		return argsToArray(arguments).reduce(function (a, b) {
-			return a - b;
-		});
-	},
-	
-	/**
-	 * Adds 1 to the given value.
-	 */
-	"1+": function (value) {
-		if (arguments.length > 1) {
-			throw new Error("(1+) requires 1 argument (got " +
-				arguments.length + ")");
-		}
-		return Number(value) + 1;
-	},
-	
-	/**
-	 * Calls sprintf (found in the vendor section) with the
-	 * supplied arguments.
-	 */
-	"format": function (print, format) {
-		if (arguments.length < 2) {
-			throw new Error("(format) expects at least 2 arguments (got " +
-				arguments.length + ")");
-		}
-		if (typeof(format) != "string") {
-			throw new Error("(format) expects a string format");
-		}
-		var output = sprintf.apply(null, argsToArray(arguments).slice(1));
-		if (print) {
-			lisp.log(output);
-			return null;
-		} else {
-			return output;
-		}
-	},
-	
-	/**
-	 * Converts the given string to uppercase.
-	 */
-	"to-upper": function (value) {
-		if (arguments.length !== 1) {
-			throw new Error("(to-upper) requires 1 argument (got " +
-				arguments.length + ")");
-		}
-		if (typeof(value) != "string") {
-			throw new Error("(to-upper) requires a string argument");
-		}
-		return value.toUpperCase();
-	},
-	
-	/**
-	 * Converts the given string to uppercase.
-	 */
-	"to-lower": function (value) {
-		if (arguments.length !== 1) {
-			throw new Error("(to-lower) requires 1 argument (got " +
-				arguments.length + ")");
-		}
-		if (typeof(value) != "string") {
-			throw new Error("(to-lower) requires a string argument");
-		}
-		return value.toLowerCase();
+	for (i = 0; i < letset.length; i++) {
+		var symbol = letset[i][0];
+		var value = resolve(letset[i][1]);
+		lisp.env.let(symbol, value);
 	}
-};
+	
+	var ret = null;
+	for (i = 0; i < args.length; i++) {
+		ret = resolve(args[i]);
+	}
+	lisp.env = lisp.env.parent;
+	return ret;
+});
+
+/**
+ * 
+ */
+defmacro("setq", function () {
+	var args = argsToArray(arguments);
+	var symbol = args[0];
+	var value  = resolve(args[1]);
+	lisp.env.set(symbol, value);
+});
+
+/**
+ * 
+ */
+defmacro("or", function () {
+	if (arguments.length === 0) {
+		return false;
+	}
+	for (var i = 0; i < arguments.length; i++) {
+		if (resolve(arguments[i])) {
+			return true;
+		}
+	}
+	return false;
+});
+
+/**
+ * 
+ */
+defmacro("and", function () {
+	if (arguments.length === 0) {
+		return false;
+	}
+	for (var i = 0; i < arguments.length; i++) {
+		if (!resolve(arguments[i])) {
+			return false;
+		}
+	}
+	return true;
+});
+
+/**
+ * 
+ */
+defmacro("==", function () {
+	if (arguments.length < 2) {
+		throw new Error("Macro '==' requires at least to arguments");
+	}
+	var last = resolve(arguments[0]);
+	for (var i = 1; i < arguments.length; i++) {
+		var arg = resolve(arguments[i]);
+		if (!(arg == last)) {
+			return false;
+		}
+		last = arg;
+	}
+	return true;
+});
+
+/**
+ * 
+ */
+defmacro("===", function () {
+	if (arguments.length < 2) {
+		throw new Error("Macro '===' requires at least to arguments");
+	}
+	var last = resolve(arguments[0]);
+	for (var i = 1; i < arguments.length; i++) {
+		var arg = resolve(arguments[i]);
+		if (!(arg === last)) {
+			return false;
+		}
+		last = arg;
+	}
+	return true;
+});
+
+/**
+ * 
+ */
+defmacro("!=", function () {
+	if (arguments.length < 2) {
+		throw new Error("Macro '!=' requires at least to arguments");
+	}
+	var last = resolve(arguments[0]);
+	for (var i = 1; i < arguments.length; i++) {
+		var arg = resolve(arguments[i]);
+		if (!(arg != last)) {
+			return false;
+		}
+		last = arg;
+	}
+	return true;
+});
+
+/**
+ * 
+ */
+defmacro("!==", function () {
+	if (arguments.length < 2) {
+		throw new Error("Macro '!==' requires at least to arguments");
+	}
+	var last = resolve(arguments[0]);
+	for (var i = 1; i < arguments.length; i++) {
+		var arg = resolve(arguments[i]);
+		if (!(arg !== last)) {
+			return false;
+		}
+		last = arg;
+	}
+	return true;
+});
+
+/**
+ * Returns true if the given values === true.
+ */
+defmacro("is-true", function () {
+	return predicate(arguments, function (value) {
+		return value === true;
+	});
+});
+
+/**
+ * Returns true if the given values === false.
+ */
+defmacro("is-false", function () {
+	return predicate(arguments, function (value) {
+		return value === false;
+	});
+});
+
+/**
+ * Returns true if the given values === null.
+ */
+defmacro("is-null", function () {
+	return predicate(arguments, function (value) {
+		return value === null;
+	});
+});
+
+/**
+ * 
+ */
+defmacro("is-undefined", function () {
+	return predicate(arguments, function (value) {
+		return value === undefined;
+	});
+});
+
+/**
+ * Returns true if the given values are strings.
+ */
+defmacro("is-string", function () {
+	return predicate(arguments, function (value) {
+		return typeof(value) == "string";
+	});
+});
+
+/**
+ * Returns true if the given values are numbers.
+ */
+defmacro("is-number", function () {
+	return predicate(arguments, function (value) {
+		return typeof(value) == "number";
+	});
+});
+
+/**
+ * Returns true if the given values are booleans.
+ */
+defmacro("is-boolean", function () {
+	return predicate(arguments, function (value) {
+		return typeof(value) == "boolean";
+	});
+});
+
+/**
+ * Returns true if the given values are functions.
+ */
+defmacro("is-function", function () {
+	return predicate(arguments, function (value) {
+		return typeof(value) == "function";
+	});
+});
+
+/**
+ * Returns true if the given values are objects.
+ */
+defmacro("is-object", function () {
+	return predicate(arguments, function (value) {
+		return typeof(value) == "object";
+	});
+});
+/**
+ * Performs a logical negation on the given value.
+ */
+defun("not", function (value) {
+	if (arguments.length != 1) {
+		throw new Error("(not) requires 1 argument");
+	}
+	return !value;
+});
+
+/**
+ * Returns the given arguments as a list.
+ */
+defun("list", function () {
+	return argsToArray(arguments);
+});
+
+/**
+ * Creates a JavaScript object using the given arguments as an
+ * association list.
+ */
+defun("object", function () {
+	var args = argsToArray(arguments);
+	var object = {};
+	
+	if (args.length % 2 !== 0) {
+		throw new Error("Invalid number of arguments to (object): " + args.length);
+	}
+	
+	for (var i = 0; i < args.length; i += 2) {
+		object[args[i]] = args[i+1];
+	}
+	
+	return object;
+});
+
+/**
+ * Returns an instance of the given class, initialized with
+ * the rest of the given arguments.
+ */
+defun("new", function (Class) {
+	if (arguments.length < 1) {
+		throw new Error("(new) requires at least 1 argument");
+	}
+	var argnames = [];
+	// This is the only way I could figure out how to make the
+	// passing of arguments to new Class(...) dynamic.
+	for (var i = 1; i < arguments.length; i++) {
+		var argname = "arg" + i;
+		eval("var " + argname + " = " + arguments[i]);
+		argnames.push(argname);
+	}
+	return eval("new Class(" + argnames.join(",") + ")");
+});
+
+/**
+ * Returns a value from an object given a key (will work with
+ * array indices as well).
+ */
+defun("getkey", function (key, object) {
+	if (arguments.length !== 2) {
+		throw new Error("(getkey) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
+	return object[key];
+});
+
+/**
+ * Sets a value on the given object using the given key.
+ */
+defun("setkey", function (key, object, value) {
+	if (arguments.length !== 3) {
+		throw new Error("(setkey) requires 3 arguments (got " +
+			arguments.length + ")");
+	}
+	return object[key] = value;
+});
+
+/**
+ * Prints the given arguments to the console.
+ */
+defun("puts", function () {
+	// Do not remove this. This is not a debug statement.
+	lisp.log.apply(null, arguments);
+});
+
+/**
+ * Joins the given arguments together into one string.
+ */
+defun("concat", function () {
+	return argsToArray(arguments).join("");
+});
+
+/**
+ * Joins the given arguments together into one string, using
+ * the first argument as the separator.
+ */
+defun("join", function () {
+	var args = argsToArray(arguments);
+	var sep  = args[0];
+	var list = args.slice(1).reduce(function (a, b) { return a.concat(b); });
+	return list.join(sep);
+});
+
+/**
+ * Returns the type of the given value.
+ */
+defun("typeof", function (value) {
+	if (arguments.length !== 1) {
+		throw new Error("(typeof) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return typeof(value);
+});
+
+/**
+ * Converts the given value to a string.
+ */
+defun("to-string", function (value) {
+	if (arguments.length !== 1) {
+		throw new Error("(to-string) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return String(value);
+});
+
+/**
+ * Converts the given value to a number.
+ */
+defun("to-number", function (value) {
+	if (arguments.length !== 1) {
+		throw new Error("(to-number) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return Number(value);
+});
+
+/**
+ * Converts the given value to a number.
+ */
+defun("to-boolean", function (value) {
+	if (arguments.length !== 1) {
+		throw new Error("(to-boolean) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return Boolean(value);
+});
+
+/**
+ * Reduces the given arguments on the / operator.
+ */
+defun("/", function () {
+	return argsToArray(arguments).reduce(function (a, b) {
+		return a / b;
+	});
+});
+
+/**
+ * Reduces the given arguments on the * operator.
+ */
+defun("*", function () {
+	return argsToArray(arguments).reduce(function (a, b) {
+		return a * b;
+	});
+});
+
+/**
+ * Reduces the given arguments on the + operator.
+ */
+defun("+", function () {
+	return argsToArray(arguments).reduce(function (a, b) {
+		return a + b;
+	});
+});
+
+/**
+ * Reduces the given arguments on the - operator.
+ */
+defun("-", function () {
+	return argsToArray(arguments).reduce(function (a, b) {
+		return a - b;
+	});
+});
+
+/**
+ * Adds 1 to the given value.
+ */
+defun("1+", function (value) {
+	if (arguments.length > 1) {
+		throw new Error("(1+) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return Number(value) + 1;
+});
+
+/**
+ * Calls sprintf (found in the vendor section) with the
+ * supplied arguments.
+ */
+defun("format", function (print, format) {
+	if (arguments.length < 2) {
+		throw new Error("(format) expects at least 2 arguments (got " +
+			arguments.length + ")");
+	}
+	if (typeof(format) != "string") {
+		throw new Error("(format) expects a string format");
+	}
+	var output = sprintf.apply(null, argsToArray(arguments).slice(1));
+	if (print) {
+		lisp.log(output);
+		return null;
+	} else {
+		return output;
+	}
+});
+
+/**
+ * Converts the given string to uppercase.
+ */
+defun("to-upper", function (value) {
+	if (arguments.length !== 1) {
+		throw new Error("(to-upper) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (typeof(value) != "string") {
+		throw new Error("(to-upper) requires a string argument");
+	}
+	return value.toUpperCase();
+});
+
+/**
+ * Converts the given string to uppercase.
+ */
+defun("to-lower", function (value) {
+	if (arguments.length !== 1) {
+		throw new Error("(to-lower) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (typeof(value) != "string") {
+		throw new Error("(to-lower) requires a string argument");
+	}
+	return value.toLowerCase();
+});
 return {
 	VERSION: "0.0.1",
 	
 	Env: Env,
 	Macro: Macro,
 	Symbol: Symbol,
+	Keyword: Keyword,
 	
-	env: new Env(new Env(null, global), DEFUNS),
-	macros: MACROS,
+	env: ROOT_ENV,
 	
 	parse: parse,
+	defun: defun,
+	defmacro: defmacro,
 	
 	eval: function (string, env) {
 		var tempEnv = lisp.env;
