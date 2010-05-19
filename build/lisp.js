@@ -534,8 +534,9 @@ var parse = {
 		try {
 			while (!stream.eof()) {
 				stream.swallowWhitespace();
-				var sexp = parse.sexp(stream);
-				expressions.push(sexp);
+				var exp = parse.any(stream);
+				if (exp !== undefined)
+					expressions.push(exp);
 				stream.swallowWhitespace();
 			}
 		} catch (e) {
@@ -558,6 +559,8 @@ var parse = {
 			return parse.string(stream);
 		case ':':
 			return parse.keyword(stream);
+		case ';':
+			return parse.comment(stream);
 		// case '{':
 		// 	return parse.object(stream);
 		default:
@@ -584,7 +587,9 @@ var parse = {
 		stream.swallowWhitespace();
 		var parts = [];
 		while (stream.peek() != ')' && !stream.eof()) {
-			parts.push(parse.any(stream));
+			var exp = parse.any(stream);
+			if (exp !== undefined)
+				parts.push(exp);
 			stream.swallowWhitespace();
 		}
 		stream.next();
@@ -687,6 +692,22 @@ var parse = {
 		
 		stream.position += match.length;
 		return eval(match);
+	},
+	
+	comment: function (stream) {
+		stream = validateInput(stream);
+		stream.swallowWhitespace();
+		if (stream.peek() != ';') {
+			throw new parse.ParserException("Invalid comment at position " +
+				stream.position + " (starting with: '" + stream.peek() + "')");
+		}
+		var c = '';
+		while ('\n\r'.indexOf(stream.peek()) == -1 &&
+			   !stream.eof() &&
+		 	   stream.slice(stream.position, stream.position+2) != '\n\r') {
+			c += stream.next();
+		}
+		stream.next();
 	}
 };
 const WHITESPACE = " \t\n\r";

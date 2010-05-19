@@ -11,7 +11,7 @@
 * Write function: (load) (loads and evaluates a lisp file inline, synchronously)
 * Write macro: (defmacro)
 * Make some proofs of concept (or "examples"). Some good ones would be:
-	* A lisp repl in the browser
+	* A lisp repl in the browser (javascript vt100 emulator)
 	* An interactive UI using a popular framework (or several UIs using different frameworks)
 	* A game (a graphical one)
 	* A graphics-intensive simulation
@@ -22,12 +22,11 @@
 	* Any others?
 * Look at how different lisps handle users trying to define both functions and macros (and vars for that matter) that have already been defined
 * Figure out a better place to put all the library functions and macros
-* Do lambda unit tests
 * Make a Cons class for sexp's (instead of using Array)
 	* Write related functions: (first), (rest), (second), (third), (last)
 	* OR: (car), (cdr), (caar), (cadr), (caaar), etc
 * Write macro: (is-list) (for Cons')
-* Parse comments
+* Write function: (is-array) (because at this point lists will be Cons')
 * Make a webpage at the root of /src that runs on `rake run`
 	* This webpage should link off to the test runner(s) and all examples
 	* As a demonstration, all the interactions of this page should be written in lisp
