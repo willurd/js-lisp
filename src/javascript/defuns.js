@@ -144,6 +144,17 @@ var DEFUNS = {
 	},
 	
 	/**
+	 * Converts the given value to a number.
+	 */
+	"to-boolean": function (value) {
+		if (arguments.length !== 1) {
+			throw new Error("(to-boolean) requires 1 argument (got " +
+				arguments.length + ")");
+		}
+		return Boolean(value);
+	},
+	
+	/**
 	 * Reduces the given arguments on the / operator.
 	 */
 	"/": function () {

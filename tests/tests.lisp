@@ -74,6 +74,18 @@
 			(this.assertEqual x 5)))))
 
 (JSTest.TestCase (object
+	:name "Conversion Functions"
+	:testToString (lambda ()
+		(this.assertTrue (=== "3" (to-string 3))))
+	:testToNumber (lambda ()
+		(this.assertTrue (=== 3 (to-number "3"))))
+	:testToBoolean (lambda ()
+		(this.assertTrue (is-true (to-boolean "hi")))
+		(this.assertTrue (is-true (to-boolean (object))))
+		(this.assertTrue (is-false (to-boolean nil)))
+		(this.assertTrue (is-false (to-boolean 0))))))
+
+(JSTest.TestCase (object
 	:name "Numbers"
 	:testOctals (lambda ()
 		(this.assertEqual 0100 64))

@@ -9,7 +9,6 @@
 * Test return values of sexps (including null when there is no return)
 * Write tests for any lisp functions that have not been tested yet
 * Write macros: (if), (when), (cond)
-* Write function: (to-boolean)
 * Write function: (load) (loads and evaluates a lisp file inline, synchronously)
 * Write macro: (defmacro)
 * Look at how different lisps handle users trying to define both functions and macros (and vars for that matter) that have already been defined
