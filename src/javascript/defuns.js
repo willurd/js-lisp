@@ -1,16 +1,4 @@
 /**
- * Performs a logical negation on the given value.
- * 
- * @tested
- */
-defun("not", function (value) {
-	if (arguments.length != 1) {
-		throw new Error("(not) requires 1 argument");
-	}
-	return !value;
-});
-
-/**
  * Returns the given arguments as a list.
  */
 defun("list", function () {

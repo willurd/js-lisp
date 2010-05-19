@@ -19,29 +19,6 @@ string" "a\nstring"))
 		(this.assertEqual "a	string" "a\tstring"))))
 
 (JSTest.TestCase (object
-    :name "Logical Operators"
-    :testNot (lambda ()
-        (this.assertFalse (not true))
-        (this.assertFalse (not "string"))
-        (this.assertFalse (not :keyword))
-        (this.assertFalse (not (not nil)))
-        (this.assertFalse (not (not false))))
-    :testOr (lambda ()
-        (this.assertTrue (or nil t))
-        (this.assertTrue (not (or nil false))))
-    :testOrShortCircuit (lambda ()
-        (let ((x 5))
-            (or true (setq x 10))
-            (this.assertEqual x 5)))
-    :testAnd (lambda ()
-        (this.assertTrue (and t true "hi"))
-        (this.assertTrue (not (and t true nil))))
-    :testAndShortCircuit (lambda ()
-        (let ((x 5))
-            (and nil (setq x 10))
-            (this.assertEqual x 5)))))
-
-(JSTest.TestCase (object
 	:name "Equality Operators"
 	:testDoubleEquals (lambda ()
 		(this.assertTrue (== 2 2))
@@ -170,6 +147,58 @@ string" "a\nstring")))
         (this.assertEqual x 1))
     :testReturnValue (lambda ()
         (this.assertEqual (setq somevar "hello") "hello"))))
+
+(JSTest.TestCase (object
+	:name "macro (not)"
+	:testNoArguments (lambda ()
+		;; The nil is for 'custom message' in JSTest, so it doesn't get
+		;; applied to (not). This is testing that (not) will throw an error
+		;; when it isn't given any arguments.
+		(this.assertRaises Error (getfunc not) nil))
+	:testOneArgument (lambda ()
+		(this.assertTrue (not nil))
+		(this.assertFalse (not true))
+        (this.assertFalse (not "string"))
+        (this.assertFalse (not :keyword))
+        (this.assertFalse (not (not nil)))
+        (this.assertFalse (not (not false))))
+	:testManyArguments (lambda ()
+		(this.assertTrue (not nil false null))
+		(this.assertFalse (not nil false null t))) ;; The t at the end makes it false
+	:testShortCircuiting (lambda ()
+        (let ((x 5))
+            (not nil false t (setq x 10)) ;; The t makes it cut short
+            (this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (or)"
+	:testNoArguments (lambda ()
+		(this.assertFalse (or)))
+	:testOneArgument (lambda ()
+        (this.assertFalse (or nil))
+        (this.assertTrue (or t)))
+	:testManyArguments (lambda ()
+        (this.assertTrue (or nil false t))
+        (this.assertFalse (or nil false null)))
+	:testShortCircuiting (lambda ()
+        (let ((x 5))
+            (or nil false t (setq x 10)) ;; The t makes it cut short
+            (this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (and)"
+	:testNoArguments (lambda ()
+		(this.assertTrue (and)))
+	:testOneArgument (lambda ()
+        (this.assertFalse (and nil))
+        (this.assertTrue (and t)))
+	:testManyArguments (lambda ()
+        (this.assertTrue (and t "hi" :hello))
+        (this.assertFalse (and t :keyword nil)))
+	:testShortCircuiting (lambda ()
+        (let ((x 5))
+            (and t :keyword nil (setq x 10)) ;; The nil makes it cut short
+            (this.assertEqual x 5)))))
 
 (JSTest.TestCase (object
 	:name "macro (is-true)"

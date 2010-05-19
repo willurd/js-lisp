@@ -772,6 +772,23 @@ defmacro("defun", function () {
 });
 
 /**
+ * Returns the function that the given symbol points to.
+ */
+defmacro("getfunc", function (symbol) {
+	if (arguments.length !== 1) {
+		throw new Error("(getfunc) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	var object = lisp.env.get(symbol);
+	if (typeof(object) == "function") {
+		return object;
+	} else if (object instanceof Macro) {
+		return object.callable;
+	}
+	throw new Error("'" + symbol + "' is not a function or macro");
+});
+
+/**
  * 
  */
 defmacro("let", function () {
@@ -807,12 +824,26 @@ defmacro("setq", function () {
 });
 
 /**
+ * Performs a logical negation on the given value.
+ * 
+ * @tested
+ */
+defmacro("not", function (value) {
+	if (arguments.length === 0) {
+		throw new Error("(not) requires at least 1 argument");
+	}
+	for (var i = 0; i < arguments.length; i++) {
+		if (!(!resolve(arguments[i]))) {
+			return false;
+		}
+	}
+	return true;
+});
+
+/**
  * 
  */
 defmacro("or", function () {
-	if (arguments.length === 0) {
-		return false;
-	}
 	for (var i = 0; i < arguments.length; i++) {
 		if (resolve(arguments[i])) {
 			return true;
@@ -825,9 +856,6 @@ defmacro("or", function () {
  * 
  */
 defmacro("and", function () {
-	if (arguments.length === 0) {
-		return false;
-	}
 	for (var i = 0; i < arguments.length; i++) {
 		if (!resolve(arguments[i])) {
 			return false;
@@ -988,18 +1016,6 @@ defmacro("is-object", function () {
 		return typeof(value) == "object";
 	});
 });
-/**
- * Performs a logical negation on the given value.
- * 
- * @tested
- */
-defun("not", function (value) {
-	if (arguments.length != 1) {
-		throw new Error("(not) requires 1 argument");
-	}
-	return !value;
-});
-
 /**
  * Returns the given arguments as a list.
  */

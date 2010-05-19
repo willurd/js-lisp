@@ -5,6 +5,7 @@
 * Take a look at the CL, scheme, elisp, and closure specs for ideas. OR just conform to one language. OR make an implementation per language.
 * Start putting together a library of lisp methods and macros
 
+* Write tests for each function/macro for invalid input
 * Test return values of sexps (including null when there is no return)
 * Think about the fact that 'nil' is actually the empty list (right now it's 'null')
 * Write tests for any lisp functions that have not been tested yet
