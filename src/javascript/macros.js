@@ -81,6 +81,7 @@ defmacro("setq", function () {
 	var symbol = args[0];
 	var value  = resolve(args[1]);
 	lisp.env.set(symbol, value);
+	return value;
 });
 
 /**

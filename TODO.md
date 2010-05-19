@@ -2,14 +2,24 @@
 
 * Look through Practical Common Lisp for ideas on what to implement next
 	* On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
-
 * Start putting together a library of lisp methods and macros
-* Think about the fact that 'nil' is actually the empty list (right now it's 'null')
+
 * Test return values of sexps (including null when there is no return)
+* Think about the fact that 'nil' is actually the empty list (right now it's 'null')
 * Write tests for any lisp functions that have not been tested yet
 * Write macros: (if), (when), (cond)
 * Write function: (load) (loads and evaluates a lisp file inline, synchronously)
 * Write macro: (defmacro)
+* Make some proofs of concept (or "examples"). Some good ones would be:
+	* A lisp repl in the browser
+	* An interactive UI using a popular framework (or several UIs using different frameworks)
+	* A game (a graphical one)
+	* A graphics-intensive simulation
+	* An animation library or game-development framework
+	* An in-browser text editor (js-emacs or, more likely, something much simpler)
+	* A dynamic form (like a multi-"page" survey)
+	* An audio sequencer
+	* Any others?
 * Look at how different lisps handle users trying to define both functions and macros (and vars for that matter) that have already been defined
 * Figure out a better place to put all the library functions and macros
 * Do lambda unit tests

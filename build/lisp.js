@@ -474,6 +474,7 @@ var Env = Class.extend({
 		}
 	},
 	
+	// FIXME: This method sucks.
 	let: function (symbol, value) {
 		if (symbol instanceof Symbol) {
 			symbol = symbol.value;
@@ -781,6 +782,7 @@ defmacro("setq", function () {
 	var symbol = args[0];
 	var value  = resolve(args[1]);
 	lisp.env.set(symbol, value);
+	return value;
 });
 
 /**
@@ -967,6 +969,8 @@ defmacro("is-object", function () {
 });
 /**
  * Performs a logical negation on the given value.
+ * 
+ * @tested
  */
 defun("not", function (value) {
 	if (arguments.length != 1) {
@@ -1082,6 +1086,8 @@ defun("typeof", function (value) {
 
 /**
  * Converts the given value to a string.
+ * 
+ * @tested
  */
 defun("to-string", function (value) {
 	if (arguments.length !== 1) {
@@ -1093,6 +1099,8 @@ defun("to-string", function (value) {
 
 /**
  * Converts the given value to a number.
+ * 
+ * @tested
  */
 defun("to-number", function (value) {
 	if (arguments.length !== 1) {
@@ -1104,6 +1112,8 @@ defun("to-number", function (value) {
 
 /**
  * Converts the given value to a number.
+ * 
+ * @tested
  */
 defun("to-boolean", function (value) {
 	if (arguments.length !== 1) {
@@ -1111,6 +1121,38 @@ defun("to-boolean", function (value) {
 			arguments.length + ")");
 	}
 	return Boolean(value);
+});
+
+/**
+ * Converts the given string to uppercase.
+ * 
+ * @tested
+ */
+defun("to-upper", function (value) {
+	if (arguments.length !== 1) {
+		throw new Error("(to-upper) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (typeof(value) != "string") {
+		throw new Error("(to-upper) requires a string argument");
+	}
+	return value.toUpperCase();
+});
+
+/**
+ * Converts the given string to uppercase.
+ * 
+ * @tested
+ */
+defun("to-lower", function (value) {
+	if (arguments.length !== 1) {
+		throw new Error("(to-lower) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (typeof(value) != "string") {
+		throw new Error("(to-lower) requires a string argument");
+	}
+	return value.toLowerCase();
 });
 
 /**
@@ -1163,6 +1205,8 @@ defun("1+", function (value) {
 /**
  * Calls sprintf (found in the vendor section) with the
  * supplied arguments.
+ * 
+ * @tested
  */
 defun("format", function (print, format) {
 	if (arguments.length < 2) {
@@ -1179,34 +1223,6 @@ defun("format", function (print, format) {
 	} else {
 		return output;
 	}
-});
-
-/**
- * Converts the given string to uppercase.
- */
-defun("to-upper", function (value) {
-	if (arguments.length !== 1) {
-		throw new Error("(to-upper) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (typeof(value) != "string") {
-		throw new Error("(to-upper) requires a string argument");
-	}
-	return value.toUpperCase();
-});
-
-/**
- * Converts the given string to uppercase.
- */
-defun("to-lower", function (value) {
-	if (arguments.length !== 1) {
-		throw new Error("(to-lower) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (typeof(value) != "string") {
-		throw new Error("(to-lower) requires a string argument");
-	}
-	return value.toLowerCase();
 });
 return {
 	VERSION: "0.0.1",

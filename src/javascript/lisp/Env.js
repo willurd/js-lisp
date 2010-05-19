@@ -84,6 +84,7 @@ var Env = Class.extend({
 		}
 	},
 	
+	// FIXME: This method sucks.
 	let: function (symbol, value) {
 		if (symbol instanceof Symbol) {
 			symbol = symbol.value;

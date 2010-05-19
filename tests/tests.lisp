@@ -74,18 +74,6 @@
 			(this.assertEqual x 5)))))
 
 (JSTest.TestCase (object
-	:name "Conversion Functions"
-	:testToString (lambda ()
-		(this.assertTrue (=== "3" (to-string 3))))
-	:testToNumber (lambda ()
-		(this.assertTrue (=== 3 (to-number "3"))))
-	:testToBoolean (lambda ()
-		(this.assertTrue (is-true (to-boolean "hi")))
-		(this.assertTrue (is-true (to-boolean (object))))
-		(this.assertTrue (is-false (to-boolean nil)))
-		(this.assertTrue (is-false (to-boolean 0))))))
-
-(JSTest.TestCase (object
 	:name "Numbers"
 	:testOctals (lambda ()
 		(this.assertEqual 0100 64))
@@ -98,11 +86,7 @@
 		(this.assertEqual "a
 string" "a\nstring"))
 	:testHardTab (lambda ()
-		(this.assertEqual "a	string" "a\tstring"))
-	:testToUpper (lambda ()
-		(this.assertEqual (to-upper "hello") "HELLO"))
-	:testToLower (lambda ()
-		(this.assertEqual (to-lower "HELLO") "hello"))))
+		(this.assertEqual "a	string" "a\tstring"))))
 
 (JSTest.TestCase (object
     :name "Logical Operators"
@@ -237,7 +221,7 @@ string" "a\nstring")))
             (this.assertEqual (d.getTime) 1234567890000)))))
 
 (JSTest.TestCase (object
-	:name "Functions"
+	:name "Functions As Function Calls"
 	:testFunctionCallAsFirstArg (lambda ()
 		(let ((o (object :func (lambda (x) (1+ x)))))
 			(this.assertEqual 2 ((getkey :func o) 1))))
@@ -245,7 +229,55 @@ string" "a\nstring")))
 		(this.assertEqual 2 ((lambda (x) (1+ x)) 1)))))
 
 (JSTest.TestCase (object
-	:name "Function: sprintf"
+    :name "macro (setq)"
+    :testScoping (lambda ()
+        (setq x 1)
+        (this.assertEqual x 1)
+        (let ((x 2))
+            (this.assertEqual x 2)
+            (setq x 3)
+            (this.assertEqual x 3))
+        (this.assertEqual x 1))
+    :testReturnValue (lambda ()
+        (this.assertEqual (setq somevar "hello") "hello"))))
+
+(JSTest.TestCase (object
+    :name "function (not)"
+    :testBasic (lambda ()
+        (this.assertTrue (not nil))
+        (this.assertTrue (not (not t)))
+        (this.assertTrue (=== (not (not "hello")) true)))))
+
+(JSTest.TestCase (object
+	:name "function (to-string)"
+	:testBasic (lambda ()
+		(this.assertTrue (=== "3" (to-string 3))))))
+
+(JSTest.TestCase (object
+	:name "function (to-number)"
+	:testBasic (lambda ()
+		(this.assertTrue (=== 3 (to-number "3"))))))
+
+(JSTest.TestCase (object
+	:name "function (to-boolean)"
+	:testToBoolean (lambda ()
+		(this.assertTrue (is-true (to-boolean "hi")))
+		(this.assertTrue (is-true (to-boolean (object))))
+		(this.assertTrue (is-false (to-boolean nil)))
+		(this.assertTrue (is-false (to-boolean 0))))))
+
+(JSTest.TestCase (object
+    :name "function (to-upper)"
+    :testBasic (lambda ()
+		(this.assertEqual (to-upper "hello") "HELLO"))))
+
+(JSTest.TestCase (object
+    :name "function (to-lower)"
+	:testToLower (lambda ()
+		(this.assertEqual (to-lower "HELLO") "hello"))))
+
+(JSTest.TestCase (object
+	:name "function (format)"
 	:testNumberFormatting (lambda ()
 		(this.assertEqual (format nil "%01.2f" 123.1) "123.10")
 		(this.assertEqual (format nil "%x" 15) "f")
