@@ -2,6 +2,7 @@
 
 * Look through Practical Common Lisp for ideas on what to implement next
 	* On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
+* Take a look at the CL, scheme, elisp, and closure specs for ideas. OR just conform to one language. OR make an implementation per language.
 * Start putting together a library of lisp methods and macros
 
 * Test return values of sexps (including null when there is no return)
@@ -21,7 +22,6 @@
 	* An audio sequencer
 	* Any others?
 * Look at how different lisps handle users trying to define both functions and macros (and vars for that matter) that have already been defined
-* Figure out a better place to put all the library functions and macros
 * Make a Cons class for sexp's (instead of using Array)
 	* Write related functions: (first), (rest), (second), (third), (last)
 	* OR: (car), (cdr), (caar), (cadr), (caaar), etc
@@ -32,4 +32,3 @@
 	* As a demonstration, all the interactions of this page should be written in lisp
 * Update the README big time
 * Think about how to get line numbers for lisp scripts for debugging
-* Take a look at the CL, scheme, elisp, and closure specs for ideas. OR just conform to one language. OR make an implementation per language.

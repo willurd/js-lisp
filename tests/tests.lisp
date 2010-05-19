@@ -4,76 +4,6 @@
 		(this.message "It works!"))))
 
 (JSTest.TestCase (object
-	:name "Predicates"
-	:testIsTrue (lambda ()
-		(this.assertTrue (is-true t))
-		(this.assertTrue (is-true true))
-		(this.assertTrue (is-true t true))
-		(let ((x 5))
-			(this.assertFalse (is-true t nil (setq x 10)))
-			(this.assertEqual x 5)))
-	:testIsFalse (lambda ()
-		(this.assertTrue (is-false false))
-		(this.assertTrue (is-false false false))
-		(let ((x 5))
-			(this.assertFalse (is-false false nil (setq x 10)))
-			(this.assertEqual x 5)))
-	:testIsNull (lambda ()
-		(this.assertTrue (is-null nil))
-		(this.assertTrue (is-null null))
-		(this.assertTrue (is-null nil null))
-		(let ((x 5))
-			(this.assertFalse (is-null nil t (setq x 10)))
-			(this.assertEqual x 5)))
-	:testIsUndefined (lambda ()
-		(this.assertTrue (is-undefined undefined))
-		(this.assertTrue (is-undefined undefined undefined))
-		(let ((x 5))
-			(this.assertFalse (is-undefined undefined nil (setq x 10)))
-			(this.assertEqual x 5)))
-	:testIsString (lambda ()
-		(this.assertTrue (is-string "hello"))
-		(this.assertTrue (is-string "these" "are" "strings"))
-		(this.assertFalse (is-string nil))
-		(this.assertFalse (is-string t))
-		(this.assertFalse (is-string false))
-		(this.assertFalse (is-string undefined))
-		(let ((x 5))
-			(this.assertFalse (is-string "hello" 2 (setq x 10)))
-			(this.assertEqual x 5)))
-	:testIsNumber (lambda ()
-		(this.assertTrue (is-number 345))
-		(this.assertTrue (is-number 34.5))
-		(this.assertTrue (is-number 3.45e2))
-		(this.assertTrue (is-number 0377))
-		(this.assertTrue (is-number 0xFF))
-		(this.assertTrue (is-number 1 2 3 4))
-		(let ((x 5))
-			(this.assertFalse (is-number 2 "hello" (setq x 10)))
-			(this.assertEqual x 5)))
-	:testIsBoolean (lambda ()
-		(this.assertTrue (is-boolean false))
-		(this.assertTrue (is-boolean true))
-		(this.assertTrue (is-boolean false true))
-		(let ((x 5))
-			(this.assertFalse (is-boolean t nil (setq x 10)))
-			(this.assertEqual x 5)))
-	:testIsFunction (lambda ()
-		(this.assertTrue (is-function this.assertTrue))
-		(this.assertTrue (is-function /))
-		(this.assertTrue (is-function (lambda ())))
-		(let ((x 5))
-			(this.assertFalse (is-function (lambda ()) nil (setq x 10)))
-			(this.assertEqual x 5)))
-	:testIsObject (lambda ()
-		(this.assertTrue (is-object window))
-		(this.assertTrue (is-object this))
-		(this.assertTrue (is-object (object)))
-		(let ((x 5))
-			(this.assertFalse (is-object (object) "hi" (setq x 10)))
-			(this.assertEqual x 5)))))
-
-(JSTest.TestCase (object
 	:name "Numbers"
 	:testOctals (lambda ()
 		(this.assertEqual 0100 64))
@@ -240,6 +170,109 @@ string" "a\nstring")))
         (this.assertEqual x 1))
     :testReturnValue (lambda ()
         (this.assertEqual (setq somevar "hello") "hello"))))
+
+(JSTest.TestCase (object
+	:name "macro (is-true)"
+	:testBasic (lambda ()
+		(this.assertTrue (is-true t))
+		(this.assertTrue (is-true true))
+		(this.assertTrue (is-true t true)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (is-true t nil (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (is-false)"
+	:testBasic (lambda ()
+		(this.assertTrue (is-false false))
+		(this.assertTrue (is-false false false)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (is-false false nil (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (is-null)"
+	:testBasic (lambda ()
+		(this.assertTrue (is-null nil))
+		(this.assertTrue (is-null null))
+		(this.assertTrue (is-null nil null)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (is-null nil t (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (is-undefined)"
+	:testBasic (lambda ()
+		(this.assertTrue (is-undefined undefined))
+		(this.assertTrue (is-undefined undefined undefined)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (is-undefined undefined nil (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (is-string)"
+	:testBasic (lambda ()
+		(this.assertTrue (is-string "hello"))
+		(this.assertTrue (is-string "these" "are" "strings"))
+		(this.assertFalse (is-string nil))
+		(this.assertFalse (is-string t))
+		(this.assertFalse (is-string false))
+		(this.assertFalse (is-string undefined)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (is-string "hello" 2 (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (is-number)"
+	:testBasic (lambda ()
+		(this.assertTrue (is-number 345))
+		(this.assertTrue (is-number 34.5))
+		(this.assertTrue (is-number 3.45e2))
+		(this.assertTrue (is-number 0377))
+		(this.assertTrue (is-number 0xFF))
+		(this.assertTrue (is-number 1 2 3 4)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (is-number 2 "hello" (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (is-boolean)"
+	:testBasic (lambda ()
+		(this.assertTrue (is-boolean false))
+		(this.assertTrue (is-boolean true))
+		(this.assertTrue (is-boolean false true)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (is-boolean t nil (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (is-function)"
+	:testBasic (lambda ()
+		(this.assertTrue (is-function this.assertTrue))
+		(this.assertTrue (is-function /))
+		(this.assertTrue (is-function (lambda ()))))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (is-function (lambda ()) nil (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (is-object)"
+	:testBasic (lambda ()
+		(this.assertTrue (is-object window))
+		(this.assertTrue (is-object this))
+		(this.assertTrue (is-object (object))))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (is-object (object) "hi" (setq x 10)))
+			(this.assertEqual x 5)))))
 
 (JSTest.TestCase (object
     :name "function (not)"
