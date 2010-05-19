@@ -11,6 +11,10 @@ JSL_CONFIG = "./support/jsl.conf"
 
 task :default => :buildall
 
+task :watch do
+  sh "python support/bin/watch.py"
+end
+
 # Build the javascript lisp library and core lisp library
 task :buildall => [:build, :minify]
 
