@@ -1,0 +1,65 @@
+var StringStream = Class.extend({
+	init: function (data) {
+		if (typeof(data) != "string") {
+			throw new Error("Invalid object as StringStream input: " + data);
+		}
+
+		this.data = data;
+		this.length = data.length;
+		this.position = 0;
+	},
+	
+	slice: function () {
+		return this.data.slice.apply(this.data, arguments);
+	},
+	
+	rest: function (from) {
+		from = from || this.position;
+		return this.slice(from, this.data.length);
+	},
+	
+	bof: function () {
+		return this.position < 0;
+	},
+	
+	eof: function () {
+		return this.position >= this.length;
+	},
+	
+	peek: function (distance) {
+		distance = distance || 0;
+		return this.charAt(this.position + distance);
+	},
+	
+	charAt: function (index) {
+		return this.data.charAt(index);
+	},
+	
+	next: function (count) {
+		if (this.eof()) {
+			throw new Error("EOF reached in StringStream");
+		}
+
+		count = count || 1;
+		var c = this.charAt(this.position);
+		this.position += 1;
+		return c;
+	},
+	
+	prev: function (count) {
+		count = count || 1;
+		this.position -= count;
+
+		if (this.bof()) {
+			throw new Error("Cannot access character at position " + this.position +
+				" of StringStream");
+		}
+		
+		return this.charAt(this.position);
+	},
+	
+	swallowWhitespace: function () {
+		while (WHITESPACE.indexOf(this.peek()) != -1 && !this.eof())
+			this.position++;
+	}
+});
