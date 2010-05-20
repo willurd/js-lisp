@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>js-lisp Scripts - Example 2</title>
+		<link href="/support/vendor/JSTest/src/themes/default/style.css"
+			type="text/css" rel="stylesheet" media="screen" />
+		<script type="text/javascript" src="/build/lisp.js"></script>
+		<script type="text/lisp" src="/examples/scripts/example2.lisp">
+		(defun window.onload ()
+			(say-hi "test-results"))
+		</script>
+		<script type="text/javascript">
+		lisp.run();
+		</script>
+	</head>
+	<body>
+		<div id="header">
+			<h1>js-lisp Scripts - Example 2</h1>
+			<div class="clear"></div>
+		</div>
+		<div id="test-results"></div>
+	</body>
+</html>
