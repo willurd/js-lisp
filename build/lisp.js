@@ -1017,6 +1017,25 @@ defmacro("is-object", function () {
 	});
 });
 /**
+ * Returns an instance of the given class, initialized with
+ * the rest of the given arguments.
+ */
+defun("new", function (Class) {
+	if (arguments.length < 1) {
+		throw new Error("(new) requires at least 1 argument");
+	}
+	var argnames = [];
+	// This is the only way I could figure out how to make the
+	// passing of arguments to new Class(...) dynamic.
+	for (var i = 1; i < arguments.length; i++) {
+		var argname = "arg" + i;
+		eval("var " + argname + " = " + arguments[i]);
+		argnames.push(argname);
+	}
+	return eval("new Class(" + argnames.join(",") + ")");
+});
+
+/**
  * Returns the given arguments as a list.
  */
 defun("list", function () {
@@ -1043,22 +1062,10 @@ defun("object", function () {
 });
 
 /**
- * Returns an instance of the given class, initialized with
- * the rest of the given arguments.
+ * Returns the given arguments as a list.
  */
-defun("new", function (Class) {
-	if (arguments.length < 1) {
-		throw new Error("(new) requires at least 1 argument");
-	}
-	var argnames = [];
-	// This is the only way I could figure out how to make the
-	// passing of arguments to new Class(...) dynamic.
-	for (var i = 1; i < arguments.length; i++) {
-		var argname = "arg" + i;
-		eval("var " + argname + " = " + arguments[i]);
-		argnames.push(argname);
-	}
-	return eval("new Class(" + argnames.join(",") + ")");
+defun("array", function () {
+	return argsToArray(arguments);
 });
 
 /**
@@ -1225,6 +1232,15 @@ defun("+", function () {
 defun("-", function () {
 	return argsToArray(arguments).reduce(function (a, b) {
 		return a - b;
+	});
+});
+
+/**
+ * Reduces the given arguments on the % operator.
+ */
+defun("%", function () {
+	return argsToArray(arguments).reduce(function (a, b) {
+		return a % b;
 	});
 });
 
