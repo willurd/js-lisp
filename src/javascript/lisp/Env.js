@@ -23,9 +23,7 @@ var Env = Class.extend({
 	},
 	
 	get: function (symbol) {
-		if (symbol instanceof Symbol) {
-			symbol = symbol.value;
-		}
+		symbol = String(symbol);
 		
 		var parts = symbol.split(".");
 		var value;
@@ -54,9 +52,7 @@ var Env = Class.extend({
 	},
 	
 	set: function (symbol, value) {
-		if (symbol instanceof Symbol) {
-			symbol = symbol.value;
-		}
+		symbol = String(symbol);
 		
 		var parts = symbol.split(".");
 		
@@ -86,9 +82,7 @@ var Env = Class.extend({
 	
 	// FIXME: This method sucks.
 	let: function (symbol, value) {
-		if (symbol instanceof Symbol) {
-			symbol = symbol.value;
-		}
+		symbol = String(symbol);
 		this.symbols[symbol] = value;
 	}
 });

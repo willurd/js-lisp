@@ -24,10 +24,6 @@ return {
 		return ret;
 	},
 	
-	log: function () {
-		
-	},
-	
 	/**
 	 * This method is here so lisp.log can be called in code and it
 	 * will work regardless of if we're being called in a browser (with

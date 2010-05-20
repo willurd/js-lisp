@@ -279,6 +279,8 @@ var StringStream = Class.extend({
 		this.data = data;
 		this.length = data.length;
 		this.position = 0;
+		this.line = 1;
+		this.column = 0;
 	},
 	
 	slice: function () {
@@ -307,14 +309,18 @@ var StringStream = Class.extend({
 		return this.data.charAt(index);
 	},
 	
-	next: function (count) {
+	next: function () {
 		if (this.eof()) {
 			throw new Error("EOF reached in StringStream");
 		}
-
-		count = count || 1;
+		
 		var c = this.charAt(this.position);
 		this.position += 1;
+		this.column++;
+		if (c == "\n") {
+			this.line++;
+			this.column = 0;
+		}
 		return c;
 	},
 	
@@ -331,8 +337,9 @@ var StringStream = Class.extend({
 	},
 	
 	swallowWhitespace: function () {
-		while (WHITESPACE.indexOf(this.peek()) != -1 && !this.eof())
+		while (WHITESPACE.indexOf(this.peek()) != -1 && !this.eof()) {
 			this.position++;
+		}
 	}
 });
 function defun (name, func) {
@@ -413,9 +420,7 @@ var Env = Class.extend({
 	},
 	
 	get: function (symbol) {
-		if (symbol instanceof Symbol) {
-			symbol = symbol.value;
-		}
+		symbol = String(symbol);
 		
 		var parts = symbol.split(".");
 		var value;
@@ -444,9 +449,7 @@ var Env = Class.extend({
 	},
 	
 	set: function (symbol, value) {
-		if (symbol instanceof Symbol) {
-			symbol = symbol.value;
-		}
+		symbol = String(symbol);
 		
 		var parts = symbol.split(".");
 		
@@ -476,9 +479,7 @@ var Env = Class.extend({
 	
 	// FIXME: This method sucks.
 	let: function (symbol, value) {
-		if (symbol instanceof Symbol) {
-			symbol = symbol.value;
-		}
+		symbol = String(symbol);
 		this.symbols[symbol] = value;
 	}
 });
@@ -718,7 +719,9 @@ var ROOT_ENV = new Env(new Env(null, global), {
 	"false": false,
 	"nil": null,
 	"null": null,
-	"undefined": undefined
+	"undefined": undefined,
+	
+	"*features*": [new Keyword("notmuch")],
 });
 /**
  * Returns an anonymous function.
@@ -1094,7 +1097,7 @@ defun("setkey", function (key, object, value) {
 /**
  * Prints the given arguments to the console.
  */
-defun("puts", function () {
+defun("print", function () {
 	// Do not remove this. This is not a debug statement.
 	lisp.log.apply(null, arguments);
 });
@@ -1301,10 +1304,6 @@ return {
 		}
 		lisp.env = tempEnv;
 		return ret;
-	},
-	
-	log: function () {
-		
 	},
 	
 	/**

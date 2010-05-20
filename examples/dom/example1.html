@@ -9,9 +9,9 @@
 		(defun window.onload (e)
 			"Updates an HTML element using the DOM"
 			(let ((div (document.getElementById "thediv")))
-			  (puts "before:" div.innerText)
+			  (print "before:" div.innerText)
 			  (setq div.innerText "it works!")
-			  (puts "after:" div.innerText)))
+			  (print "after:" div.innerText)))
 		</script>
 		<script type="text/javascript">
 		lisp.run();

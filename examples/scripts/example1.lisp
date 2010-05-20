@@ -1,4 +1,4 @@
 (defun window.onload (e)
-	(puts "hello")
-	(puts (document.getElementsByTagName "h1"))
-	(puts "success"))
+	(print "hello")
+	(print (document.getElementsByTagName "h1"))
+	(print "success"))

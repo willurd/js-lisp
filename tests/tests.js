@@ -48,7 +48,7 @@ JSTest.TestCase({
 	// sexp
 	
 	testParseSexp: function () {
-		this.assertEqual(lisp.parse.script('(puts "hello!")')[0], ["puts", "hello!"]);
+		this.assertEqual(lisp.parse.script('(print "hello!")')[0], ["print", "hello!"]);
 	},
 	
 	// any

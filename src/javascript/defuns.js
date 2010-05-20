@@ -76,7 +76,7 @@ defun("setkey", function (key, object, value) {
 /**
  * Prints the given arguments to the console.
  */
-defun("puts", function () {
+defun("print", function () {
 	// Do not remove this. This is not a debug statement.
 	lisp.log.apply(null, arguments);
 });

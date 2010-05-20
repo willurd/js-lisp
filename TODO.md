@@ -4,6 +4,7 @@
 	* On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
 * Take a look at the CL, scheme, elisp, and closure specs for ideas. OR just conform to one language. OR make an implementation per language.
 * Start putting together a library of lisp methods and macros
+* Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
 
 * Write tests for each function/macro for invalid input
 * Test return values of sexps (including null when there is no return)
@@ -33,3 +34,28 @@
 	* As a demonstration, all the interactions of this page should be written in lisp
 * Update the README big time
 * Think about how to get line numbers for lisp scripts for debugging
+
+add macro: (prop <object> <prop.dot.path>)
+	Example: (prop ($ this) some.func)
+
+add function: (funcall <func.dot.path> <object/nil> [arg1 [arg2 [arg3 [...]]]])
+
+update Env.get to simply return parent[symbol] if !(parent instanceof Env)
+	Use case (setTimeout) (was not working)
+
+think about changing how Env works:
+	Current:
+		* Javascript libs can't access (let)'d variables
+	New:
+		* There's only one Env instance which uses global for everything
+		* Env has "scopes"
+			* Each scope is a set of vars that have changed and their old values so the Env can be reset when that scope goes out
+		* scope = Scope(parentScope, env)
+		* Closures copy scopes (which takes the current values, instead of the old values)
+
+handle empty list: if an sexp has no arguments, it's an empty list
+
+think about Cons' and how they'll fit in (or if they will...)
+
+`rake fileline build/lisp.js 432`
+	* Finds the actual source file and line that corresponds with the line of a compiled file

@@ -7,6 +7,8 @@ var StringStream = Class.extend({
 		this.data = data;
 		this.length = data.length;
 		this.position = 0;
+		this.line = 1;
+		this.column = 0;
 	},
 	
 	slice: function () {
@@ -35,14 +37,18 @@ var StringStream = Class.extend({
 		return this.data.charAt(index);
 	},
 	
-	next: function (count) {
+	next: function () {
 		if (this.eof()) {
 			throw new Error("EOF reached in StringStream");
 		}
-
-		count = count || 1;
+		
 		var c = this.charAt(this.position);
 		this.position += 1;
+		this.column++;
+		if (c == "\n") {
+			this.line++;
+			this.column = 0;
+		}
 		return c;
 	},
 	
@@ -59,7 +65,8 @@ var StringStream = Class.extend({
 	},
 	
 	swallowWhitespace: function () {
-		while (WHITESPACE.indexOf(this.peek()) != -1 && !this.eof())
+		while (WHITESPACE.indexOf(this.peek()) != -1 && !this.eof()) {
 			this.position++;
+		}
 	}
 });
