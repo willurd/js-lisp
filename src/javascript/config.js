@@ -8,5 +8,5 @@ var ROOT_ENV = new Env(new Env(null, global), {
 	"null": null,
 	"undefined": undefined,
 	
-	"*features*": [new Keyword("notmuch")],
+	"*features*": [new Keyword("notmuch")]
 });

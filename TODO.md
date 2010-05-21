@@ -35,6 +35,10 @@
 	* As a demonstration, all the interactions of this page should be written in lisp
 * Update the README big time
 * Think about how to get line numbers for lisp scripts for debugging
+* Make browser extensions:
+	* Chrome
+	* Firefox (using Jetpack)
+	* Greasemonkey
 
 Add macro: (prop <object> <prop.dot.path>)
 	Example: (prop ($ this) some.func)
@@ -52,6 +56,3 @@ Think about changing how Env works:
 Handle empty list: if an sexp has no arguments, it's an empty list
 
 Think about Cons' and how they'll fit in (or if they will...)
-
-`rake fileline build/lisp.js 432`
-	* Finds the actual source file and line that corresponds with the line of a compiled file

@@ -68,6 +68,36 @@ task :nodetest => [:build] do
   "
 end
 
-# task :chrome_extension do
-#   
-# end
+task :line, :filename, :num do |t, args|
+  # Because the files that actually get run in the browser are compiled
+  # files, put together from a bunch of smaller files, the line numbers
+  # that are reported when error occur, and by programs like js lint, are
+  # not the line numbers actually needed to easily find the problems in
+  # code. This task takes one of the files in the build.yaml file and a
+  # line number, and returns the actual file/line that we want.
+  File.open(BUILD_CONFIG) do |out|
+    config = YAML::load(out)
+    files = config[args.filename]
+    if not files
+      raise "No build file #{args.filename}"
+    end
+    line = args.num.to_i
+    current_line = 0
+    found = false
+    files.each do |filename|
+      content = File.read(filename)
+      file_line_count = content.lines.count
+      current_line += file_line_count
+      if current_line >= line
+        actual_line = file_line_count - (current_line - line)
+        found = true
+        puts "File: #{filename}, line: #{actual_line}"
+        sh "if which mate; then mate #{filename} -l #{actual_line}; fi"
+        break
+      end
+    end
+    if not found
+      raise "File not found with line number #{line}"
+    end
+  end
+end

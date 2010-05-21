@@ -164,7 +164,16 @@ string" "a\nstring")))
 		(let ((x 5))
 			(when nil
 				(setq x 10))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5)))
+	:testManyArguments (lambda ()
+		(let ((x 5))
+			(when t
+				(setq x 10)
+				(setq x 20))
+			(this.assertEqual x 20)))
+	:testReturnValues (lambda ()
+		(let ((x 5))
+			(this.assertEqual (when t (setq x 20)) 20)))))
 
 (JSTest.TestCase (object
 	:name "macro (not)"
