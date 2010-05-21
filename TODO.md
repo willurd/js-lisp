@@ -38,8 +38,6 @@
 add macro: (prop <object> <prop.dot.path>)
 	Example: (prop ($ this) some.func)
 
-add function: (funcall <func.dot.path> <object/nil> [arg1 [arg2 [arg3 [...]]]])
-
 update Env.get to simply return parent[symbol] if !(parent instanceof Env)
 	Use case (setTimeout) (was not working)
 

@@ -14,8 +14,7 @@
 		(tabs.tabs)
 		;; Dialog
 		(let ((close (lambda ()
-				(let ((dialog ($ this)))
-					(dialog.dialog "close")))))
+				(funcall ($ this) :dialog "close"))))
 			(dialog.dialog (object
 				:autoOpen false
 				:width    600
@@ -37,11 +36,9 @@
 		;; "hover states on the static widgets"
 		(static-widgets.hover
 			(lambda ()
-				(let ((widget ($ this)))
-					(widget.addClass "ui-state-hover")))
+				(funcall ($ this) :addClass "ui-state-hover"))
 			(lambda ()
-				(let ((widget ($ this)))
-					(widget.removeClass "ui-state-hover")))))))
+				(funcall ($ this) :removeClass "ui-state-hover"))))))
 
 ($ (lambda ()
 	(let ((update-progressbar (lambda ()

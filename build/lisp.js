@@ -792,6 +792,37 @@ defmacro("getfunc", function (symbol) {
 });
 
 /**
+ * Takes an object and a dotpath and calls the dotpath as a function
+ * on the given object (with the given arguments).
+ */
+defmacro("funcall", function (object, dotpath) {
+	if (arguments.length < 2) {
+		throw new Error("(funcall) requires at least 2 arguments " +
+			"(got " + arguments.length + ")");
+	}
+	// Grab the object.
+	object = resolve(object);
+	// Make sure we can get a string dotpath from the supplied argument.
+	if (dotpath instanceof Symbol || dotpath instanceof Keyword) {
+		dotpath = dotpath.value;
+	} else if (typeof(dotpath) != "string") {
+		throw new Error("Unknown function key in (funcall): " + String(dotpath));
+	}
+	// Resolve the object down to the second-to-last part of the dot path.
+	var parts = String(dotpath).split(".");
+	for (var i = 0; i < parts.length-1; i++) {
+		object = object[parts[i]];
+	}
+	// Make sure what's being "called" is actually a function.
+	var funckey = parts[parts.length-1];
+	if (typeof(object[funckey]) != "function") {
+		throw new Error(String(dotpath) + " on " + object + " is not a function");
+	}
+	var args = argsToArray(arguments).slice(2).map(resolve);
+	return object[funckey].apply(object, args);
+});
+
+/**
  * 
  */
 defmacro("let", function () {
