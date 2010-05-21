@@ -30,7 +30,7 @@ var Env = Class.extend({
 		symbol = parts[0];
 		parts = parts.slice(1);
 		
-		if (this.symbols.hasOwnProperty(symbol)) {
+		if (this.symbols.hasOwnProperty(symbol) || this.symbols[symbol]) {
 			value = this.symbols[symbol];
 		} else if (!this.parent) {
 			value = undefined;

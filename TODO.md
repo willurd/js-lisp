@@ -6,13 +6,13 @@
 * Start putting together a library of lisp methods and macros
 * Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
 
+* Write macros: (if), (when), (cond)
+* Write function: (load) (loads and evaluates a lisp file inline, synchronously)
 * Write tests for each function/macro for invalid input
 * Test return values of sexps (including null when there is no return)
 * Think about the fact that 'nil' is actually the empty list (right now it's 'null')
 * Write tests for any lisp functions that have not been tested yet
-* Write macros: (if), (when), (cond)
-* Write function: (load) (loads and evaluates a lisp file inline, synchronously)
-* Write macro: (defmacro)
+* Write macro: (defmacro) (and corresponding parsers: ",", "`", "@")
 * Make some proofs of concept (or "examples"). Some good ones would be:
 	* A lisp repl in the browser (javascript vt100 emulator)
 	* An interactive UI using a popular framework (or several UIs using different frameworks)
@@ -35,13 +35,10 @@
 * Update the README big time
 * Think about how to get line numbers for lisp scripts for debugging
 
-add macro: (prop <object> <prop.dot.path>)
+Add macro: (prop <object> <prop.dot.path>)
 	Example: (prop ($ this) some.func)
 
-update Env.get to simply return parent[symbol] if !(parent instanceof Env)
-	Use case (setTimeout) (was not working)
-
-think about changing how Env works:
+Think about changing how Env works:
 	Current:
 		* Javascript libs can't access (let)'d variables
 	New:
@@ -51,9 +48,9 @@ think about changing how Env works:
 		* scope = Scope(parentScope, env)
 		* Closures copy scopes (which takes the current values, instead of the old values)
 
-handle empty list: if an sexp has no arguments, it's an empty list
+Handle empty list: if an sexp has no arguments, it's an empty list
 
-think about Cons' and how they'll fit in (or if they will...)
+Think about Cons' and how they'll fit in (or if they will...)
 
 `rake fileline build/lisp.js 432`
 	* Finds the actual source file and line that corresponds with the line of a compiled file

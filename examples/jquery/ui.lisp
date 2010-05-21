@@ -45,5 +45,5 @@
 			(let ((progressbar     ($ "#progressbar")))
 				(progressbar.progressbar (object
 					:value (% (1+ (progressbar.progressbar "option" "value")) 100))))
-			(window.setTimeout (getfunc update-progressbar) 100))))
+			(setTimeout (getfunc update-progressbar) 100))))
 		(update-progressbar))))
