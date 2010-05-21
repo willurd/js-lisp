@@ -6,6 +6,8 @@
 * Start putting together a library of lisp methods and macros
 * Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
 
+* Write macros: (<), (>), (<=), (>=)
+* Write function: (1-)
 * Write macros: (if), (cond)
 * Write macro: (progn) (or (do), or something similar)
 * Write function: (load) (loads and evaluates a lisp file inline, synchronously)
@@ -23,6 +25,7 @@
 	* An in-browser text editor (js-emacs or, more likely, something much simpler)
 	* A dynamic form (like a multi-"page" survey)
 	* An audio sequencer
+	* Something with this perhaps: http://sizzlejs.com/
 	* Any others?
 * Look at how different lisps handle users trying to define both functions and macros (and vars for that matter) that have already been defined
 * Make a Cons class for sexp's (instead of using Array)
