@@ -6,7 +6,8 @@
 * Start putting together a library of lisp methods and macros
 * Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
 
-* Write macros: (if), (when), (cond)
+* Write macros: (if), (cond)
+* Write macro: (progn) (or (do), or something similar)
 * Write function: (load) (loads and evaluates a lisp file inline, synchronously)
 * Write tests for each function/macro for invalid input
 * Test return values of sexps (including null when there is no return)

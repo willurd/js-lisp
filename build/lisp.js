@@ -858,6 +858,25 @@ defmacro("setq", function () {
 });
 
 /**
+ * Executes the rest of the arguments if the first argument
+ * is true.
+ * 
+ * @return The return value of the last expression.
+ * @tested
+ */
+defmacro("when", function () {
+	if (arguments.length === 0) {
+		throw new Error("(when) requires at least 1 argument " +
+			"(got " + arguments.length + ")");
+	}
+	if (!!resolve(arguments[0])) {
+		var args = argsToArray(arguments).slice(1).map(resolve);
+		return args[args.length-1];
+	}
+	return null;
+});
+
+/**
  * Performs a logical negation on the given value.
  * 
  * @tested

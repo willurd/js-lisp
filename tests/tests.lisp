@@ -149,6 +149,24 @@ string" "a\nstring")))
         (this.assertEqual (setq somevar "hello") "hello"))))
 
 (JSTest.TestCase (object
+	:name "macro (when)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error (getfunc when) null))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error (getfunc when) null t)
+		(this.assertNotRaises Error (getfunc when) null nil))
+	:testWhenTrue (lambda ()
+		(let ((x 5))
+			(when t
+				(setq x 10))
+			(this.assertEqual x 10)))
+	:testWhenFalse (lambda ()
+		(let ((x 5))
+			(when nil
+				(setq x 10))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
 	:name "macro (not)"
 	:testNoArguments (lambda ()
 		;; The nil is for 'custom message' in JSTest, so it doesn't get
