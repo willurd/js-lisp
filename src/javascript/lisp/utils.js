@@ -23,7 +23,7 @@ function doSExp (sexp) {
 	var object = resolve(first);
 	
 	if (typeof(object) != "function" && !(object instanceof Macro)) {
-		throw new Error(first.value + " is not callable");
+		throw new Error("'" + first.value + "' is not callable");
 	}
 	
 	var thisObject = null;

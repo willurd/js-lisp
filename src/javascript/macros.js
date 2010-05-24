@@ -197,7 +197,7 @@ defmacro("and", function () {
  */
 defmacro("==", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '==' requires at least to arguments");
+		throw new Error("Macro '==' requires at least 2 arguments");
 	}
 	var last = resolve(arguments[0]);
 	for (var i = 1; i < arguments.length; i++) {
@@ -215,7 +215,7 @@ defmacro("==", function () {
  */
 defmacro("===", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '===' requires at least to arguments");
+		throw new Error("Macro '===' requires at least 2 arguments");
 	}
 	var last = resolve(arguments[0]);
 	for (var i = 1; i < arguments.length; i++) {
@@ -233,7 +233,7 @@ defmacro("===", function () {
  */
 defmacro("!=", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '!=' requires at least to arguments");
+		throw new Error("Macro '!=' requires at least 2 arguments");
 	}
 	var last = resolve(arguments[0]);
 	for (var i = 1; i < arguments.length; i++) {
@@ -251,7 +251,7 @@ defmacro("!=", function () {
  */
 defmacro("!==", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '!==' requires at least to arguments");
+		throw new Error("Macro '!==' requires at least 2 arguments");
 	}
 	var last = resolve(arguments[0]);
 	for (var i = 1; i < arguments.length; i++) {
@@ -267,9 +267,40 @@ defmacro("!==", function () {
 /**
  * 
  */
-// defmacro("<", function () {
-// 	
-// });
+defmacro("<", function () {
+	if (arguments.length < 2) {
+		throw new Error("Macro '<' requires at least 2 arguments");
+	}
+	var last = resolve(arguments[0]);
+	for (var i = 1; i < arguments.length; i++) {
+		var arg = resolve(arguments[i]);
+		if (!(last < arg)) {
+			return false;
+		}
+		last = arg;
+	}
+	return true;
+});
+
+/**
+ * Examples:
+ *    * (> x y)
+ *    * (> 3 2 1 0 -1)
+ */
+defmacro(">", function () {
+	if (arguments.length < 2) {
+		throw new Error("Macro '>' requires at least 2 arguments");
+	}
+	var last = resolve(arguments[0]);
+	for (var i = 1; i < arguments.length; i++) {
+		var arg = resolve(arguments[i]);
+		if (!(last > arg)) {
+			return false;
+		}
+		last = arg;
+	}
+	return true;
+});
 
 /**
  * Returns true if the given values === true.

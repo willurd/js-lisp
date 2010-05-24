@@ -367,7 +367,7 @@ function doSExp (sexp) {
 	var object = resolve(first);
 	
 	if (typeof(object) != "function" && !(object instanceof Macro)) {
-		throw new Error(first.value + " is not callable");
+		throw new Error("'" + first.value + "' is not callable");
 	}
 	
 	var thisObject = null;
@@ -518,7 +518,7 @@ function validateInput (input) {
 }
 var parse = {
 	NUMBER_FORMATS: [
-		(/^([0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/),
+		(/^(([+-]{1})?[0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/),
 		(/^(0x(?:[0-9a-fA-F]+))(?:\s+|\)|$)/)
 	],
 	
@@ -687,7 +687,7 @@ var parse = {
 		}
 		
 		if (!match) {
-			throw new ParseException("Invalid number at position " + stream.position +
+			throw new parse.ParserException("Invalid number at position " + stream.position +
 				" (starting with: '" + stream.peek() + "')");
 		}
 		
@@ -923,7 +923,7 @@ defmacro("and", function () {
  */
 defmacro("==", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '==' requires at least to arguments");
+		throw new Error("Macro '==' requires at least 2 arguments");
 	}
 	var last = resolve(arguments[0]);
 	for (var i = 1; i < arguments.length; i++) {
@@ -941,7 +941,7 @@ defmacro("==", function () {
  */
 defmacro("===", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '===' requires at least to arguments");
+		throw new Error("Macro '===' requires at least 2 arguments");
 	}
 	var last = resolve(arguments[0]);
 	for (var i = 1; i < arguments.length; i++) {
@@ -959,7 +959,7 @@ defmacro("===", function () {
  */
 defmacro("!=", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '!=' requires at least to arguments");
+		throw new Error("Macro '!=' requires at least 2 arguments");
 	}
 	var last = resolve(arguments[0]);
 	for (var i = 1; i < arguments.length; i++) {
@@ -977,7 +977,7 @@ defmacro("!=", function () {
  */
 defmacro("!==", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '!==' requires at least to arguments");
+		throw new Error("Macro '!==' requires at least 2 arguments");
 	}
 	var last = resolve(arguments[0]);
 	for (var i = 1; i < arguments.length; i++) {
@@ -993,9 +993,40 @@ defmacro("!==", function () {
 /**
  * 
  */
-// defmacro("<", function () {
-// 	
-// });
+defmacro("<", function () {
+	if (arguments.length < 2) {
+		throw new Error("Macro '<' requires at least 2 arguments");
+	}
+	var last = resolve(arguments[0]);
+	for (var i = 1; i < arguments.length; i++) {
+		var arg = resolve(arguments[i]);
+		if (!(last < arg)) {
+			return false;
+		}
+		last = arg;
+	}
+	return true;
+});
+
+/**
+ * Examples:
+ *    * (> x y)
+ *    * (> 3 2 1 0 -1)
+ */
+defmacro(">", function () {
+	if (arguments.length < 2) {
+		throw new Error("Macro '>' requires at least 2 arguments");
+	}
+	var last = resolve(arguments[0]);
+	for (var i = 1; i < arguments.length; i++) {
+		var arg = resolve(arguments[i]);
+		if (!(last > arg)) {
+			return false;
+		}
+		last = arg;
+	}
+	return true;
+});
 
 /**
  * Returns true if the given values === true.

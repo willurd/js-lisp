@@ -6,7 +6,7 @@
 * Start putting together a library of lisp methods and macros
 * Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
 
-* Write comparison macros: (<), (>), (<=), (>=)
+* Write comparison macros: (<=), (>=)
 * Write function: (1-)
 * Write macros: (if), (cond)
 * Write macro: (progn) (or (do), or something similar)
@@ -47,6 +47,13 @@
 
 Add macro: (prop <object> <prop.dot.path>)
 	Example: (prop ($ this) some.func)
+OR
+Add macro: (get "string.dot.path" [object])
+	Examples:
+		- (get "aVar")
+		- (let ((prop "some.prop"))
+			(get prop))
+		- (get "some.prop" this)
 
 Think about changing how Env works:
 	Current:

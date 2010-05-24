@@ -1,6 +1,6 @@
 var parse = {
 	NUMBER_FORMATS: [
-		(/^([0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/),
+		(/^(([+-]{1})?[0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/),
 		(/^(0x(?:[0-9a-fA-F]+))(?:\s+|\)|$)/)
 	],
 	
@@ -169,7 +169,7 @@ var parse = {
 		}
 		
 		if (!match) {
-			throw new ParseException("Invalid number at position " + stream.position +
+			throw new parse.ParserException("Invalid number at position " + stream.position +
 				" (starting with: '" + stream.peek() + "')");
 		}
 		
