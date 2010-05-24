@@ -265,6 +265,13 @@ defmacro("!==", function () {
 });
 
 /**
+ * 
+ */
+// defmacro("<", function () {
+// 	
+// });
+
+/**
  * Returns true if the given values === true.
  */
 defmacro("is-true", function () {

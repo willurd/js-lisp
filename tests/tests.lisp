@@ -19,40 +19,6 @@ string" "a\nstring"))
 		(this.assertEqual "a	string" "a\tstring"))))
 
 (JSTest.TestCase (object
-	:name "Equality Operators"
-	:testDoubleEquals (lambda ()
-		(this.assertTrue (== 2 2))
-		(this.assertTrue (== 2 "2"))
-		(this.assertTrue (== 2 "2" 2.0))
-		(this.assertFalse (== 2 3))
-		(this.assertFalse (== 2 "2" "a string"))
-		(let ((x 5))
-			(this.assertFalse (== 2 3 (setq x 10)))
-			(this.assertEqual x 5)))
-	:testTripleEquals (lambda ()
-		(this.assertTrue (=== 2 2))
-		(this.assertFalse (=== 2 "2"))
-		(this.assertTrue (=== 2 2.0 (/ 4 2))
-		(this.assertTrue (=== "a
-string" "a\nstring")))
-		(let ((x 5))
-			(this.assertFalse (=== 2 "2" (setq x 10)))
-			(this.assertEqual x 5)))
-	:testDoubleNotEquals (lambda ()
-		(this.assertTrue (!= 2 3))
-		(this.assertFalse (!= 2 "2"))
-		(this.assertFalse (!= 2 (/ 4 "2")))
-		(let ((x 5))
-			(this.assertFalse (!= 2 "2" (setq x 10)))
-			(this.assertEqual x 5)))
-	:testTripleNotEquals (lambda ()
-		(this.assertTrue (!== 2 "2"))
-		(this.assertFalse (!== 10 10.0))
-		(let ((x 5))
-			(this.assertFalse (!== 2 2 (setq x 10)))
-			(this.assertEqual x 5)))))
-
-(JSTest.TestCase (object
     :name "Conditions"))
 
 (JSTest.TestCase (object
@@ -228,6 +194,74 @@ string" "a\nstring")))
             (this.assertEqual x 5)))))
 
 (JSTest.TestCase (object
+	:name "macro (==)"
+	:testOneArgument (lambda ()
+		(this.assertRaises Error (getfunc ==) nil 2))
+	:testTwoArguments (lambda ()
+		(this.assertTrue (== 2 2))
+		(this.assertFalse (== 2 3)))
+	:testManyArguments (lambda ()
+		(this.assertTrue (== 2 2.0 (/ 4 2))))
+	:testTypeConversion (lambda ()
+		(this.assertTrue (== 2 "2"))
+		(this.assertTrue (== "2" 2.0)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (== 2 3 (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (===)"
+	:testOneArgument (lambda ()
+		(this.assertRaises Error (getfunc ===) nil 2))
+	:testTwoArguments (lambda ()
+		(this.assertTrue (=== 2 2))
+		(this.assertFalse (=== 2 3))
+		(this.assertTrue (=== "a
+string" "a\nstring")))
+	:testManyArguments (lambda ()
+		(this.assertTrue (=== 2 2.0 (/ 4 2))))
+	:testNoTypeConversion (lambda ()
+		(this.assertFalse (=== 2 "2"))
+		(this.assertFalse (=== 2 "2" 2.0)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (=== 2 "2" (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (!=)"
+	:testOneArgument (lambda ()
+		(this.assertRaises Error (getfunc !=) nil 2))
+	:testTwoArguments (lambda ()	
+		(this.assertTrue (!= 2 3))
+		(this.assertFalse (!= 2 "2")))
+	:testManyArguments (lambda ()
+		(this.assertTrue (!= 2 3 4)))
+	:testTypeConversion (lambda ()
+		(this.assertFalse (!= 2 "2")))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (!= 2 "2" (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (!==)"
+	:testOneArgument (lambda ()
+		(this.assertRaises Error (getfunc !==) nil 2))
+	:testTwoArguments (lambda ()	
+		(this.assertTrue (!== 2 3))
+		(this.assertTrue (!== 2 "2")))
+	:testManyArguments (lambda ()
+		(this.assertTrue (!== 2 3 4)))
+	:testNoTypeConversion (lambda ()
+		(this.assertTrue (!== 2 "2")))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (!== 2 2 (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
 	:name "macro (is-true)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-true t))
@@ -344,8 +378,16 @@ string" "a\nstring")))
 
 (JSTest.TestCase (object
 	:name "function (to-number)"
-	:testBasic (lambda ()
-		(this.assertTrue (=== 3 (to-number "3"))))))
+	:testStringToNumber (lambda ()
+		(this.assertTrue (=== 3 (to-number "3")))
+		;;(this.assertEqual NaN (to-number "hello")) ; why does NaN != NaN?
+		)
+	:testBooleanToNumber (lambda ()
+		(this.assertEqual 1 (to-number t))
+		(this.assertEqual 0 (to-number false)))
+	:testNullToNumber (lambda ()
+		(this.assertEqual 0 (to-number nil))
+		(this.assertEqual 0 (to-number null)))))
 
 (JSTest.TestCase (object
 	:name "function (to-boolean)"

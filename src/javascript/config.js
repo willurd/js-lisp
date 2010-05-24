@@ -7,6 +7,7 @@ var ROOT_ENV = new Env(new Env(null, global), {
 	"nil": null,
 	"null": null,
 	"undefined": undefined,
+	"NaN": NaN,
 	
 	"*features*": [new Keyword("notmuch")]
 });
