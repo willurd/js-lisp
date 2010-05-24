@@ -297,6 +297,44 @@ string" "a\nstring")))
 			(this.assertEqual x 5)))))
 
 (JSTest.TestCase (object
+	:name "macro (<=)"
+	:testOneArgument (lambda ()
+		(this.assertRaises Error (getfunc <=) nil 2))
+	:testTwoArguments (lambda ()
+		(this.assertTrue (<= 2 3))
+		(this.assertTrue (<= 2 2)))
+	:testManyArguments (lambda ()
+		(this.assertTrue (<= 2 (/ 4 2) 3 (/ 9 3))))
+	:testTypeConversion (lambda ()
+		(this.assertTrue (<= 2 "3"))
+		(this.assertTrue (<= 2 "2"))
+		(this.assertTrue (<= "2" 3.0))
+		(this.assertTrue (<= "2" 2)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (<= 2 1 (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (>=)"
+	:testOneArgument (lambda ()
+		(this.assertRaises Error (getfunc >=) nil 2))
+	:testTwoArguments (lambda ()
+		(this.assertTrue (>= 3 2))
+		(this.assertTrue (>= 1 -1))
+		(this.assertTrue (>= 2 2)))
+	:testManyArguments (lambda ()
+		(this.assertTrue (>= (/ 9 3) 3 2)))
+	:testTypeConversion (lambda ()
+		(this.assertTrue (>= 3 "2"))
+		(this.assertTrue (>= 3 "3"))
+		(this.assertTrue (>= "3.0" 3)))
+	:testShortCircuiting (lambda ()
+		(let ((x 5))
+			(this.assertFalse (>= 2 3 (setq x 10)))
+			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
 	:name "macro (is-true)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-true t))
@@ -415,8 +453,7 @@ string" "a\nstring")))
 	:name "function (to-number)"
 	:testStringToNumber (lambda ()
 		(this.assertTrue (=== 3 (to-number "3")))
-		;;(this.assertEqual NaN (to-number "hello")) ; why does NaN != NaN?
-		)
+		(this.assertTrue (isNaN (to-number "hello"))))
 	:testBooleanToNumber (lambda ()
 		(this.assertEqual 1 (to-number t))
 		(this.assertEqual 0 (to-number false)))

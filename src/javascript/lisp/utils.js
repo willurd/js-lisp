@@ -51,3 +51,18 @@ function predicate (args, testFunc) {
 	}
 	return true;
 }
+
+function comparator (args, testFunc) {
+	if (args.length < 2) {
+		return false;
+	}
+	var a = resolve(args[0]);
+	for (var i = 1; i < args.length; i++) {
+		var b = resolve(args[i]);
+		if (!testFunc(a, b)) {
+			return false;
+		}
+		a = b;
+	}
+	return true;
+}

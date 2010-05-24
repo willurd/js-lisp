@@ -6,7 +6,6 @@
 * Start putting together a library of lisp methods and macros
 * Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
 
-* Write comparison macros: (<=), (>=)
 * Write function: (1-)
 * Write macros: (if), (cond)
 * Write macro: (progn) (or (do), or something similar)

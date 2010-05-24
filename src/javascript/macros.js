@@ -156,16 +156,13 @@ defmacro("when", function () {
  * 
  * @tested
  */
-defmacro("not", function (value) {
+defmacro("not", function (value) {	
 	if (arguments.length === 0) {
 		throw new Error("(not) requires at least 1 argument");
 	}
-	for (var i = 0; i < arguments.length; i++) {
-		if (!(!resolve(arguments[i]))) {
-			return false;
-		}
-	}
-	return true;
+	return predicate(arguments, function (value) {
+		return !value;
+	});
 });
 
 /**
@@ -184,12 +181,12 @@ defmacro("or", function () {
  * 
  */
 defmacro("and", function () {
-	for (var i = 0; i < arguments.length; i++) {
-		if (!resolve(arguments[i])) {
-			return false;
-		}
+	if (arguments.length === 0) {
+		return true;
 	}
-	return true;
+	return predicate(arguments, function (value) {
+		return !!value;
+	});
 });
 
 /**
@@ -199,15 +196,9 @@ defmacro("==", function () {
 	if (arguments.length < 2) {
 		throw new Error("Macro '==' requires at least 2 arguments");
 	}
-	var last = resolve(arguments[0]);
-	for (var i = 1; i < arguments.length; i++) {
-		var arg = resolve(arguments[i]);
-		if (!(arg == last)) {
-			return false;
-		}
-		last = arg;
-	}
-	return true;
+	return comparator(arguments, function (a, b) {
+		return a == b;
+	});
 });
 
 /**
@@ -217,15 +208,9 @@ defmacro("===", function () {
 	if (arguments.length < 2) {
 		throw new Error("Macro '===' requires at least 2 arguments");
 	}
-	var last = resolve(arguments[0]);
-	for (var i = 1; i < arguments.length; i++) {
-		var arg = resolve(arguments[i]);
-		if (!(arg === last)) {
-			return false;
-		}
-		last = arg;
-	}
-	return true;
+	return comparator(arguments, function (a, b) {
+		return a === b;
+	});
 });
 
 /**
@@ -235,15 +220,9 @@ defmacro("!=", function () {
 	if (arguments.length < 2) {
 		throw new Error("Macro '!=' requires at least 2 arguments");
 	}
-	var last = resolve(arguments[0]);
-	for (var i = 1; i < arguments.length; i++) {
-		var arg = resolve(arguments[i]);
-		if (!(arg != last)) {
-			return false;
-		}
-		last = arg;
-	}
-	return true;
+	return comparator(arguments, function (a, b) {
+		return a != b;
+	});
 });
 
 /**
@@ -253,33 +232,23 @@ defmacro("!==", function () {
 	if (arguments.length < 2) {
 		throw new Error("Macro '!==' requires at least 2 arguments");
 	}
-	var last = resolve(arguments[0]);
-	for (var i = 1; i < arguments.length; i++) {
-		var arg = resolve(arguments[i]);
-		if (!(arg !== last)) {
-			return false;
-		}
-		last = arg;
-	}
-	return true;
+	return comparator(arguments, function (a, b) {
+		return a !== b;
+	});
 });
 
 /**
- * 
+* Examples:
+*    * (< x y)
+*    * (< -1 0 1 2 3)
  */
 defmacro("<", function () {
 	if (arguments.length < 2) {
 		throw new Error("Macro '<' requires at least 2 arguments");
 	}
-	var last = resolve(arguments[0]);
-	for (var i = 1; i < arguments.length; i++) {
-		var arg = resolve(arguments[i]);
-		if (!(last < arg)) {
-			return false;
-		}
-		last = arg;
-	}
-	return true;
+	return comparator(arguments, function (a, b) {
+		return a < b;
+	});
 });
 
 /**
@@ -291,15 +260,37 @@ defmacro(">", function () {
 	if (arguments.length < 2) {
 		throw new Error("Macro '>' requires at least 2 arguments");
 	}
-	var last = resolve(arguments[0]);
-	for (var i = 1; i < arguments.length; i++) {
-		var arg = resolve(arguments[i]);
-		if (!(last > arg)) {
-			return false;
-		}
-		last = arg;
+	return comparator(arguments, function (a, b) {
+		return a > b;
+	});
+});
+
+/**
+ * Examples:
+ *    * (<= x y)
+ *    * (<= 1 1 2 3 4)
+ */
+defmacro("<=", function () {
+	if (arguments.length < 2) {
+		throw new Error("Macro '>' requires at least 2 arguments");
 	}
-	return true;
+	return comparator(arguments, function (a, b) {
+		return a <= b;
+	});
+});
+
+/**
+ * Examples:
+ *    * (>= x y)
+ *    * (>= 4 3 2 2 1)
+ */
+defmacro(">=", function () {
+	if (arguments.length < 2) {
+		throw new Error("Macro '>' requires at least 2 arguments");
+	}
+	return comparator(arguments, function (a, b) {
+		return a >= b;
+	});
 });
 
 /**
