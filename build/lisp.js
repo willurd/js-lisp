@@ -1141,8 +1141,8 @@ defun("list", function () {
 });
 
 /**
- * Creates a JavaScript object using the given arguments as an
- * association list.
+ * Creates a JavaScript object using the given arguments as a
+ * property list.
  */
 defun("object", function () {
 	var args = argsToArray(arguments);
