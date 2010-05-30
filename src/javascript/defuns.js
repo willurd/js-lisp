@@ -210,7 +210,17 @@ defun("to-lower", function (value) {
  * Reduces the given arguments on the / operator.
  */
 defun("/", function () {
-	return argsToArray(arguments).reduce(function (a, b) {
+	if (arguments.length < 1) {
+		throw new Error("(/) requires at least 1 argument (got " +
+			arguments.length + ")");
+	}
+	var args = argsToArray(arguments);
+	// This is to emulate common lisp, where dividing one number
+	// is the same as dividing 1 by that number.
+	if (args.length === 1) {
+		args = [1].concat(args);
+	}
+	return args.reduce(function (a, b) {
 		return a / b;
 	});
 });
@@ -219,7 +229,11 @@ defun("/", function () {
  * Reduces the given arguments on the * operator.
  */
 defun("*", function () {
-	return argsToArray(arguments).reduce(function (a, b) {
+	var args = argsToArray(arguments);
+	if (args.length < 2) {
+		args = [1].concat(args);
+	}
+	return args.reduce(function (a, b) {
 		return a * b;
 	});
 });

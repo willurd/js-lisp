@@ -566,12 +566,38 @@ string" "a\nstring")))
 	:testBasic (lambda ()
 		(this.assertEqual (to-lower "HELLO") "hello"))))
 
-;; (JSTest.TestCase (object
-;;     :name "function (/)"
-;; 	:test
+(JSTest.TestCase (object
+    :name "function (/)"
+	:testNoArguments (lambda ()
+        (this.assertRaises Error (getfunc /) nil))
+	:testOneArgument (lambda ()
+        (this.assertNotRaises Error (getfunc /) nil 1))
+	:testManyArguments (lambda ()
+        (this.assertNotRaises Error (getfunc /) nil 2 3))
+	:testDividingOneNumber (lambda ()
+	    (this.assertEqual (/ 2) 0.5))
+	:testDividingTwoNumbers (lambda ()
+        (this.assertEqual (/ 4 2) 2))
+	:testDividingManyNumbers (lambda ()
+        (this.assertEqual (/ 4 2 4) 0.5))))
 
-;; TODO: Test (/)
-;; TODO: Test (*)
+(JSTest.TestCase (object
+    :name "function (*)"
+	:testNoArguments (lambda ()
+        (this.assertNotRaises Error (getfunc *) nil))
+	:testOneArgument (lambda ()
+        (this.assertNotRaises Error (getfunc *) nil 1))
+	:testManyArguments (lambda ()
+        (this.assertNotRaises Error (getfunc *) nil 2 3))
+	:testMultiplyingNoNumbers (lambda ()
+        (this.assertEqual (*) 1))
+	:testMultiplyingOneNumber (lambda ()
+	    (this.assertEqual (* 2) 2))
+	:testMultiplyingTwoNumbers (lambda ()
+        (this.assertEqual (* 4 2) 8))
+	:testMultiplyingManyNumbers (lambda ()
+        (this.assertEqual (* 2 3 4) 24))))
+
 ;; TODO: Test (+)
 ;; TODO: Test (-)
 ;; TODO: Test (%)
