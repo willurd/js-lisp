@@ -505,6 +505,12 @@ string" "a\nstring")))
 
 (JSTest.TestCase (object
 	:name "function (to-string)"
+	:testNoArguments (lambda ()
+	    (this.assertRaises Error (getfunc to-string) nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error (getfunc to-string) nil 0))
+	:testManyArguments (lambda ()
+        (this.assertRaises Error (getfunc to-string) nil 1 2))
 	:testBasic (lambda ()
 		(this.assertTrue (=== "3" (to-string 3))))))
 
@@ -522,7 +528,13 @@ string" "a\nstring")))
 
 (JSTest.TestCase (object
 	:name "function (to-boolean)"
-	:testToBoolean (lambda ()
+	:testNoArguments (lambda ()
+	    (this.assertRaises Error (getfunc to-boolean) nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error (getfunc to-boolean) nil "arg 1"))
+	:testManyArguments (lambda ()
+        (this.assertRaises Error (getfunc to-boolean) nil "arg 1" "arg 2"))
+	:testBasic (lambda ()
 		(this.assertTrue (is-true (to-boolean "hi")))
 		(this.assertTrue (is-true (to-boolean (object))))
 		(this.assertTrue (is-false (to-boolean nil)))
@@ -530,13 +542,33 @@ string" "a\nstring")))
 
 (JSTest.TestCase (object
     :name "function (to-upper)"
+	:testNoArguments (lambda ()
+	    (this.assertRaises Error (getfunc to-upper) nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error (getfunc to-upper) nil "arg 1"))
+	:testManyArguments (lambda ()
+        (this.assertRaises Error (getfunc to-upper) nil "arg 1" "arg 2"))
+	:testNonStringArgument (lambda ()
+        (this.assertRaises Error (getfunc to-upper) nil 0))
     :testBasic (lambda ()
 		(this.assertEqual (to-upper "hello") "HELLO"))))
 
 (JSTest.TestCase (object
     :name "function (to-lower)"
-	:testToLower (lambda ()
+	:testNoArguments (lambda ()
+	    (this.assertRaises Error (getfunc to-lower) nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error (getfunc to-lower) nil "arg 1"))
+	:testManyArguments (lambda ()
+        (this.assertRaises Error (getfunc to-lower) nil "arg 1" "arg 2"))
+	:testNonStringArgument (lambda ()
+        (this.assertRaises Error (getfunc to-lower) nil 0))
+	:testBasic (lambda ()
 		(this.assertEqual (to-lower "HELLO") "hello"))))
+
+;; (JSTest.TestCase (object
+;;     :name "function (/)"
+;; 	:test
 
 ;; TODO: Test (/)
 ;; TODO: Test (*)
@@ -553,7 +585,7 @@ string" "a\nstring")))
 	:testOneArgument (lambda ()
 		(this.assertRaises Error (getfunc format) nil t))
 	:testManyArguments (lambda ()
-		(this.assertNotRaises Error (getfunc format) nil t "hello"))
+		(this.assertNotRaises Error (getfunc format) nil nil "hello"))
 	:testNumberFormatting (lambda ()
 		(this.assertEqual (format nil "%01.2f" 123.1) "123.10")
 		(this.assertEqual (format nil "%x" 15) "f")
