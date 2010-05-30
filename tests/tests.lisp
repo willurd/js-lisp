@@ -459,7 +459,18 @@ string" "a\nstring")))
 ;;       - no args
 ;;       - one arg
 ;;       - many args
-;; TODO: Test (concat)
+
+(JSTest.TestCase (object
+    :name "function (concat)"
+	:testNoArguments (lambda ()
+        (this.assertNotRaises Error (getfunc concat) nil)
+		(this.assertEqual (concat) ""))
+	:testOneArguments (lambda ()
+        (this.assertNotRaises Error (getfunc concat) nil "arg 1")
+		(this.assertEqual (concat "hello") "hello"))
+	:testManyArguments (lambda ()
+        (this.assertNotRaises Error (getfunc concat) nil "arg 1" "arg 2")
+		(this.assertEqual (concat "one, " "two") "one, two"))))
 
 (JSTest.TestCase (object
     :name "function (join)"
@@ -598,11 +609,76 @@ string" "a\nstring")))
 	:testMultiplyingManyNumbers (lambda ()
         (this.assertEqual (* 2 3 4) 24))))
 
-;; TODO: Test (+)
-;; TODO: Test (-)
-;; TODO: Test (%)
-;; TODO: Test (1+)
-;; TODO: Write and test (1-)
+(JSTest.TestCase (object
+    :name "function (+)"
+	:testNoArguments (lambda ()
+        (this.assertNotRaises Error (getfunc +) nil))
+	:testOneArgument (lambda ()
+        (this.assertNotRaises Error (getfunc +) nil 1))
+	:testManyArguments (lambda ()
+        (this.assertNotRaises Error (getfunc +) nil 2 3))
+	:testAddingNoNumbers (lambda ()
+        (this.assertEqual (+) 0))
+	:testAddingOneNumber (lambda ()
+	    (this.assertEqual (+ 2) 2))
+	:testAddingTwoNumbers (lambda ()
+        (this.assertEqual (+ 4 2) 6))
+	:testAddingManyNumbers (lambda ()
+        (this.assertEqual (+ 2 3 4) 9))))
+
+(JSTest.TestCase (object
+    :name "function (-)"
+	:testNoArguments (lambda ()
+        (this.assertRaises Error (getfunc -) nil))
+	:testOneArgument (lambda ()
+        (this.assertNotRaises Error (getfunc -) nil 1))
+	:testManyArguments (lambda ()
+        (this.assertNotRaises Error (getfunc -) nil 2 3))
+	:testSubtractingOneNumber (lambda ()
+	    (this.assertEqual (- 2) -2))
+	:testSubtractingTwoNumbers (lambda ()
+        (this.assertEqual (- 4 2) 2))
+	:testSubtractingManyNumbers (lambda ()
+        (this.assertEqual (- 2 3 4) -5))))
+
+(JSTest.TestCase (object
+    :name "function (%)"
+	:testNoArguments (lambda ()
+        (this.assertRaises Error (getfunc %) nil))
+	:testOneArgument (lambda ()
+        (this.assertRaises Error (getfunc %) nil 1))
+	:testTwoArguments (lambda ()
+        (this.assertNotRaises Error (getfunc %) nil 1 2))
+	:testManyArguments (lambda ()
+        (this.assertRaises Error (getfunc %) nil 1 2 3))
+	:testBasic (lambda ()
+	    (this.assertEqual (% 3 2) 1))))
+
+(JSTest.TestCase (object
+    :name "function (1+)"
+	:testNoArguments (lambda ()
+        (this.assertRaises Error (getfunc 1+) nil))
+	:testOneArgument (lambda ()
+        (this.assertNotRaises Error (getfunc 1+) nil 1))
+	:testManyArguments (lambda ()
+        (this.assertRaises Error (getfunc 1+) nil 1 2))
+	:testNonNumberArgument (lambda ()
+        (this.assertRaises Error (getfunc 1+) nil "hi"))
+	:testBasic (lambda ()
+	    (this.assertEqual (1+ 2) 3))))
+
+(JSTest.TestCase (object
+    :name "function (1-)"
+	:testNoArguments (lambda ()
+        (this.assertRaises Error (getfunc 1-) nil))
+	:testOneArgument (lambda ()
+        (this.assertNotRaises Error (getfunc 1-) nil 1))
+	:testManyArguments (lambda ()
+        (this.assertRaises Error (getfunc 1-) nil 1 2))
+	:testNonNumberArgument (lambda ()
+        (this.assertRaises Error (getfunc 1-) nil "hi"))
+	:testBasic (lambda ()
+	    (this.assertEqual (1- 2) 1))))
 
 (JSTest.TestCase (object
 	:name "function (format)"

@@ -3,7 +3,7 @@
  * the rest of the given arguments.
  */
 defun("new", function (Class) {
-	if (arguments.length < 1) {
+	if (arguments.length === 0) {
 		throw new Error("(new) requires at least 1 argument");
 	}
 	var argnames = [];
@@ -83,6 +83,8 @@ defun("print", function () {
 
 /**
  * Joins the given arguments together into one string.
+ * 
+ * @concat
  */
 defun("concat", function () {
 	return argsToArray(arguments).join("");
@@ -104,9 +106,8 @@ defun("concat", function () {
  *   "one, two, three"
  */
 defun("join", function () {
-	if (arguments.length < 1) {
-		throw new Error("(join) requires at least 2 arguments (got " +
-		    arguments.length + ")");
+	if (arguments.length === 0) {
+		throw new Error("(join) requires at least 1 argument");
 	}
 	var args = argsToArray(arguments);
 	var sep  = args[0];
@@ -208,11 +209,12 @@ defun("to-lower", function (value) {
 
 /**
  * Reduces the given arguments on the / operator.
+ * 
+ * @tested
  */
 defun("/", function () {
-	if (arguments.length < 1) {
-		throw new Error("(/) requires at least 1 argument (got " +
-			arguments.length + ")");
+	if (arguments.length === 0) {
+		throw new Error("(/) requires at least 1 argument");
 	}
 	var args = argsToArray(arguments);
 	// This is to emulate common lisp, where dividing one number
@@ -227,11 +229,13 @@ defun("/", function () {
 
 /**
  * Reduces the given arguments on the * operator.
+ * 
+ * @tested
  */
 defun("*", function () {
 	var args = argsToArray(arguments);
-	if (args.length < 2) {
-		args = [1].concat(args);
+	if (args.length === 0) {
+		args = [1];
 	}
 	return args.reduce(function (a, b) {
 		return a * b;
@@ -240,26 +244,47 @@ defun("*", function () {
 
 /**
  * Reduces the given arguments on the + operator.
+ * 
+ * @tested
  */
 defun("+", function () {
-	return argsToArray(arguments).reduce(function (a, b) {
+	var args = argsToArray(arguments);
+	if (args.length === 0) {
+		args = [0];
+	}
+	return args.reduce(function (a, b) {
 		return a + b;
 	});
 });
 
 /**
  * Reduces the given arguments on the - operator.
+ * 
+ * @tested
  */
 defun("-", function () {
-	return argsToArray(arguments).reduce(function (a, b) {
+	if (arguments.length === 0) {
+		throw new Error("(-) requires at least 1 argument");
+	}
+	var args = argsToArray(arguments);
+	if (args.length === 1) {
+		args = [0].concat(args);
+	}
+	return args.reduce(function (a, b) {
 		return a - b;
 	});
 });
 
 /**
  * Reduces the given arguments on the % operator.
+ * 
+ * @tested
  */
 defun("%", function () {
+	if (arguments.length !== 2) {
+		throw new Error("(%) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
 	return argsToArray(arguments).reduce(function (a, b) {
 		return a % b;
 	});
@@ -267,13 +292,36 @@ defun("%", function () {
 
 /**
  * Adds 1 to the given value.
+ * 
+ * @tested
  */
 defun("1+", function (value) {
-	if (arguments.length > 1) {
+	if (arguments.length !== 1) {
 		throw new Error("(1+) requires 1 argument (got " +
 			arguments.length + ")");
 	}
+	if (typeof(value) != "number") {
+		throw new Error("(1+) requires a number argument (got " +
+			value);
+	}
 	return Number(value) + 1;
+});
+
+/**
+ * Subtracts 1 from the given value.
+ * 
+ * @tested
+ */
+defun("1-", function (value) {
+	if (arguments.length !== 1) {
+		throw new Error("(1-) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (typeof(value) != "number") {
+		throw new Error("(1-) requires a number argument (got " +
+			value);
+	}
+	return Number(value) - 1;
 });
 
 /**
