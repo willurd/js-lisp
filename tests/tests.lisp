@@ -101,6 +101,10 @@ string" "a\nstring"))
 	:testLambdaAsFirstArg (lambda ()
 		(this.assertEqual 2 ((lambda (x) (1+ x)) 1)))))
 
+;; ================================================================================
+;; MACROS
+;; ================================================================================
+
 (JSTest.TestCase (object
     :name "macro (setq)"
     :testScoping (lambda ()
@@ -437,12 +441,63 @@ string" "a\nstring")))
 			(this.assertFalse (is-object (object) "hi" (setq x 10)))
 			(this.assertEqual x 5)))))
 
+;; ================================================================================
+;; FUNCTIONS
+;; ================================================================================
+
+;; TODO: Test (new)
+;; TODO: Test (list)
+;; TODO: Test (object)
+;; TODO: Test (array)
+;; TODO: Test (getkey)
+;; TODO: Test (setkey)
+;; TODO: Test (print)
+;;       - no args
+;;       - one arg
+;;       - many args
+;; TODO: Test (concat)
+
 (JSTest.TestCase (object
-    :name "function (not)"
-    :testBasic (lambda ()
-        (this.assertTrue (not nil))
-        (this.assertTrue (not (not t)))
-        (this.assertTrue (=== (not (not "hello")) true)))))
+    :name "function (join)"
+	:testNoArguments (lambda ()
+        (this.assertRaises Error (getfunc join) nil))
+	:testOneArgument (lambda ()
+        (this.assertRaises Error (getfunc join) nil))
+	:testTwoArguments (lambda ()
+		(this.assertNotRaises Error (getfunc join) nil "sep" (list "the" "list")))
+	:testManyArguments (lambda ()
+		(this.assertNotRaises Error (getfunc join) nil "sep" (list 1) (list 2)))
+	:testNonListArguments (lambda ()
+        (this.assertRaises Error (getfunc join) nil "sep" "hello")
+		(this.assertRaises Error (getfunc join) nil "sep" (list 1) 2))
+	:testNumbers (lambda ()
+		(this.assertEqual (join ", " (list 1 2)) "1, 2")
+		(this.assertEqual (join ", " (list 1) (list 2)) "1, 2"))
+	:testStrings (lambda ()
+		(this.assertEqual (join ", " (list "one" "two")) "one, two")
+		(this.assertEqual (join ", " (list "one") (list "two")) "one, two"))))
+
+(JSTest.TestCase (object
+    :name "function (typeof)"
+	:testNoArguments (lambda ()
+        (this.assertRaises Error (getfunc typeof) nil))
+	:testManyArguments (lambda ()
+        (this.assertRaises Error (getfunc typeof) nil "arg 1" 2 "arg 3"))
+	:testBoolean (lambda ()
+        (this.assertEqual (typeof t) "boolean")
+		(this.assertEqual (typeof false) "boolean"))
+	:testNumber (lambda ()
+        (this.assertEqual (typeof 0) "number"))
+	:testString (lambda ()
+        (this.assertEqual (typeof "a string") "string"))
+	:testObject (lambda ()
+        (this.assertEqual (typeof (object)) "object"))
+	:testFunction (lambda ()
+        (this.assertEqual (typeof (lambda ())) "function"))
+	:testNull (lambda ()
+        (this.assertEqual (typeof nil) "object"))
+	:testUndefined (lambda ()
+		(this.assertEqual (typeof undefined) "undefined"))))
 
 (JSTest.TestCase (object
 	:name "function (to-string)"
@@ -478,6 +533,14 @@ string" "a\nstring")))
     :name "function (to-lower)"
 	:testToLower (lambda ()
 		(this.assertEqual (to-lower "HELLO") "hello"))))
+
+;; TODO: Test (/)
+;; TODO: Test (*)
+;; TODO: Test (+)
+;; TODO: Test (-)
+;; TODO: Test (%)
+;; TODO: Test (1+)
+;; TODO: Write and test (1-)
 
 (JSTest.TestCase (object
 	:name "function (format)"

@@ -1207,16 +1207,41 @@ defun("concat", function () {
 /**
  * Joins the given arguments together into one string, using
  * the first argument as the separator.
+ * 
+ * @tested
+ * 
+ * @example
+ *   > (join ", " (list "one" "two"))
+ *   "one, two"
+ * @example
+ *   > (let ((l1 (list "one" "two"))
+ *           (l2 (list "three")))
+ *       (join ", " l1 l2))
+ *   "one, two, three"
  */
 defun("join", function () {
+	if (arguments.length < 1) {
+		throw new Error("(join) requires at least 2 arguments (got " +
+		    arguments.length + ")");
+	}
 	var args = argsToArray(arguments);
 	var sep  = args[0];
-	var list = args.slice(1).reduce(function (a, b) { return a.concat(b); });
+	var rest = args.slice(1);
+	for (var i = 0; i < rest.length; i++) {
+		var arg = rest[i];
+		if (!(arg instanceof Array)) {
+			throw new Error("(join) got an invalid argument: '" +
+			    String(arg) + "' is not a list");
+		}
+	}
+	var list = rest.reduce(function (a, b) { return a.concat(b); });
 	return list.join(sep);
 });
 
 /**
  * Returns the type of the given value.
+ * 
+ * @tested
  */
 defun("typeof", function (value) {
 	if (arguments.length !== 1) {
