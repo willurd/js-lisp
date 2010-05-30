@@ -105,6 +105,8 @@ string" "a\nstring"))
 ;; MACROS
 ;; ================================================================================
 
+(JSTest.Divider "macros")
+
 (JSTest.TestCase (object
     :name "macro (setq)"
     :testScoping (lambda ()
@@ -445,6 +447,8 @@ string" "a\nstring")))
 ;; FUNCTIONS
 ;; ================================================================================
 
+(JSTest.Divider "functions")
+
 ;; TODO: Test (new)
 ;; TODO: Test (list)
 ;; TODO: Test (object)
@@ -544,6 +548,12 @@ string" "a\nstring")))
 
 (JSTest.TestCase (object
 	:name "function (format)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error (getfunc format) nil))
+	:testOneArgument (lambda ()
+		(this.assertRaises Error (getfunc format) nil t))
+	:testManyArguments (lambda ()
+		(this.assertNotRaises Error (getfunc format) nil t "hello"))
 	:testNumberFormatting (lambda ()
 		(this.assertEqual (format nil "%01.2f" 123.1) "123.10")
 		(this.assertEqual (format nil "%x" 15) "f")
