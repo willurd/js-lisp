@@ -449,16 +449,39 @@ string" "a\nstring")))
 
 (JSTest.Divider "functions")
 
-;; TODO: Test (new)
+(JSTest.TestCase (object
+    :name "function (new)"
+	:testNoArguments (lambda ()
+        (this.assertRaises Error (getfunc new) nil))
+	:testOneArgument (lambda ()
+        (this.assertNotRaises Error (getfunc new) nil Object))
+	:testNonFunctionFirstArgument (lambda ()
+        (this.assertRaises Error (getfunc new) nil "hello"))
+	:testNewness (lambda ()
+        (this.assertInstanceOf (new Date) Date))
+	:testConstructorArguments (lambda ()
+        (this.assertEqual (funcall (new Date 1234567890) getTime) 1234567890)
+		(let ((SomeClass (lambda (arg1 arg2)
+						   (setq this.arg1 arg1)
+						   (setq this.arg2 arg2)))
+			  (instance  (new SomeClass "hello" "goodbye")))
+		  (this.assertEqual instance.arg1 "hello")
+		  (this.assertEqual instance.arg2 "goodbye")))))
+
 ;; TODO: Test (list)
 ;; TODO: Test (object)
 ;; TODO: Test (array)
 ;; TODO: Test (getkey)
 ;; TODO: Test (setkey)
-;; TODO: Test (print)
-;;       - no args
-;;       - one arg
-;;       - many args
+
+(JSTest.TestCase (object
+    :name "function (print)"
+	:testNoArguments (lambda ()
+        (this.assertNotRaises Error (getfunc print) nil))
+	:testOneArguments (lambda ()
+        (this.assertNotRaises Error (getfunc print) nil "(print) test"))
+	:testManyArguments (lambda ()
+        (this.assertNotRaises Error (getfunc print) nil "(print) test" "arg 2"))))
 
 (JSTest.TestCase (object
     :name "function (concat)"

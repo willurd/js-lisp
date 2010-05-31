@@ -1122,14 +1122,8 @@ defun("new", function (Class) {
 	if (arguments.length === 0) {
 		throw new Error("(new) requires at least 1 argument");
 	}
-	var argnames = [];
-	// This is the only way I could figure out how to make the
-	// passing of arguments to new Class(...) dynamic.
-	for (var i = 1; i < arguments.length; i++) {
-		var argname = "arg" + i;
-		eval("var " + argname + " = " + arguments[i]);
-		argnames.push(argname);
-	}
+	var args = argsToArray(arguments).slice(1);
+	var argnames = args.map(function (item, i, thisObject) { return "args[" + i + "]"; });
 	return eval("new Class(" + argnames.join(",") + ")");
 });
 
@@ -1191,6 +1185,8 @@ defun("setkey", function (key, object, value) {
 
 /**
  * Prints the given arguments to the console.
+ * 
+ * @tested
  */
 defun("print", function () {
 	// Do not remove this. This is not a debug statement.
@@ -1200,7 +1196,7 @@ defun("print", function () {
 /**
  * Joins the given arguments together into one string.
  * 
- * @concat
+ * @tested
  */
 defun("concat", function () {
 	return argsToArray(arguments).join("");
