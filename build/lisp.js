@@ -874,10 +874,55 @@ defmacro("setq", function () {
 });
 
 /**
+ * Simply executes all of the given expressions in order. This
+ * is mainly for being able to execute multiple expressions inside
+ * of places in other macros/functions where only one expression
+ * can go.
+ * 
+ * @return The return value of the last expression, or nil if there
+ *         are no expression.
+ */
+defmacro("progn", function () {
+	var ret = null;
+	for (var i = 0; i < arguments.length; i++) {
+		ret = resolve(arguments[i]);
+	}
+	return ret;
+});
+
+/**
+ * If the first expression evaluates to true in a boolean context,
+ * this macro evaluates and returns the result of the second
+ * expression, otherwise it evaluates all of the remaining expression
+ * and returns the return value of the last one.
+ * 
+ * @return The return value of either the second or last expression, or
+ *         nil if testExpression evaluates to false and there are no
+ *         remaining expressions to evaluate.
+ */
+defmacro("if", function (testExpression, ifTrue) {
+	if (arguments.length < 2) {
+		throw new Error("(if) requires at least 2 arguments (got " +
+			arguments.length + ")");
+	}
+	if (!!resolve(testExpression)) {
+		return resolve(ifTrue);
+	} else {
+		var ret = null;
+		for (var i = 2; i < arguments.length; i++) {
+			ret = resolve(arguments[i]);
+		}
+		return ret;
+	}
+	return null; // This will never happen
+});
+
+/**
  * Executes the rest of the arguments if the first argument
  * is true.
  * 
  * @return The return value of the last expression.
+ * 
  * @tested
  */
 defmacro("when", function () {

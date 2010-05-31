@@ -120,6 +120,9 @@ string" "a\nstring"))
     :testReturnValue (lambda ()
         (this.assertEqual (setq somevar "hello") "hello"))))
 
+;; TODO: Test (progn)
+;; TODO: Test (if)
+
 (JSTest.TestCase (object
 	:name "macro (when)"
 	:testNoArguments (lambda ()
