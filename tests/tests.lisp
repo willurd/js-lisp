@@ -19,9 +19,6 @@ string" "a\nstring"))
 		(this.assertEqual "a	string" "a\tstring"))))
 
 (JSTest.TestCase (object
-    :name "Conditions"))
-
-(JSTest.TestCase (object
 	:name "Scope"
 	:testLetScoping (lambda ()
 		(this.assertUndefined somevar)
@@ -51,49 +48,6 @@ string" "a\nstring"))
 	        (this.assertEqual x 3)))))
 
 (JSTest.TestCase (object
-    :name "Objects"
-    :testGetValue (lambda ()
-        (let ((o (object :key "value")))
-            (this.assertEqual (getkey :key o) "value")))
-    :testSetValue (lambda ()
-        (let ((o (object)))
-            (this.assertUndefined (getkey :key o))
-            (setkey :key o "value")
-            (this.assertNotUndefined (getkey :key o))
-            (this.assertEqual (getkey :key o) "value")))
-    :testKeyTypes (lambda ()
-        (let ((Class Object)
-              (obj   (object))
-              (func  (lambda ()))
-              (o (object
-                    :keyword   1
-                    "string"   2
-                    t          3
-                    false      4
-                    nil        5
-                    undefined  6
-                    Class      7
-                    obj        8
-                    func       9)))
-            (this.assertEqual (getkey :keyword  o) 1)        
-            (this.assertEqual (getkey "string"  o) 2)
-            (this.assertEqual (getkey t         o) 3)
-            (this.assertEqual (getkey false     o) 4)
-            (this.assertEqual (getkey nil       o) 5)
-            (this.assertEqual (getkey undefined o) 6)
-            (this.assertEqual (getkey Class     o) 7)
-            (this.assertEqual (getkey obj       o) 8)
-            (this.assertEqual (getkey func      o) 9)))
-    :testNew (lambda ()
-        (let ((d (new Date)))
-            (this.assertNotUndefined d)
-            (this.assertType (d.getTime) "number")))
-    :testNewWithArgs (lambda ()
-        (let ((d (new Date 1234567890000)))
-            (this.assertNotUndefined d)
-            (this.assertEqual (d.getTime) 1234567890000)))))
-
-(JSTest.TestCase (object
 	:name "Functions As Function Calls"
 	:testFunctionCallAsFirstArg (lambda ()
 		(let ((o (object :func (lambda (x) (1+ x)))))
@@ -111,6 +65,7 @@ string" "a\nstring"))
 ;;   * Test lambdas as closures
 ;; TODO: Test (defun)
 ;;   * Test defuns as closures
+;; TODO: Test (try) (catch)
 ;; TODO: Test (getfunc)
 ;; TODO: Test (funcall)
 ;; TODO: Test (let)
@@ -130,8 +85,77 @@ string" "a\nstring"))
 	:testMoreStuff (lambda ()
 		(this.todo "There are probably more things to test here"))))
 
-;; TODO: Test (progn)
-;; TODO: Test (if)
+(JSTest.TestCase (object
+    :name "macro (progn)"
+	:testNoExpressions (lambda ()
+        (this.assertNotRaises Error (getfunc progn) nil))
+	:testOneExpression (lambda ()
+        (this.assertNotRaises Error (getfunc progn) nil (list format nil "hello")))
+	:testManyExpressions (lambda ()
+        (let ((x 0)
+			  (y 0)
+			  (z 0))
+		  (progn
+			(setq x 10)
+			(setq y 20)
+			(setq z 30))
+		  (this.assertEqual x 10)
+		  (this.assertEqual y 20)
+		  (this.assertEqual z 30)))
+	:testReturnValue (lambda ()
+        (let ((return-value (progn
+							  (format nil "hello")
+							  (format nil "goodbye"))))
+		  (this.assertEqual "goodbye" return-value)))
+	:testShortCircuiting (lambda ()
+        (let ((x 0)
+			  (y 0))
+		  (try
+		      (setq x 10)
+			  (throw (new Error))
+			  (setq y 20)
+			(catch)) ;; Just silence the error
+		  (this.assertEqual x 10)
+		  (this.assertEqual y 0)))))
+
+(JSTest.TestCase (object
+    :name "macro (if)"
+	:testNoArguments (lambda ()
+        (this.assertRaises Error (getfunc if) nil))
+	:testOneArgument (lambda ()
+        (this.assertRaises Error (getfunc if) nil t))
+	:testManyArguments (lambda ()
+        (this.assertNotRaises Error (getfunc if) nil t t))
+	:testTrueTestExpression (lambda ()
+        (let ((x 0))
+		  (if t
+			  (setq x 5)
+			(setq x 10))
+		  (this.assertEqual x 5)))
+	:testFalseTestExpression (lambda ()
+        (let ((x 0))
+		  (if nil
+			  (setq x 5)
+			(setq x 10))
+		  (this.assertEqual x 10)))
+	:testNonEvaluationOfExpressions (lambda ()
+        (let ((x 0)
+			  (y 0))
+		  ;; Only sets x
+		  (if t
+			  (setq x 10)
+			(setq y 10))
+		  (this.assertEqual x 10)
+		  (this.assertEqual y 0)
+		  ;; Only sets y
+		  (if nil
+			  (setq x 20)
+			(setq y 20))
+		  (this.assertEqual x 10)
+		  (this.assertEqual y 20)))
+	:testReturnValues (lambda ()
+        (this.assertEqual (if t "one" "two") "one")
+		(this.assertEqual (if nil "one" "two") "two"))))
 
 (JSTest.TestCase (object
 	:name "macro (when)"
@@ -481,8 +505,52 @@ string" "a\nstring")))
 		  (this.assertEqual instance.arg1 "hello")
 		  (this.assertEqual instance.arg2 "goodbye")))))
 
+;; TODO: Test (throw)
 ;; TODO: Test (list)
-;; TODO: Test (object)
+
+(JSTest.TestCase (object
+    :name "function (object)"
+    :testGetValue (lambda ()
+        (let ((o (object :key "value")))
+            (this.assertEqual (getkey :key o) "value")))
+    :testSetValue (lambda ()
+        (let ((o (object)))
+            (this.assertUndefined (getkey :key o))
+            (setkey :key o "value")
+            (this.assertNotUndefined (getkey :key o))
+            (this.assertEqual (getkey :key o) "value")))
+    :testKeyTypes (lambda ()
+        (let ((Class Object)
+              (obj   (object))
+              (func  (lambda ()))
+              (o (object
+                    :keyword   1
+                    "string"   2
+                    t          3
+                    false      4
+                    nil        5
+                    undefined  6
+                    Class      7
+                    obj        8
+                    func       9)))
+            (this.assertEqual (getkey :keyword  o) 1)        
+            (this.assertEqual (getkey "string"  o) 2)
+            (this.assertEqual (getkey t         o) 3)
+            (this.assertEqual (getkey false     o) 4)
+            (this.assertEqual (getkey nil       o) 5)
+            (this.assertEqual (getkey undefined o) 6)
+            (this.assertEqual (getkey Class     o) 7)
+            (this.assertEqual (getkey obj       o) 8)
+            (this.assertEqual (getkey func      o) 9)))
+    :testNew (lambda ()
+        (let ((d (new Date)))
+            (this.assertNotUndefined d)
+            (this.assertType (d.getTime) "number")))
+    :testNewWithArgs (lambda ()
+        (let ((d (new Date 1234567890000)))
+            (this.assertNotUndefined d)
+            (this.assertEqual (d.getTime) 1234567890000)))))
+
 ;; TODO: Test (array)
 ;; TODO: Test (getkey)
 ;; TODO: Test (setkey)

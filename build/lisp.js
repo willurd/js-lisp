@@ -790,6 +790,63 @@ defmacro("defun", function () {
 });
 
 /**
+ * Provides JavaScript's try/catch feature to the lisp environment.
+ * 
+ * @return The return value of the last evaluated expression.
+ * 
+ * @example Does nothing
+ *   > (try)
+ *   nil
+ * @example Empty catch block (silences the error)
+ *   > (try
+ *         (throw (new Error))
+ *       (catch))
+ *   nil
+ * @example Multiple expressions with a full catch block
+ *   > (try
+ *         (print "This will print")
+ *         (throw (new Error "This cuts the expression short"))
+ *         (print "This will not print")
+ *       (catch (e)
+ *         (format t "This will print when the error is thrown: %s" e)))
+ *   (no return value)
+ */
+defmacro("try", function () {
+	var args = argsToArray(arguments);
+	var lastExpression = args[args.length-1];
+	var catchExpression;
+	
+	if ((lastExpression instanceof Array) && // The "catch" expression must be a list
+		(lastExpression.length >= 1) && // It must at least have the symbol catch
+		(lastExpression[0] instanceof Symbol) &&
+	    (lastExpression[0].value == "catch")) {
+		catchExpression = lastExpression;
+		args = args.slice(0, -1);
+	}
+	
+	var ret = null;	
+	
+	try {		
+		for (var i = 0; i < args.length; i++) {
+			ret = resolve(args[i]);
+		}
+	} catch (e) {
+		if (catchExpression) {
+			catchExpression[0].value = "lambda"; // Just make it a lambda
+			if (catchExpression.length === 1) { // Add an arglist if there isn't one
+				catchExpression.push([]);
+			}
+			var callback = resolve(catchExpression);
+			callback(e);
+		} else {
+			throw e;
+		}
+	}
+	
+	return ret;
+});
+
+/**
  * Returns the function that the given symbol points to.
  */
 defmacro("getfunc", function (symbol) {
@@ -880,6 +937,8 @@ defmacro("setq", function () {
  * 
  * @return The return value of the last expression, or nil if there
  *         are no expression.
+ * 
+ * @tested
  */
 defmacro("progn", function (/* .. */) {
 	var ret = null;
@@ -898,6 +957,8 @@ defmacro("progn", function (/* .. */) {
  * @return The return value of either the second or last expression, or
  *         nil if testExpression evaluates to false and there are no
  *         remaining expressions to evaluate.
+ * 
+ * @tested
  */
 defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
 	if (arguments.length < 2) {
@@ -1173,6 +1234,17 @@ defun("new", function (Class) {
 });
 
 /**
+ * Throws the given object.
+ */
+defun("throw", function (object) {
+	if (arguments.length !== 1) {
+		throw new Error("(throw) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	throw object;
+});
+
+/**
  * Returns the given arguments as a list.
  */
 defun("list", function () {
@@ -1181,7 +1253,12 @@ defun("list", function () {
 
 /**
  * Creates a JavaScript object using the given arguments as a
- * property list.
+ * property list to initialize the object. There must be an even
+ * number of arguments -- one value for every key.
+ * 
+ * @return The newly-created object.
+ * 
+ * @tested
  */
 defun("object", function () {
 	var args = argsToArray(arguments);
@@ -1250,6 +1327,8 @@ defun("concat", function () {
 /**
  * Joins the given arguments together into one string, using
  * the first argument as the separator.
+ * 
+ * @return The string result of the joined arguments.
  * 
  * @tested
  * 

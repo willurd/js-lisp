@@ -12,6 +12,17 @@ defun("new", function (Class) {
 });
 
 /**
+ * Throws the given object.
+ */
+defun("throw", function (object) {
+	if (arguments.length !== 1) {
+		throw new Error("(throw) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	throw object;
+});
+
+/**
  * Returns the given arguments as a list.
  */
 defun("list", function () {
@@ -20,7 +31,12 @@ defun("list", function () {
 
 /**
  * Creates a JavaScript object using the given arguments as a
- * property list.
+ * property list to initialize the object. There must be an even
+ * number of arguments -- one value for every key.
+ * 
+ * @return The newly-created object.
+ * 
+ * @tested
  */
 defun("object", function () {
 	var args = argsToArray(arguments);
@@ -89,6 +105,8 @@ defun("concat", function () {
 /**
  * Joins the given arguments together into one string, using
  * the first argument as the separator.
+ * 
+ * @return The string result of the joined arguments.
  * 
  * @tested
  * 

@@ -6,15 +6,15 @@
 * Start putting together a library of lisp methods and macros
 * Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
 
-* Test macros: (if), (progn)
+* Testing
+    * Write tests for any lisp functions that have not been tested yet
+	* Write tests for each function/macro for invalid input
+	* Test return values of sexps (including null when there is no return)
 * Write better/more documentation for current functions/macros
 * Write macro: (cond)
 * Write macro: (unless) (opposite of (when))
 * Write function: (load) (loads and evaluates a lisp file inline, synchronously)
-* Write tests for each function/macro for invalid input
-* Test return values of sexps (including null when there is no return)
 * Think about the fact that 'nil' is actually the empty list (right now it's 'null')
-* Write tests for any lisp functions that have not been tested yet
 * Write macro: (defmacro) (and corresponding parsers: ",", "`", "@")
 * Make more error classes for each type of error (ArgumentError, TypeError, etc)
 * Make some proofs of concept (or "examples"). Some good ones would be:
