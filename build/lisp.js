@@ -1,5 +1,14 @@
 // ================================================================================
-// js-lisp: A lisp interpreter for browser scripting
+// js-lisp: A 100% JavaScript lisp interpreter for browser scripting
+// 
+// Disclaimer: DO NOT attempt to use this project for any production code
+// whatsoever. This project is still VERY young; if there were such a thing
+// as negative version numbers, it would have one. For now, this is a toy
+// project. It is my hope that js-lisp will one day grow up to become a solid
+// library devs around the world can use to sefely get their Lisp fix while
+// they get their JavaScript fix, but until that time, DO NOT use this in
+// production code (and if you do, I'm not responsible for the craziness that
+// will most certainly ensue thereafter).
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

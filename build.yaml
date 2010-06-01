@@ -17,5 +17,5 @@ lisp.js:
     - src/javascript/lisp.js
     - src/javascript/wrapper/_footer.js
 
-core.lisp:
-    - src/lisp/core.lisp
+#core.lisp:
+#    - src/lisp/core.lisp

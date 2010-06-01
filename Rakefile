@@ -45,12 +45,18 @@ task :minify do
   "
 end
 
-task :test => [:build] do
+task :webserver do
   sh "
     # Press Ctrl-C to shutdown the test server
-    open http://localhost:8000/tests/tests.html
     python -c 'import SimpleHTTPServer; SimpleHTTPServer.test()'
   "
+end
+
+task :test => [:build] do
+  sh "
+    open http://localhost:8000/tests/tests.html
+  "
+  Rake::Task["webserver"].invoke
 end
 
 task :lint => [:build] do
