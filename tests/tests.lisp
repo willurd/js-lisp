@@ -107,6 +107,14 @@ string" "a\nstring"))
 
 (JSTest.Divider "macros")
 
+;; TODO: Test (lambda)
+;;   * Test lambdas as closures
+;; TODO: Test (defun)
+;;   * Test defuns as closures
+;; TODO: Test (getfunc)
+;; TODO: Test (funcall)
+;; TODO: Test (let)
+
 (JSTest.TestCase (object
     :name "macro (setq)"
     :testScoping (lambda ()
@@ -118,7 +126,9 @@ string" "a\nstring"))
             (this.assertEqual x 3))
         (this.assertEqual x 1))
     :testReturnValue (lambda ()
-        (this.assertEqual (setq somevar "hello") "hello"))))
+        (this.assertEqual (setq somevar "hello") "hello"))
+	:testMoreStuff (lambda ()
+		(this.todo "There are probably more things to test here"))))
 
 ;; TODO: Test (progn)
 ;; TODO: Test (if)

@@ -51,10 +51,19 @@ h1 {
 	margin: 0px 10px 10px;
 	}
 
-nav {
+#controls {
+	
+	}
+
+#controls nav {
+	float: left;
 	font-weight: bold;
 	margin: 0px 0px 10px;
 	}
+
+#controls #tools {
+	float: right;
+    }
 
 table {
 	border-collapse: collapse;

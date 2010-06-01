@@ -1,11 +1,10 @@
 /**
  * Returns an anonymous function.
  */
-defmacro("lambda", function () {
+defmacro("lambda", function (arglist /*, ... */) {
 	var env  = new Env(lisp.env);
 	var args = argsToArray(arguments);
 	return (function (env, args) {
-		var arglist = args[0];
 		var body = args.slice(1);
 		return function () {
 			var tempEnv = lisp.env;
@@ -141,7 +140,7 @@ defmacro("setq", function () {
  * @return The return value of the last expression, or nil if there
  *         are no expression.
  */
-defmacro("progn", function () {
+defmacro("progn", function (/* .. */) {
 	var ret = null;
 	for (var i = 0; i < arguments.length; i++) {
 		ret = resolve(arguments[i]);
@@ -159,16 +158,17 @@ defmacro("progn", function () {
  *         nil if testExpression evaluates to false and there are no
  *         remaining expressions to evaluate.
  */
-defmacro("if", function (testExpression, ifTrue) {
+defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
 	if (arguments.length < 2) {
 		throw new Error("(if) requires at least 2 arguments (got " +
 			arguments.length + ")");
 	}
-	if (!!resolve(testExpression)) {
-		return resolve(ifTrue);
-	} else {
+	if (!!resolve(testExpression)) { // testExpression evaluates to true
+		return resolve(ifTrueExpression);
+	} else { // Evaluate all of the expressions after ifTrueExpression
 		var ret = null;
-		for (var i = 2; i < arguments.length; i++) {
+		var i = 2; // Start at the 3rd expression
+		for (; i < arguments.length; i++) {
 			ret = resolve(arguments[i]);
 		}
 		return ret;

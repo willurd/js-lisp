@@ -298,7 +298,7 @@ defun("1+", function (value) {
 	}
 	if (typeof(value) != "number") {
 		throw new Error("(1+) requires a number argument (got " +
-			value);
+			value + ")");
 	}
 	return Number(value) + 1;
 });

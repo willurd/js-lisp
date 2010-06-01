@@ -1,14 +1,14 @@
 # TODO
 
 * Look through Practical Common Lisp for ideas on what to implement next
-	* On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
+    * On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
 * Take a look at the CL, scheme, elisp, and closure specs for ideas. OR just conform to one language. OR make an implementation per language.
 * Start putting together a library of lisp methods and macros
 * Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
 
-* Write function: (1-)
-* Write macros: (if), (cond)
-* Write macro: (progn) (or (do), or something similar)
+* Test macros: (if), (progn)
+* Write better/more documentation for current functions/macros
+* Write macro: (cond)
 * Write macro: (unless) (opposite of (when))
 * Write function: (load) (loads and evaluates a lisp file inline, synchronously)
 * Write tests for each function/macro for invalid input
@@ -53,6 +53,8 @@ Add macro: (get "string.dot.path" [object])
 		- (let ((prop "some.prop"))
 			(get prop))
 		- (get "some.prop" this)
+
+Research how closures are implemented in languages
 
 Think about changing how Env works:
 	Current:
