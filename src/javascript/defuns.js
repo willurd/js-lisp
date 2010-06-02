@@ -219,6 +219,17 @@ defun("to-boolean", function (value) {
 });
 
 /**
+ * Converts the given value to a json representation of that value.
+ */
+defun("to-json", function (object) {
+	if (arguments.length !== 1) {
+		throw new Error("(to-json) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return toJSON(object);
+});
+
+/**
  * Converts the given string to uppercase.
  * 
  * @tested

@@ -2,6 +2,7 @@ lisp.js:
     - src/javascript/wrapper/_header.js
     - support/vendor/Class.js
     - support/vendor/sprintf.js
+    - src/javascript/utils/json.js
     - src/javascript/utils/utils.js
     - src/javascript/utils/stream.js
     - src/javascript/lisp/utils.js

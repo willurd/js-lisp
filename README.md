@@ -19,6 +19,12 @@ Include the js-lisp code (either lisp.js or lisp.min.js from inside /build/) _be
 
 The `onload` part is the magic part. This is what evaluates the lisp code. Alternatively, if you really want to, you can call `lisp.run()` in JavaScript (again, _after_ including lisp.js) which will evaluate all script tags with `type="text/lisp"` that haven't been evaluated yet. It's important to note that `lisp.dotag()` and `lisp.run()` both remove each tag they evaluate from the page so those tags won't get evaluated again.
 
+## Playing around at the REPL
+
+Follow the steps under the section "How do I view the tests and html documentation?" to start a simple webserver at the root of the project.
+
+The REPL is located at /examples/repl/, and works just like any other REPL. Have fun!
+
 ## What lisp are you using?
 
 Currently, it's a very basic lisp that doesn't even run on Cons lists (it runs on JavaScript Arrays behind the scenes). The focus so far has been on going through the Common Lisp spec and porting as many applicable constructs as possible, but the language has already strayed from CL in a couple of ways (view the CL port document at /docs/port/, after running rake webserver).
@@ -41,18 +47,20 @@ This project comes with a little helper script that runs a SimpleHTTPServer (Pyt
 
 The web server makes available the test suite, documentation, and all of the examples contained within this project.
 
-To run the server:
-
-    rake webserver
-
-You will need to install rake in order to run that command:
-
-    gem install rake
-
-Don't forget to init and update the submodules after cloning this project:
+First thing, make sure you init and update the submodules after cloning this project:
 
     git submodule init
 	git submodule update
+
+Next, you'll need to install rake in order to run the command that starts the webserver:
+
+    gem install rake
+
+Now start the server:
+
+    rake webserver
+
+The webserver will be located at localhost:8000 (or 127.0.0.1:8000 if that doesn't work).
 
 ## Developing js-lisp
 
