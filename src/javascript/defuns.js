@@ -110,14 +110,15 @@ defun("concat", function () {
  * 
  * @tested
  * 
- * @example
- *   > (join ", " (list "one" "two"))
- *   "one, two"
- * @example
- *   > (let ((l1 (list "one" "two"))
- *           (l2 (list "three")))
- *       (join ", " l1 l2))
- *   "one, two, three"
+ * @example Join items from a single list
+ *   >> (join ", " (list "one" "two"))
+ *   => "one, two"
+ * 
+ * @example Join items from multiple lists
+ *   >> (let ((l1 (list "one" "two"))
+ *            (l2 (list "three")))
+ *        (join ", " l1 l2))
+ *   => "one, two, three"
  */
 defun("join", function () {
 	if (arguments.length === 0) {

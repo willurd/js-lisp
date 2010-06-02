@@ -55,54 +55,113 @@ defmacro("defun", function () {
 /**
  * Provides JavaScript's try/catch feature to the lisp environment.
  * 
+ * Note: (catch) and (finally) must be the last expressions in the
+ * (try) expression, and (catch) must come before (finally). The only
+ * valid uses of (catch) and (finally) in a (try) expression are:
+ * 
+ *     - (try ...) ; Not using either of them
+ *     - (try ... (catch ...))
+ *     - (try ... (finally ...))
+ *     - (try ... (catch ...) (finally ...))
+ * 
  * @return The return value of the last evaluated expression.
  * 
- * @example Does nothing
- *   > (try)
- *   nil
+ * @example Empty try block
+ *   >> (try)
+ *   => nil
+ * 
  * @example Empty catch block (silences the error)
- *   > (try
- *         (throw (new Error))
- *       (catch))
- *   nil
+ *   >> (try
+ *          (throw (new Error))
+ *        (catch))
+ *   => nil
+ * 
  * @example Multiple expressions with a full catch block
- *   > (try
- *         (print "This will print")
- *         (throw (new Error "This cuts the expression short"))
- *         (print "This will not print")
- *       (catch (e)
- *         (format t "This will print when the error is thrown: %s" e)))
- *   (no return value)
+ *   >> (try
+ *          (print "This will print")
+ *          (throw (new Error "This cuts the expression short"))
+ *          (print "This will not print")
+ *        (catch (e)
+ *          (format t "This will print when the error is thrown: %s" e)))
+ *   => (no return value)
+ * 
+ * @example try/finally
+ *   >> (try
+ *          (throw (new Error))
+ *        (finally
+ *          (print "This always runs")))
+ *   => (no return value) ; Due to the error that is thrown
+ * 
+ * @example try/catch/finally
+ *   >> (try
+ *          "hello" ; This will get returned because it's the last evaluated expression
+ *          (throw (new Error))
+ *        (catch (e)
+ *          (print "This will get called"))
+ *        (finally
+ *          (print "This always runs")))
+ *   => "hello" ; The error is caught, so there is a return value
+ * 
+ * @example catch/finally symbols as keywords
+ *   >> (try
+ *          (throw (new Error))
+ *        (:catch) ; This will work
+ *        (:finally)) ; And so will this
+ *   => nil
  */
 defmacro("try", function () {
 	var args = argsToArray(arguments);
-	var lastExpression = args[args.length-1];
-	var catchExpression;
+	var checkIndex = args.length-1;
 	
-	if ((lastExpression instanceof Array) && // The "catch" expression must be a list
-		(lastExpression.length >= 1) && // It must at least have the symbol catch
-		(lastExpression[0] instanceof Symbol) &&
-	    (lastExpression[0].value == "catch")) {
-		catchExpression = lastExpression;
-		args = args.slice(0, -1);
-	}
+	// Grab the catch and finally expressions if they are there.
+	var check = function (symbol) {
+		if (checkIndex < 0) {
+			return null; // There are no expressions to check
+		}
+		var expr = args[checkIndex];
+		if ((expr instanceof Array) && // The "catch" expression must be a list
+			(expr.length > 0) && // It must at least have the symbol catch
+			((expr[0] instanceof Symbol) || (expr[0] instanceof Keyword)) &&
+			(expr[0].value == symbol)) {
+			args = args.slice(0, -1);
+			checkIndex--;
+			return expr;
+		}
+		return null;
+	};
+	var finallyExpression = check("finally");
+	var catchExpression = check("catch");
 	
-	var ret = null;	
+	var ret = null;
+	var i;
 	
-	try {		
-		for (var i = 0; i < args.length; i++) {
+	try {
+		// Evaluate all of the expressions in the body, saving the return
+		// value of the last expression for returning from this expression.
+		for (i = 0; i < args.length; i++) {
 			ret = resolve(args[i]);
 		}
 	} catch (e) {
+		// Evaluate the `catch` expression if there is one.
 		if (catchExpression) {
-			catchExpression[0].value = "lambda"; // Just make it a lambda
+			catchExpression[0] = new Symbol("lambda"); // Just make it a lambda
 			if (catchExpression.length === 1) { // Add an arglist if there isn't one
 				catchExpression.push([]);
 			}
 			var callback = resolve(catchExpression);
 			callback(e);
 		} else {
+			// If there is no catch expression, throw the error for something
+			// else to catch it (or not).
 			throw e;
+		}
+	} finally {
+		// Evaluate all expressions in the `finally` expression if there
+		// is one.
+		if (finallyExpression) {
+			for (i = 0; i < finallyExpression.length; i++) {
+				resolve(finallyExpression[i]);
+			}
 		}
 	}
 	

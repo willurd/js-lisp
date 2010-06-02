@@ -10,6 +10,8 @@
     * Write tests for any lisp functions that have not been tested yet
 	* Write tests for each function/macro for invalid input
 	* Test return values of sexps (including null when there is no return)
+* Tools
+    * Make a repl (using jquery-console perhaps)
 * Write better/more documentation for current functions/macros
 * Write macro: (cond)
 * Write macro: (unless) (opposite of (when))

@@ -66,6 +66,84 @@ string" "a\nstring"))
 ;; TODO: Test (defun)
 ;;   * Test defuns as closures
 ;; TODO: Test (try) (catch)
+
+(JSTest.TestCase (object
+    :name "macro (try)"
+	:testEmptyExpression (lambda ()
+        (this.assertNotRaises Error (getfunc try) nil))
+	:testOneExpression (lambda ()
+        (let ((x 0))
+		  (try
+		      (setq x 10))
+		  (this.assertEqual x 10)))
+	:testManyExpressions (lambda ()
+        (let ((x 0)
+			  (y 0))
+		  (try
+		      (setq x 10)
+			  (setq y 20))
+		  (this.assertEqual x 10)
+		  (this.assertEqual y 20)))
+	:testEmptyCatchBlock (lambda ()
+        (let ((func (lambda ()
+					  (try
+					      (throw (new Error))
+						(catch)))))
+		  (this.assertNotRaises Error func nil)))
+	:testCompleteCatchBlock (lambda ()
+        (let ((x nil)
+			  (func (lambda ()
+					  (try
+					      (throw (new Error))
+						(catch (e)
+						  (setq x e))))))
+		  (this.assertNotRaises Error func nil)
+		  (this.assertInstanceOf x Error)))
+	:testEmptyFinallyBlock (lambda ()
+        (let ((func (lambda ()
+					  (try
+						(finally
+						  (throw (new Error)))))))
+		  (this.assertRaises Error func nil)))
+	:testCompleteFinallyBlock (lambda ()
+        (let ((x 0))
+		  (try
+		    (finally
+			  (setq x 10)))
+		  (this.assertEqual x 10)))
+	:testTryCatchFinally (lambda ()
+        (let ((x 0)
+			  (y 0))
+		  (try
+		      (throw (new Error))
+			(catch ()
+			  (setq x 10))
+		    (finally
+			  (setq y 20)))
+		  (this.assertEqual x 10)
+		  (this.assertEqual y 20)))
+	:testReturnValueWithNoException (lambda ()
+        (let ((ret (try
+					   (format nil "%0.2f" 10.254))))
+		  (this.assertEqual ret "10.25")))
+	:testReturnValueWithCaughtException (lambda ()
+        (let ((ret (try
+					   (format nil "%0.2f" 10.254)
+					   (throw (new Error))
+					 (catch))))
+		  (this.assertEqual ret "10.25")))
+	:testCatchFinallySymbolsAsKeywords (lambda ()
+        (let ((x 0)
+			  (y 0))
+		  (try
+		      (throw (new Error))
+			(:catch ()
+			  (setq x 10))
+		    (:finally
+			  (setq y 20)))
+		  (this.assertEqual x 10)
+		  (this.assertEqual y 20)))))
+
 ;; TODO: Test (getfunc)
 ;; TODO: Test (funcall)
 ;; TODO: Test (let)
