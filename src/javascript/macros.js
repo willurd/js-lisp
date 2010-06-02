@@ -1,5 +1,9 @@
 /**
- * Returns an anonymous function.
+ * Creates an anonymous function with the first (required) expression
+ * as its arglist and which executes the rest of the expressions
+ * when called.
+ * 
+ * @return The created function.
  */
 defmacro("lambda", function (arglist /*, ... */) {
 	var env  = new Env(lisp.env);

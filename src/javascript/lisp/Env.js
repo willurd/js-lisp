@@ -75,7 +75,11 @@ var Env = Class.extend({
 					this.parent[symbol] = value;
 				}
 			} else {
-				this.symbols[symbol] = value;
+				var object = this;
+				while (object.parent) {
+					object = object.parent;
+				}
+				object.symbols[symbol] = value;
 			}
 		}
 	},

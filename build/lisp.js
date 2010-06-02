@@ -496,7 +496,11 @@ var Env = Class.extend({
 					this.parent[symbol] = value;
 				}
 			} else {
-				this.symbols[symbol] = value;
+				var object = this;
+				while (object.parent) {
+					object = object.parent;
+				}
+				object.symbols[symbol] = value;
 			}
 		}
 	},
@@ -749,7 +753,11 @@ var ROOT_ENV = new Env(new Env(null, global), {
 	"*features*": [new Keyword("notmuch")]
 });
 /**
- * Returns an anonymous function.
+ * Creates an anonymous function with the first (required) expression
+ * as its arglist and which executes the rest of the expressions
+ * when called.
+ * 
+ * @return The created function.
  */
 defmacro("lambda", function (arglist /*, ... */) {
 	var env  = new Env(lisp.env);
