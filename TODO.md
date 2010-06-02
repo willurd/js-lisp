@@ -1,11 +1,11 @@
 # TODO
 
-* Look through Practical Common Lisp for ideas on what to implement next
-    * On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
-* Take a look at the CL, scheme, elisp, and closure specs for ideas. OR just conform to one language. OR make an implementation per language.
-* Start putting together a library of lisp methods and macros
-* Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
-
+* Ideas
+    * Look through Practical Common Lisp for ideas on what to implement next
+        * On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
+    * Take a look at the CL, scheme, elisp, and closure specs for ideas. OR just conform to one language. OR make an implementation per language.
+	* Start putting together a library of lisp methods and macros
+	* Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
 * Testing
     * Write tests for any lisp functions that have not been tested yet
 	* Write tests for each function/macro for invalid input
@@ -39,26 +39,21 @@
 * Make a webpage at the root of /src that runs on `rake run`
 	* This webpage should link off to the test runner(s) and all examples
 	* As a demonstration, all the interactions of this page should be written in lisp
-* Update the README big time
 * Think about how to get line numbers for lisp scripts for debugging
 * Make browser extensions:
 	* Chrome
 	* Firefox (using Jetpack)
 	* Greasemonkey
-
-Add macro: (prop <object> <prop.dot.path>)
-	Example: (prop ($ this) some.func)
-OR
-Add macro: (get "string.dot.path" [object])
-	Examples:
+* Add macro: (prop <object> <prop.dot.path>)
+	* Example: (prop ($ this) some.func)
+	* Or Add macro: (get "string.dot.path" [object])
+	  Examples:
 		- (get "aVar")
 		- (let ((prop "some.prop"))
 			(get prop))
 		- (get "some.prop" this)
-
-Research how closures are implemented in languages
-
-Think about changing how Env works:
+* Research how closures are implemented in languages
+* Think about changing how Env works:
 	Current:
 		* Javascript libs can't access (let)'d variables
 	New:
@@ -67,7 +62,5 @@ Think about changing how Env works:
 			* Each scope is a set of vars that have changed and their old values so the Env can be reset when that scope goes out
 		* scope = Scope(parentScope, env)
 		* Closures copy scopes (which takes the current values, instead of the old values)
-
-Handle empty list: if an sexp has no arguments, it's an empty list
-
-Think about Cons' and how they'll fit in (or if they will...)
+* Handle empty list: if an sexp has no arguments, it's an empty list
+* Think about Cons' and how they'll fit in (or if they will...)

@@ -65,7 +65,6 @@ string" "a\nstring"))
 ;;   * Test lambdas as closures
 ;; TODO: Test (defun)
 ;;   * Test defuns as closures
-;; TODO: Test (try) (catch)
 
 (JSTest.TestCase (object
     :name "macro (try)"
