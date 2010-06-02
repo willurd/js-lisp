@@ -582,7 +582,33 @@ string" "a\nstring")))
 		  (this.assertEqual instance.arg1 "hello")
 		  (this.assertEqual instance.arg2 "goodbye")))))
 
-;; TODO: Test (throw)
+(JSTest.TestCase (object
+    :name "function (throw)"
+	:testDefaultValue (lambda ()
+        (let ((self this))
+		  (try
+		      (throw)
+			(catch (e)
+			  (self.assertEqual (to-string e) "Error")))))
+	:testSuppliedValue (lambda ()
+        (let ((self this))
+		  (try
+		      (throw (new Error "hello"))
+			(catch (e)
+			  (self.assertEqual (to-string e) "Error: hello")))))
+	:testManyArguments (lambda ()
+        (let ((self this))
+		  (try
+		      (throw (new Error) "arg 2")
+			(catch (e)
+			  (self.assertNotEqual (to-string e) "Error")))))
+	:testNonErrorClassValue (lambda ()
+        (let ((self this))
+		  (try
+		      (throw 12)
+			(catch (e)
+			  (self.assertTrue (=== e 12))))))))
+
 ;; TODO: Test (list)
 
 (JSTest.TestCase (object
@@ -639,7 +665,9 @@ string" "a\nstring")))
 	:testOneArguments (lambda ()
         (this.assertNotRaises Error (getfunc print) nil "(print) test"))
 	:testManyArguments (lambda ()
-        (this.assertNotRaises Error (getfunc print) nil "(print) test" "arg 2"))))
+        (this.assertNotRaises Error (getfunc print) nil "(print) test" "arg 2"))
+	:testReturnValue (lambda ()
+        (this.assertEqual (print) nil))))
 
 (JSTest.TestCase (object
     :name "function (concat)"

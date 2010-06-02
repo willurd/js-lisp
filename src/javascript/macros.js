@@ -66,6 +66,8 @@ defmacro("defun", function () {
  * 
  * @return The return value of the last evaluated expression.
  * 
+ * @tested
+ * 
  * @example Empty try block
  *   >> (try)
  *   => nil
@@ -120,7 +122,7 @@ defmacro("try", function () {
 		}
 		var expr = args[checkIndex];
 		if ((expr instanceof Array) && // The "catch" expression must be a list
-			(expr.length > 0) && // It must at least have the symbol catch
+			(expr.length > 0) && // It must at least have the symbol specifying the block type
 			((expr[0] instanceof Symbol) || (expr[0] instanceof Keyword)) &&
 			(expr[0].value == symbol)) {
 			args = args.slice(0, -1);

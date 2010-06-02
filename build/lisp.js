@@ -820,6 +820,8 @@ defmacro("defun", function () {
  * 
  * @return The return value of the last evaluated expression.
  * 
+ * @tested
+ * 
  * @example Empty try block
  *   >> (try)
  *   => nil
@@ -874,7 +876,7 @@ defmacro("try", function () {
 		}
 		var expr = args[checkIndex];
 		if ((expr instanceof Array) && // The "catch" expression must be a list
-			(expr.length > 0) && // It must at least have the symbol catch
+			(expr.length > 0) && // It must at least have the symbol specifying the block type
 			((expr[0] instanceof Symbol) || (expr[0] instanceof Keyword)) &&
 			(expr[0].value == symbol)) {
 			args = args.slice(0, -1);
@@ -1299,6 +1301,8 @@ defmacro("is-object", function () {
 /**
  * Returns an instance of the given class, initialized with
  * the rest of the given arguments.
+ * 
+ * @return The new class instance.
  */
 defun("new", function (Class) {
 	if (arguments.length === 0) {
@@ -1310,13 +1314,32 @@ defun("new", function (Class) {
 });
 
 /**
- * Throws the given object.
+ * Throws the given object, or "new Error()" if no object is
+ * provided.
+ * 
+ * @return Nothing. After throw'ing the stack is unwided to the
+ *         nearest 'catch' block.
+ * 
+ * @tested
+ * 
+ * @example Basic Error
+ *   >> (throw) ; Throws "new Error()"
+ * 
+ * @example Custom Error
+ *   >> (throw (new Error "My Custom Error"))
+ * 
+ * @example Anything else you can normally throw
+ *   >> (throw "a string")
+ *   >> (throw 12)
+ *   >> (throw (object :type "MyError"))
+ *   >> (throw (array 1 2 3))
  */
 defun("throw", function (object) {
-	if (arguments.length !== 1) {
-		throw new Error("(throw) requires 1 argument (got " +
+	if (arguments.length > 1) {
+		throw new Error("(throw) accepts 1 optional argument (got " +
 			arguments.length + ")");
 	}
+	object = object || new Error(); // Throw "new Error()" if nothing is provided
 	throw object;
 });
 
@@ -1332,7 +1355,7 @@ defun("list", function () {
  * property list to initialize the object. There must be an even
  * number of arguments -- one value for every key.
  * 
- * @return The newly-created object.
+ * @return The new object.
  * 
  * @tested
  */
@@ -1352,7 +1375,9 @@ defun("object", function () {
 });
 
 /**
- * Returns the given arguments as a list.
+ * Creates an array from the given arguments.
+ * 
+ * @return The new array.
  */
 defun("array", function () {
 	return argsToArray(arguments);
@@ -1384,15 +1409,20 @@ defun("setkey", function (key, object, value) {
 /**
  * Prints the given arguments to the console.
  * 
+ * @return nil.
+ * 
  * @tested
  */
 defun("print", function () {
 	// Do not remove this. This is not a debug statement.
 	lisp.log.apply(null, arguments);
+	return null;
 });
 
 /**
  * Joins the given arguments together into one string.
+ * 
+ * @return The string result of the joined arguments.
  * 
  * @tested
  */
@@ -1632,7 +1662,7 @@ defun("1-", function (value) {
 	}
 	if (typeof(value) != "number") {
 		throw new Error("(1-) requires a number argument (got " +
-			value);
+			value + ")");
 	}
 	return Number(value) - 1;
 });
