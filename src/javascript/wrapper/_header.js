@@ -1,5 +1,5 @@
 // ================================================================================
-// js-lisp: A 100% JavaScript lisp interpreter for browser scripting
+// js-lisp: A, 100% JavaScript, lisp interpreter for browser scripting
 // 
 // Disclaimer: DO NOT attempt to use this project for any production code
 // whatsoever. This project is still VERY young; if there were such a thing

@@ -2,6 +2,23 @@
 
 Disclaimer: DO NOT attempt to use this project for any production code whatsoever. This project is still VERY young; if there were such a thing as negative version numbers, it would have one. For now, this is a toy project. It is my hope that js-lisp will one day grow up to become a solid library devs around the world can use to sefely get their Lisp fix while they get their JavaScript fix, but until that time, DO NOT use this in production code (and if you do, I'm not responsible for the craziness that will most certainly ensue thereafter).
 
+## Usage
+
+*Step 1: Include js-lisp*
+
+Include the js-lisp code (either lisp.js or lisp.min.js from inside /build/) _before_ you try to evaluate any of your lisp code.
+
+    <script src="/path/to/lisp.js"></script>
+
+*Step 2: Include your lisp code*
+
+    <script type="text/lisp" src="/path/to/code.lisp" onload="lisp.dotag(this)">
+    ; Lisp code can go here too. It will be evaluated after the lisp code
+    ; pointed to in 'src' (if there is any).
+    </script>
+
+The `onload` part is the magic part. This is what evaluates the lisp code. Alternatively, if you really want to, you can call `lisp.run()` in JavaScript (again, _after_ including lisp.js) which will evaluate all script tags with `type="text/lisp"` that haven't been evaluated yet. It's important to note that `lisp.dotag()` and `lisp.run()` both remove each tag they evaluate from the page so those tags won't get evaluated again.
+
 ## What lisp are you using?
 
 Currently, it's a very basic lisp that doesn't even run on Cons lists (it runs on JavaScript Arrays behind the scenes). The focus so far has been on going through the Common Lisp spec and porting as many applicable constructs as possible, but the language has already strayed from CL in a couple of ways (view the CL port document at /docs/port/, after running rake webserver).
