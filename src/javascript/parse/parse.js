@@ -25,6 +25,8 @@ parse.ParserException = Class.extend("ParserException", {
 	 * <p>Returns a string representation of the exception.</p>
 	 * 
 	 * @function
+	 * @name toString
+	 * @member parse.ParserException
 	 */
 	toString: function () {
 		return "ParserException: " + message;

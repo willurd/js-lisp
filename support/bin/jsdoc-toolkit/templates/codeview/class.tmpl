@@ -188,8 +188,8 @@
 												if (member.isInner) output += "&lt;inner&gt; ";
 												if (member.isStatic) output += "&lt;static&gt; ";
 											!}&nbsp;</td>
-											<td class="nameDescription">
-												<div class="fixedFont"><if test="member.isStatic && member.memberOf != '_global_'">{+member.memberOf+}.</if><b>{+new Link().toSymbol(member.alias).withText(member.name.replace(/\^\d+$/, ''))+}</b>{+makeSignature(member.params)+}
+											<td class="nameDescription"><!--{+member.name.replace(/\^\d+$/, '')+}-->
+												<div class="fixedFont"><b><a href="#.{+member.name.replace(/\^\d+$/, '')+}">{+member.name.replace(/\^\d+$/, '')+}</a></b>{+makeSignature(member.params)+}
 												</div>
 												<div class="description">{+resolveLinks(summarize(member.desc))+}</div>
 											</td>
@@ -412,7 +412,7 @@
 									
 									<if test="member.type"><span class="light">{{+new Link().toSymbol(member.type)+}}</span></if>
 									
-									<if test="member.isStatic && member.memberOf != '_global_'"><span class="light">{+member.memberOf+}.</span></if><b>{+member.name+}</b>							
+									<b>{+member.name+}</b>							
 								</div>
 								
 								<div class="description">
@@ -489,7 +489,7 @@
 									
 									<if test="member.type"><span class="light">{{+new Link().toSymbol(member.type)+}}</span></if>
 									
-									<if test="member.isStatic && member.memberOf != '_global_'"><span class="light">{+member.memberOf+}.</span></if><b>{+member.name.replace(/\^\d+$/, '')+}</b>{+makeSignature(member.params)+}
+									<b>{+member.name.replace(/\^\d+$/, '')+}</b>{+makeSignature(member.params)+}
 								</div>
 								
 								<div class="description">
@@ -502,12 +502,6 @@
 									
 									<if test="member.author"><br /><i>Author: </i>{+member.author+}.</if>
 								</div>
-								
-								<if test="member.example.length">
-									<for each="example" in="member.example">
-										<pre class="code">{+example+}</pre>
-									</for>
-								</if>
 								
 								<if test="member.params.length">
 									<dl class="detailList params">
@@ -570,7 +564,13 @@
 									
 									</dl>
 								</if>
-
+								
+								<if test="member.example.length">
+									<for each="example" in="member.example">
+										<pre class="code">{+example+}</pre>
+									</for>
+								</if>
+								
 								<if test="!$member_last"><div class="hr"></div></if>
 							</for>
 						</div>

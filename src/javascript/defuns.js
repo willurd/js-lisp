@@ -1,10 +1,10 @@
 /**
  * Functions that are defined for the lisp environment.
  * 
+ * @name lisp.functions
  * @namespace
  */
-lisp.functions = {};
-delete lisp.functions; // Delete it because it's just for documentation
+var functions = {}; // This is just for documentation. It doesn't get used.
 
 /**
  * Returns an instance of the given class, initialized with
@@ -12,7 +12,7 @@ delete lisp.functions; // Delete it because it's just for documentation
  * 
  * @function
  * @name new
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @param {Class} Class
  *     The class to create a new instance of.
@@ -44,7 +44,7 @@ defun("new", function (Class /*, ... */) {
  * 
  * @function
  * @name throw
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @param {mixed} object The object to throw. Defaults to new Error().
  * 
@@ -79,7 +79,7 @@ defun("throw", function (object) {
  * 
  * @function
  * @name list
- * @memberOf lisp.functions
+ * @member lisp.functions
  */
 defun("list", function (/* ... */) {
 	return argsToArray(arguments);
@@ -92,11 +92,31 @@ defun("list", function (/* ... */) {
  * 
  * @function
  * @name object
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @returns The new object.
  * 
  * @tested
+ * 
+ * @example An empty object
+ *     >> (object)
+ *     => {}
+ * 
+ * @example An object using keywords as keys
+ *     >> (object :start 0 :end 10)
+ *     => {start: 0, end: 10}
+ * 
+ * @example An object using strings as keys
+ *     >> (object "start" 0 "end" 10)
+ *     => {start: 0, end: 10}
+ * 
+ * @example A compound object
+ *     >> (object :name "Joe"
+ *                :parents (array (object :name "John")
+ *                                (object :name "Jane")))
+ *     => {name: "Joe",
+ *         parents: [{name: "John"},
+ *                   {name: "Jane"}]}
  */
 defun("object", function () {
 	var args = argsToArray(arguments);
@@ -118,9 +138,21 @@ defun("object", function () {
  * 
  * @function
  * @name array
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @returns The new array.
+ * 
+ * @example An empty array
+ *     >> (array)
+ *     => []
+ * 
+ * @example An array with some elements
+ *     >> (array 1 2 "three")
+ *     => [1, 2, "three"]
+ * 
+ * @example A compound array
+ *     >> (array (array 1 2) (array 3 4))
+ *     => [[1, 2], [3, 4]]
  */
 defun("array", function () {
 	return argsToArray(arguments);
@@ -132,7 +164,7 @@ defun("array", function () {
  * 
  * @function
  * @name getkey
- * @memberOf lisp.functions
+ * @member lisp.functions
  */
 defun("getkey", function (key, object) {
 	if (arguments.length !== 2) {
@@ -147,7 +179,7 @@ defun("getkey", function (key, object) {
  * 
  * @function
  * @name setkey
- * @memberOf lisp.functions
+ * @member lisp.functions
  */
 defun("setkey", function (key, object, value) {
 	if (arguments.length !== 3) {
@@ -162,11 +194,16 @@ defun("setkey", function (key, object, value) {
  * 
  * @function
  * @name print
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @returns nil.
  * 
  * @tested
+ * 
+ * @example Basic (print) expression
+ *     >> (print "Hello" "Lisp")
+ *     Hello Lisp
+ *     => nil
  */
 defun("print", function () {
 	// Do not remove this. This is not a debug statement.
@@ -179,11 +216,20 @@ defun("print", function () {
  * 
  * @function
  * @name concat
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @returns The string result of the joined arguments.
  * 
  * @tested
+ * 
+ * @example Concatenate a single object (if you really want to)
+ *     >> (concat "Hello")
+ *     => "Hello"
+ * 
+ * @example Concatenate many objects
+ *     >> (let ((name "Lisp"))
+ *          (concat "Hello: " name))
+ *     => "Hello: Lisp"
  */
 defun("concat", function () {
 	return argsToArray(arguments).join("");
@@ -195,7 +241,7 @@ defun("concat", function () {
  * 
  * @function
  * @name join
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @returns The string result of the joined arguments.
  * 
@@ -234,7 +280,7 @@ defun("join", function () {
  * 
  * @function
  * @name typeof
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -251,7 +297,7 @@ defun("typeof", function (value) {
  * 
  * @function
  * @name to-string
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -268,7 +314,7 @@ defun("to-string", function (value) {
  * 
  * @function
  * @name to-number
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -285,7 +331,7 @@ defun("to-number", function (value) {
  * 
  * @function
  * @name to-boolean
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -302,7 +348,7 @@ defun("to-boolean", function (value) {
  * 
  * @function
  * @name to-json
- * @memberOf lisp.functions
+ * @member lisp.functions
  */
 defun("to-json", function (object) {
 	if (arguments.length !== 1) {
@@ -317,7 +363,7 @@ defun("to-json", function (object) {
  * 
  * @function
  * @name to-upper
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -337,7 +383,7 @@ defun("to-upper", function (value) {
  * 
  * @function
  * @name to-lower
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -357,7 +403,7 @@ defun("to-lower", function (value) {
  * 
  * @function
  * @name /
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -381,7 +427,7 @@ defun("/", function () {
  * 
  * @function
  * @name *
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -400,7 +446,7 @@ defun("*", function () {
  * 
  * @function
  * @name +
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -419,7 +465,7 @@ defun("+", function () {
  * 
  * @function
  * @name -
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -441,7 +487,7 @@ defun("-", function () {
  * 
  * @function
  * @name %
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -460,7 +506,7 @@ defun("%", function () {
  * 
  * @function
  * @name 1+
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -481,7 +527,7 @@ defun("1+", function (value) {
  * 
  * @function
  * @name 1-
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
@@ -503,7 +549,7 @@ defun("1-", function (value) {
  * 
  * @function
  * @name format
- * @memberOf lisp.functions
+ * @member lisp.functions
  * 
  * @tested
  */
