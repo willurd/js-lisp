@@ -26,4 +26,7 @@
 // Author: William Bowers <william.bowers@gmail.com>
 // ================================================================================
 
+/**
+ * @namespace
+ */
 var lisp = (function (global) {

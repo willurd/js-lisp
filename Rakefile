@@ -3,11 +3,15 @@ require "yaml"
 LISP_JS = "lisp"
 LISP_JS_MIN = "lisp.min"
 
+DOCS_CODE_ROOT = "docs/jsdoc"
+
 BUILD_CONFIG = "build.yaml"
 BUILD_DIRECTORY = "build"
 
-JSL_BINARY = "./support/bin/jsl"
-JSL_CONFIG = "./support/jsl.conf"
+JSL_BINARY = "support/bin/jsl"
+JSL_CONFIG = "support/jsl.conf"
+
+JSDOC_ROOT = "support/bin/jsdoc-toolkit"
 
 task :default => :buildall
 
@@ -42,6 +46,14 @@ task :minify do
   File.delete(minfile) if File.exists?(minfile)
   sh "
     ruby support/bin/jsmin.rb < #{BUILD_DIRECTORY}/#{LISP_JS}.js > #{minfile}
+  "
+end
+
+task :doc do
+  sh "
+    mkdir -p #{DOCS_CODE_ROOT}
+    java -jar #{JSDOC_ROOT}/jsrun.jar #{JSDOC_ROOT}/app/run.js -a -d=#{DOCS_CODE_ROOT} \
+      -t=#{JSDOC_ROOT}/templates/codeview #{BUILD_DIRECTORY}/#{LISP_JS}.js
   "
 end
 

@@ -3,7 +3,7 @@
  * as its arglist and which executes the rest of the expressions
  * when called.
  * 
- * @return The created function.
+ * @returns The created function.
  */
 defmacro("lambda", function (arglist /*, ... */) {
 	var env  = new Env(lisp.env);
@@ -64,7 +64,7 @@ defmacro("defun", function () {
  *     - (try ... (finally ...))
  *     - (try ... (catch ...) (finally ...))
  * 
- * @return The return value of the last evaluated expression.
+ * @returns The return value of the last evaluated expression.
  * 
  * @tested
  * 
@@ -259,7 +259,7 @@ defmacro("setq", function () {
  * of places in other macros/functions where only one expression
  * can go.
  * 
- * @return The return value of the last expression, or nil if there
+ * @returns The return value of the last expression, or nil if there
  *         are no expression.
  * 
  * @tested
@@ -278,7 +278,7 @@ defmacro("progn", function (/* .. */) {
  * expression, otherwise it evaluates all of the remaining expression
  * and returns the return value of the last one.
  * 
- * @return The return value of either the second or last expression, or
+ * @returns The return value of either the second or last expression, or
  *         nil if testExpression evaluates to false and there are no
  *         remaining expressions to evaluate.
  * 
@@ -306,7 +306,7 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
  * Executes the rest of the arguments if the first argument
  * is true.
  * 
- * @return The return value of the last expression.
+ * @returns The return value of the last expression.
  * 
  * @tested
  */

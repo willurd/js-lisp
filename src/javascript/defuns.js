@@ -1,10 +1,35 @@
 /**
+ * Functions that are defined for the lisp environment.
+ * 
+ * @namespace
+ */
+lisp.functions = {};
+delete lisp.functions; // Delete it because it's just for documentation
+
+/**
  * Returns an instance of the given class, initialized with
  * the rest of the given arguments.
  * 
- * @return The new class instance.
+ * @function
+ * @name new
+ * @memberOf lisp.functions
+ * 
+ * @param {Class} Class
+ *     The class to create a new instance of.
+ * @param {[mixed]} rest
+ *     The arguments to be passed to the class constructor.
+ * 
+ * @returns The new class instance.
+ * 
+ * @example Instantiate a class
+ *     >> (new MyClass)
+ *     => ; the MyClass instance
+ *
+ * @example Instantiate a class with constructor arguments
+ *     >> (new Error "My error message")
+ *     => ; the Error instance
  */
-defun("new", function (Class) {
+defun("new", function (Class /*, ... */) {
 	if (arguments.length === 0) {
 		throw new Error("(new) requires at least 1 argument");
 	}
@@ -14,11 +39,17 @@ defun("new", function (Class) {
 });
 
 /**
- * Throws the given object, or "new Error()" if no object is
+ * Throws the given object, or new Error() if no object is
  * provided.
  * 
- * @return Nothing. After throw'ing the stack is unwided to the
- *         nearest 'catch' block.
+ * @function
+ * @name throw
+ * @memberOf lisp.functions
+ * 
+ * @param {mixed} object The object to throw. Defaults to new Error().
+ * 
+ * @returns Nothing. After throw'ing the stack is unwided to the
+ *          nearest 'catch' block.
  * 
  * @tested
  * 
@@ -45,8 +76,12 @@ defun("throw", function (object) {
 
 /**
  * Returns the given arguments as a list.
+ * 
+ * @function
+ * @name list
+ * @memberOf lisp.functions
  */
-defun("list", function () {
+defun("list", function (/* ... */) {
 	return argsToArray(arguments);
 });
 
@@ -55,7 +90,11 @@ defun("list", function () {
  * property list to initialize the object. There must be an even
  * number of arguments -- one value for every key.
  * 
- * @return The new object.
+ * @function
+ * @name object
+ * @memberOf lisp.functions
+ * 
+ * @returns The new object.
  * 
  * @tested
  */
@@ -77,7 +116,11 @@ defun("object", function () {
 /**
  * Creates an array from the given arguments.
  * 
- * @return The new array.
+ * @function
+ * @name array
+ * @memberOf lisp.functions
+ * 
+ * @returns The new array.
  */
 defun("array", function () {
 	return argsToArray(arguments);
@@ -86,6 +129,10 @@ defun("array", function () {
 /**
  * Returns a value from an object given a key (will work with
  * array indices as well).
+ * 
+ * @function
+ * @name getkey
+ * @memberOf lisp.functions
  */
 defun("getkey", function (key, object) {
 	if (arguments.length !== 2) {
@@ -97,6 +144,10 @@ defun("getkey", function (key, object) {
 
 /**
  * Sets a value on the given object using the given key.
+ * 
+ * @function
+ * @name setkey
+ * @memberOf lisp.functions
  */
 defun("setkey", function (key, object, value) {
 	if (arguments.length !== 3) {
@@ -109,7 +160,11 @@ defun("setkey", function (key, object, value) {
 /**
  * Prints the given arguments to the console.
  * 
- * @return nil.
+ * @function
+ * @name print
+ * @memberOf lisp.functions
+ * 
+ * @returns nil.
  * 
  * @tested
  */
@@ -122,7 +177,11 @@ defun("print", function () {
 /**
  * Joins the given arguments together into one string.
  * 
- * @return The string result of the joined arguments.
+ * @function
+ * @name concat
+ * @memberOf lisp.functions
+ * 
+ * @returns The string result of the joined arguments.
  * 
  * @tested
  */
@@ -134,7 +193,11 @@ defun("concat", function () {
  * Joins the given arguments together into one string, using
  * the first argument as the separator.
  * 
- * @return The string result of the joined arguments.
+ * @function
+ * @name join
+ * @memberOf lisp.functions
+ * 
+ * @returns The string result of the joined arguments.
  * 
  * @tested
  * 
@@ -169,6 +232,10 @@ defun("join", function () {
 /**
  * Returns the type of the given value.
  * 
+ * @function
+ * @name typeof
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("typeof", function (value) {
@@ -181,6 +248,10 @@ defun("typeof", function (value) {
 
 /**
  * Converts the given value to a string.
+ * 
+ * @function
+ * @name to-string
+ * @memberOf lisp.functions
  * 
  * @tested
  */
@@ -195,6 +266,10 @@ defun("to-string", function (value) {
 /**
  * Converts the given value to a number.
  * 
+ * @function
+ * @name to-number
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("to-number", function (value) {
@@ -208,6 +283,10 @@ defun("to-number", function (value) {
 /**
  * Converts the given value to a number.
  * 
+ * @function
+ * @name to-boolean
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("to-boolean", function (value) {
@@ -220,6 +299,10 @@ defun("to-boolean", function (value) {
 
 /**
  * Converts the given value to a json representation of that value.
+ * 
+ * @function
+ * @name to-json
+ * @memberOf lisp.functions
  */
 defun("to-json", function (object) {
 	if (arguments.length !== 1) {
@@ -231,6 +314,10 @@ defun("to-json", function (object) {
 
 /**
  * Converts the given string to uppercase.
+ * 
+ * @function
+ * @name to-upper
+ * @memberOf lisp.functions
  * 
  * @tested
  */
@@ -248,6 +335,10 @@ defun("to-upper", function (value) {
 /**
  * Converts the given string to uppercase.
  * 
+ * @function
+ * @name to-lower
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("to-lower", function (value) {
@@ -263,6 +354,10 @@ defun("to-lower", function (value) {
 
 /**
  * Reduces the given arguments on the / operator.
+ * 
+ * @function
+ * @name /
+ * @memberOf lisp.functions
  * 
  * @tested
  */
@@ -284,6 +379,10 @@ defun("/", function () {
 /**
  * Reduces the given arguments on the * operator.
  * 
+ * @function
+ * @name *
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("*", function () {
@@ -299,6 +398,10 @@ defun("*", function () {
 /**
  * Reduces the given arguments on the + operator.
  * 
+ * @function
+ * @name +
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("+", function () {
@@ -313,6 +416,10 @@ defun("+", function () {
 
 /**
  * Reduces the given arguments on the - operator.
+ * 
+ * @function
+ * @name -
+ * @memberOf lisp.functions
  * 
  * @tested
  */
@@ -332,6 +439,10 @@ defun("-", function () {
 /**
  * Reduces the given arguments on the % operator.
  * 
+ * @function
+ * @name %
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("%", function () {
@@ -346,6 +457,10 @@ defun("%", function () {
 
 /**
  * Adds 1 to the given value.
+ * 
+ * @function
+ * @name 1+
+ * @memberOf lisp.functions
  * 
  * @tested
  */
@@ -364,6 +479,10 @@ defun("1+", function (value) {
 /**
  * Subtracts 1 from the given value.
  * 
+ * @function
+ * @name 1-
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("1-", function (value) {
@@ -379,8 +498,12 @@ defun("1-", function (value) {
 });
 
 /**
- * Calls sprintf (found in the vendor section) with the
+ * Calls {@link sprintf} (found in the vendor section) with the
  * supplied arguments.
+ * 
+ * @function
+ * @name format
+ * @memberOf lisp.functions
  * 
  * @tested
  */

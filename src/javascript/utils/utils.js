@@ -17,6 +17,9 @@ function makeRequest (url, successCallback) {
 		throw new Error("Ajax request not supported in this browser");
 	}
 	
+	/**
+	 * @ignore
+	 */
 	request.onreadystatechange = function () {
 		if (request.readyState == 4) {
 			if (request.status == 200) {

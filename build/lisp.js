@@ -26,78 +26,120 @@
 // Author: William Bowers <william.bowers@gmail.com>
 // ================================================================================
 
+/**
+ * @namespace
+ */
 var lisp = (function (global) {
 /*jsl:ignore*/ // Suppress jsl warnings
-// From: http://ejohn.org/blog/simple-javascript-inheritance/
-// Inspired by base2 and Prototype
-(function(){
-  var initializing = false, fnTest = (/xyz/).test(function(){xyz;}) ? (/\b_super\b/) : /.*/;
-  // The base Class implementation (does nothing)
-  this.Class = function(){};
 
-  // Create a new Class that inherits from this class
-  Class.extend = function (classNameOrProp, prop) {
-    var _super = this.prototype;
-
-	var className = prop ? classNameOrProp : "Class";
-	prop = prop || classNameOrProp;
-
-    // Instantiate a base class (but only create the instance,
-    // don't run the init constructor)
-    initializing = true;
-    var prototype = new this();
-    initializing = false;
-
-    // Copy the properties over onto the new prototype
-    for (var name in prop) {
-      // Check if we're overwriting an existing function
-      prototype[name] = typeof prop[name] == "function" && 
-        typeof _super[name] == "function" && fnTest.test(prop[name]) ?
-        (function(name, fn){
-          return function() {
-            var tmp = this._super;
-
-            // Add a new ._super() method that is the same method
-            // but on the super-class
-            this._super = _super[name];
-
-            // The method only need to be bound temporarily, so we
-            // remove it when we're done executing
-            var ret = fn.apply(this, arguments);        
-            this._super = tmp;
-
-            return ret;
-          };
-        })(name, prop[name]) :
-        prop[name];
-    }
-
-    // The dummy class constructor
-    function Class() {
-      // All construction is actually done in the init method
-      if ( !initializing && this.init )
-        this.init.apply(this, arguments);
-    }
-
-	Class.className = className;
-
-    // Populate our constructed prototype object
-    Class.prototype = prototype;
-
-    // Enforce the constructor to be what we expect
-    Class.constructor = Class;
-
-    // And make this class extendable
-    Class.extend = arguments.callee;
-
-    return Class;
-  };
+(function () {
+	var initializing = false;
+	var fnTest = (/xyz/).test(function(){xyz;}) ? (/\b_super\b/) : /.*/;
+	
+	/**
+	 * <p>Defines a base class from which to create new classes that can be
+	 * extended into new classes as well.</p>
+	 * 
+	 * <p>This constructor does nothing.</p>
+	 * 
+	 * <p>Modified from: http://ejohn.org/blog/simple-javascript-inheritance/</p>
+	 * 
+	 * @class
+	 * @name Class
+	 */
+	this.Class = function () {};
+	
+	/**
+	 * <p>Creates a new class that inherits from the calling class.</p>
+	 * 
+	 * @function
+	 * 
+	 * @param {string, object} classNameOrProps
+	 *     Either the name of the class, or an object containing the class' properties.
+	 * @param {object} props
+	 *     An object containing the class' properties (only if classNameOrProps
+	 *     specifies the class name).
+	 */
+	Class.extend = function (classNameOrProps, props) {
+		var _super = this.prototype;
+		var className = props ? classNameOrProps : "Class";
+		props = props || classNameOrProps;
+		
+		// Instantiate a base class (but only create the instance,
+		// don't run the init constructor)
+		initializing = true;
+		var prototype = new this();
+		initializing = false;
+		
+		// Copy the properties over onto the new prototype
+		for (var name in props) {
+			// Check if we're overwriting an existing function
+			if (typeof props[name] == "function" &&
+				typeof _super[name] == "function" &&
+				fnTest.test(props[name])) {
+				prototype[name] = (function(name, fn){
+					return function() {
+					var tmp = this._super;
+					
+					// Add a new ._super() method that is the same method
+					// but on the super-class
+					this._super = _super[name];
+					
+					// The method only need to be bound temporarily, so we
+					// remove it when we're done executing
+					var ret = fn.apply(this, arguments);        
+					this._super = tmp;
+					
+					return ret;
+					};
+				})(name, props[name]);
+			} else {
+				prototype[name] = props[name];
+			}
+		}
+		
+		// The new class
+		var NewClass = function () {
+			// All construction is actually done in the init method
+			if (!initializing && this.init)
+				this.init.apply(this, arguments);
+		}
+		
+		NewClass.className = className;
+		NewClass.prototype = prototype;
+		NewClass.constructor = Class;
+		NewClass.extend = arguments.callee;
+		
+		return NewClass;
+	};
 })();
+
 /*jsl:end*/
 /*jsl:ignore*/ // Suppress jsl warnings
-// From: http://phpjs.org/functions/sprintf:522
-// More info: http://php.net/manual/en/function.sprintf.php
-function sprintf () {
+
+/**
+ * <p>Formats the string 'format' with the given arguments. Uses the
+ * php formatting style, defined at
+ * http://php.net/manual/en/function.sprintf.php.</p>
+ * 
+ * <p>From: http://phpjs.org/functions/sprintf:522.</p>
+ * 
+ * @param {string} format
+ *     The string to be formatted with the given arguments.
+ * @param {[mixed]} rest
+ *     The rest of the arguments with which to format the given string.
+ * 
+ * @example
+ *     >> sprintf("%01.2f", 123.1)
+ *     => 123.10
+ * @example
+ *     >> sprintf("[%10s]", 'monkey')
+ *     => "[    monkey]"
+ * @example
+ *     >> sprintf("[%'#10s]", 'monkey')
+ *     => "[####monkey]"
+ */
+function sprintf (format /*, ... */) {
     // http://kevin.vanzonneveld.net
     // +   original by: Ash Searle (http://hexmen.com/blog/)
     // + namespaced by: Michael White (http://getsprink.com)
@@ -107,24 +149,16 @@ function sprintf () {
     // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
     // +      input by: Brett Zamir (http://brett-zamir.me)
     // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // *     example 1: sprintf("%01.2f", 123.1);
-    // *     returns 1: 123.10
-    // *     example 2: sprintf("[%10s]", 'monkey');
-    // *     returns 2: '[    monkey]'
-    // *     example 3: sprintf("[%'#10s]", 'monkey');
-    // *     returns 3: '[####monkey]'
 
     var regex = /%%|%(\d+\$)?([-+\'#0 ]*)(\*\d+\$|\*|\d+)?(\.(\*\d+\$|\*|\d+))?([scboxXuidfegEG])/g;
     var a = arguments, i = 0, format = a[i++];
-
-    // pad()
+	
     var pad = function (str, len, chr, leftJustify) {
         if (!chr) {chr = ' ';}
         var padding = (str.length >= len) ? '' : Array(1 + len - str.length >>> 0).join(chr);
         return leftJustify ? str + padding : padding + str;
     };
-
-    // justify()
+	
     var justify = function (value, prefix, leftJustify, minWidth, zeroPad, customPadChar) {
         var diff = minWidth - value.length;
         if (diff > 0) {
@@ -136,8 +170,7 @@ function sprintf () {
         }
         return value;
     };
-
-    // formatBaseX()
+	
     var formatBaseX = function (value, base, prefix, leftJustify, minWidth, precision, zeroPad) {
         // Note: casts negative numbers to positive ones
         var number = value >>> 0;
@@ -245,6 +278,7 @@ function sprintf () {
 
     return format.replace(regex, doFormat);
 }
+
 /*jsl:end*/
 function toJSON (object) {
 	switch (typeof(object))
@@ -317,6 +351,9 @@ function makeRequest (url, successCallback) {
 		throw new Error("Ajax request not supported in this browser");
 	}
 	
+	/**
+	 * @ignore
+	 */
 	request.onreadystatechange = function () {
 		if (request.readyState == 4) {
 			if (request.status == 200) {
@@ -596,200 +633,253 @@ function validateInput (input) {
 	}
 	return new StringStream(input);
 }
-var parse = {
-	NUMBER_FORMATS: [
-		(/^(([+-]{1})?[0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/),
-		(/^(0x(?:[0-9a-fA-F]+))(?:\s+|\)|$)/)
-	],
-	
-	ParserException: function (message) {
-		this.toString = function () {
-			return "ParserException: " + message;
-		};
-	},
-	
-	script: function (stream) {
-		stream = validateInput(stream);
-		var expressions = [];
-		
-		try {
-			while (!stream.eof()) {
-				stream.swallowWhitespace();
-				var exp = parse.any(stream);
-				if (exp !== undefined)
-					expressions.push(exp);
-				stream.swallowWhitespace();
-			}
-		} catch (e) {
-			// There aren't any sexps left, or the rest is invalid
-			// Should something else be done besides throwing an error?
-			throw e;
-		}
-		
-		return expressions;
-	},
-	
-	any: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		switch (stream.peek())
-		{
-		case '(':
-			return parse.sexp(stream);
-		case '"':
-			return parse.string(stream);
-		case ':':
-			return parse.keyword(stream);
-		case ';':
-			return parse.comment(stream);
-		// case '{':
-		// 	return parse.object(stream);
-		default:
-			var rest = stream.rest();
-			for (var i = 0; i < lisp.parse.NUMBER_FORMATS.length; i++) {
-				var format = lisp.parse.NUMBER_FORMATS[i];
-				var match = rest.match(format);
-				if (match) {
-					return parse.number(stream, match[1]);
-				}
-			}
-			return parse.symbol(stream);
-		}
-	},
-	
-	sexp: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		if (stream.peek() != '(') {
-			throw new parse.ParserException("Invalid sexp at position " +
-				stream.position + " (starting with: '" + stream.peek() + "')");
-		}
-		stream.next();
-		stream.swallowWhitespace();
-		var parts = [];
-		while (stream.peek() != ')' && !stream.eof()) {
+/**
+ * @namespace
+ * @name parse
+ */
+var parse = {};
+
+/**
+ * <p>A list of possible number formats.</p>
+ * 
+ * @constant
+ */
+parse.NUMBER_FORMATS = [
+	(/^(([+-]{1})?[0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/),
+	(/^(0x(?:[0-9a-fA-F]+))(?:\s+|\)|$)/)
+];
+
+/**
+ * <p>The exception type thrown when any parse error occurs.</p>
+ * 
+ * @class
+ * @extends Class
+ */
+parse.ParserException = Class.extend("ParserException", {
+	/**
+	 * <p>Returns a string representation of the exception.</p>
+	 * 
+	 * @function
+	 */
+	toString: function () {
+		return "ParserException: " + message;
+	}
+});
+
+/**
+ * Parses a lisp script, which can be any number of root-level expression,
+ * into an array of ASTs representing those expressions.
+ * 
+ * @param {string, StringStream} stream
+ *     A string or StringStream instance that holds the script contents.
+ * 
+ * @returns An array of the parsed expressions.
+ */
+parse.script = function (stream) {
+	stream = validateInput(stream);
+	var expressions = [];
+
+	try {
+		while (!stream.eof()) {
+			stream.swallowWhitespace();
 			var exp = parse.any(stream);
 			if (exp !== undefined)
-				parts.push(exp);
+				expressions.push(exp);
 			stream.swallowWhitespace();
 		}
-		stream.next();
-		return parts;
-	},
-	
-	// Do we want object literals?
-	// object: function (stream) {
-	// 	throw new Error("Not impelemented");
-	// 	stream = validateInput(stream);
-	// 	stream.swallowWhitespace();
-	// 	if (stream.peek() != '{') {
-	// 		throw new parse.ParserException("Invalid object at position " +
-	// 			stream.position + " (starting with: '" + stream.peek() + "')");
-	// 	}
-	// 	stream.next()
-	// 	stream.swallowWhitespace();
-	// 	while (stream.peek() != '}') {
-	// 		stream.swallowWhitespace();
-	// 		var key /* grab the key */;
-	// 	}
-	// },
-	
-	symbol: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		var badChars = WHITESPACE + '()';
-		if (badChars.indexOf(stream.peek()) != -1) {
-			throw new parse.ParserException("Invalid symbol at position " +
-				stream.position + " (starting with: '" + stream.peek() + "')");
-		}
-		var symbol = "";
-		while (badChars.indexOf(stream.peek()) == -1 && !stream.eof()) {
-			symbol += stream.next();
-		}
-		return new Symbol(symbol);
-	},
-	
-	keyword: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		if (stream.peek() != ':') {
-			throw new parse.ParserException("Invalid keyword at position " +
-				stream.position + " (starting with: '" + stream.peek() + "')");
-		}
-		stream.next();
-		return new Keyword(parse.symbol(stream).value);
-	},
-	
-	string: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		if (stream.peek() != '"') {
-			throw new parse.ParserException("Invalid string at position " +
-				stream.position + " (starting with: '" + stream.peek() + "')");
-		}
-		var string = "";
-		stream.next();
-		while (stream.peek() != '"' && !stream.eof()) {
-			var c = stream.next();
-			switch (c)
-			{
-			case "\\":
-				string += parse.stringEscape(stream);
-				break;
-			default:
-				string += c;
-				break;
-			}
-		}
-		stream.next();
-		return string;
-	},
-	
-	stringEscape: function (stream) {
-		stream = validateInput(stream);
-		var c = stream.next();
-		return eval('"' + '\\' + c + '"');
-	},
-	
-	number: function (stream, match) {
-		if (!match) {
-			stream = validateInput(stream);
-			stream.swallowWhitespace();
-			var rest = stream.rest();
-			for (var i = 0; i < lisp.parse.NUMBER_FORMATS.length; i++) {
-				var format = lisp.parse.NUMBER_FORMATS[i];
-				match = rest.match(format);
-				if (match) {
-					match = match[1];
-					break;
-				}
-			}
-		}
-		
-		if (!match) {
-			throw new parse.ParserException("Invalid number at position " + stream.position +
-				" (starting with: '" + stream.peek() + "')");
-		}
-		
-		stream.position += match.length;
-		return eval(match);
-	},
-	
-	comment: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		if (stream.peek() != ';') {
-			throw new parse.ParserException("Invalid comment at position " +
-				stream.position + " (starting with: '" + stream.peek() + "')");
-		}
-		var c = '';
-		while ('\n\r'.indexOf(stream.peek()) == -1 &&
-			   !stream.eof() &&
-		 	   stream.slice(stream.position, stream.position+2) != '\n\r') {
-			c += stream.next();
-		}
-		stream.next();
+	} catch (e) {
+		// There aren't any sexps left, or the rest is invalid
+		// Should something else be done besides throwing an error?
+		throw e;
 	}
+
+	return expressions;
+};
+
+/**
+ * @returns The parsed object.
+ */
+parse.any = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	switch (stream.peek())
+	{
+	case '(':
+		return parse.sexp(stream);
+	case '"':
+		return parse.string(stream);
+	case ':':
+		return parse.keyword(stream);
+	case ';':
+		return parse.comment(stream);
+	// case '{':
+	// 	return parse.object(stream);
+	default:
+		var rest = stream.rest();
+		for (var i = 0; i < parse.NUMBER_FORMATS.length; i++) {
+			var format = parse.NUMBER_FORMATS[i];
+			var match = rest.match(format);
+			if (match) {
+				return parse.number(stream, match[1]);
+			}
+		}
+		return parse.symbol(stream);
+	}
+};
+
+/**
+ * @returns The parsed sexp.
+ */
+parse.sexp = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	if (stream.peek() != '(') {
+		throw new parse.ParserException("Invalid sexp at position " +
+			stream.position + " (starting with: '" + stream.peek() + "')");
+	}
+	stream.next();
+	stream.swallowWhitespace();
+	var parts = [];
+	while (stream.peek() != ')' && !stream.eof()) {
+		var exp = parse.any(stream);
+		if (exp !== undefined)
+			parts.push(exp);
+		stream.swallowWhitespace();
+	}
+	stream.next();
+	return parts;
+};
+
+// Do we want object literals?
+// parse.object = function (stream) {
+// 	throw new Error("Not impelemented");
+// 	stream = validateInput(stream);
+// 	stream.swallowWhitespace();
+// 	if (stream.peek() != '{') {
+// 		throw new parse.ParserException("Invalid object at position " +
+// 			stream.position + " (starting with: '" + stream.peek() + "')");
+// 	}
+// 	stream.next()
+// 	stream.swallowWhitespace();
+// 	while (stream.peek() != '}') {
+// 		stream.swallowWhitespace();
+// 		var key /* grab the key */;
+// 	}
+// };
+
+/**
+ * @returns The parsed symbol.
+ */
+parse.symbol = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	var badChars = WHITESPACE + '()';
+	if (badChars.indexOf(stream.peek()) != -1) {
+		throw new parse.ParserException("Invalid symbol at position " +
+			stream.position + " (starting with: '" + stream.peek() + "')");
+	}
+	var symbol = "";
+	while (badChars.indexOf(stream.peek()) == -1 && !stream.eof()) {
+		symbol += stream.next();
+	}
+	return new Symbol(symbol);
+};
+
+/**
+ * @returns The parsed keyword.
+ */
+parse.keyword = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	if (stream.peek() != ':') {
+		throw new parse.ParserException("Invalid keyword at position " +
+			stream.position + " (starting with: '" + stream.peek() + "')");
+	}
+	stream.next();
+	return new Keyword(parse.symbol(stream).value);
+};
+
+/**
+ * @returns The parsed string.
+ */
+parse.string = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	if (stream.peek() != '"') {
+		throw new parse.ParserException("Invalid string at position " +
+			stream.position + " (starting with: '" + stream.peek() + "')");
+	}
+	var string = "";
+	stream.next();
+	while (stream.peek() != '"' && !stream.eof()) {
+		var c = stream.next();
+		switch (c)
+		{
+		case "\\":
+			string += parse.stringEscape(stream);
+			break;
+		default:
+			string += c;
+			break;
+		}
+	}
+	stream.next();
+	return string;
+};
+
+/**
+ * @returns The parsed escaped character.
+ */
+parse.stringEscape = function (stream) {
+	stream = validateInput(stream);
+	var c = stream.next();
+	return eval('"' + '\\' + c + '"');
+};
+
+/**
+ * @returns The parsed number.
+ */
+parse.number = function (stream, match) {
+	if (!match) {
+		stream = validateInput(stream);
+		stream.swallowWhitespace();
+		var rest = stream.rest();
+		for (var i = 0; i < parse.NUMBER_FORMATS.length; i++) {
+			var format = parse.NUMBER_FORMATS[i];
+			match = rest.match(format);
+			if (match) {
+				match = match[1];
+				break;
+			}
+		}
+	}
+
+	if (!match) {
+		throw new parse.ParserException("Invalid number at position " + stream.position +
+			" (starting with: '" + stream.peek() + "')");
+	}
+
+	stream.position += match.length;
+	return eval(match);
+};
+
+/**
+ * @returns Nothing
+ */
+parse.comment = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	if (stream.peek() != ';') {
+		throw new parse.ParserException("Invalid comment at position " +
+			stream.position + " (starting with: '" + stream.peek() + "')");
+	}
+	var c = '';
+	while ('\n\r'.indexOf(stream.peek()) == -1 &&
+		   !stream.eof() &&
+	 	   stream.slice(stream.position, stream.position+2) != '\n\r') {
+		c += stream.next();
+	}
+	stream.next();
 };
 const WHITESPACE = " \t\n\r";
 
@@ -809,7 +899,7 @@ var ROOT_ENV = new Env(new Env(null, global), {
  * as its arglist and which executes the rest of the expressions
  * when called.
  * 
- * @return The created function.
+ * @returns The created function.
  */
 defmacro("lambda", function (arglist /*, ... */) {
 	var env  = new Env(lisp.env);
@@ -870,7 +960,7 @@ defmacro("defun", function () {
  *     - (try ... (finally ...))
  *     - (try ... (catch ...) (finally ...))
  * 
- * @return The return value of the last evaluated expression.
+ * @returns The return value of the last evaluated expression.
  * 
  * @tested
  * 
@@ -1065,7 +1155,7 @@ defmacro("setq", function () {
  * of places in other macros/functions where only one expression
  * can go.
  * 
- * @return The return value of the last expression, or nil if there
+ * @returns The return value of the last expression, or nil if there
  *         are no expression.
  * 
  * @tested
@@ -1084,7 +1174,7 @@ defmacro("progn", function (/* .. */) {
  * expression, otherwise it evaluates all of the remaining expression
  * and returns the return value of the last one.
  * 
- * @return The return value of either the second or last expression, or
+ * @returns The return value of either the second or last expression, or
  *         nil if testExpression evaluates to false and there are no
  *         remaining expressions to evaluate.
  * 
@@ -1112,7 +1202,7 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
  * Executes the rest of the arguments if the first argument
  * is true.
  * 
- * @return The return value of the last expression.
+ * @returns The return value of the last expression.
  * 
  * @tested
  */
@@ -1351,12 +1441,37 @@ defmacro("is-object", function () {
 	});
 });
 /**
+ * Functions that are defined for the lisp environment.
+ * 
+ * @namespace
+ */
+lisp.functions = {};
+delete lisp.functions; // Delete it because it's just for documentation
+
+/**
  * Returns an instance of the given class, initialized with
  * the rest of the given arguments.
  * 
- * @return The new class instance.
+ * @function
+ * @name new
+ * @memberOf lisp.functions
+ * 
+ * @param {Class} Class
+ *     The class to create a new instance of.
+ * @param {[mixed]} rest
+ *     The arguments to be passed to the class constructor.
+ * 
+ * @returns The new class instance.
+ * 
+ * @example Instantiate a class
+ *     >> (new MyClass)
+ *     => ; the MyClass instance
+ *
+ * @example Instantiate a class with constructor arguments
+ *     >> (new Error "My error message")
+ *     => ; the Error instance
  */
-defun("new", function (Class) {
+defun("new", function (Class /*, ... */) {
 	if (arguments.length === 0) {
 		throw new Error("(new) requires at least 1 argument");
 	}
@@ -1366,11 +1481,17 @@ defun("new", function (Class) {
 });
 
 /**
- * Throws the given object, or "new Error()" if no object is
+ * Throws the given object, or new Error() if no object is
  * provided.
  * 
- * @return Nothing. After throw'ing the stack is unwided to the
- *         nearest 'catch' block.
+ * @function
+ * @name throw
+ * @memberOf lisp.functions
+ * 
+ * @param {mixed} object The object to throw. Defaults to new Error().
+ * 
+ * @returns Nothing. After throw'ing the stack is unwided to the
+ *          nearest 'catch' block.
  * 
  * @tested
  * 
@@ -1397,8 +1518,12 @@ defun("throw", function (object) {
 
 /**
  * Returns the given arguments as a list.
+ * 
+ * @function
+ * @name list
+ * @memberOf lisp.functions
  */
-defun("list", function () {
+defun("list", function (/* ... */) {
 	return argsToArray(arguments);
 });
 
@@ -1407,7 +1532,11 @@ defun("list", function () {
  * property list to initialize the object. There must be an even
  * number of arguments -- one value for every key.
  * 
- * @return The new object.
+ * @function
+ * @name object
+ * @memberOf lisp.functions
+ * 
+ * @returns The new object.
  * 
  * @tested
  */
@@ -1429,7 +1558,11 @@ defun("object", function () {
 /**
  * Creates an array from the given arguments.
  * 
- * @return The new array.
+ * @function
+ * @name array
+ * @memberOf lisp.functions
+ * 
+ * @returns The new array.
  */
 defun("array", function () {
 	return argsToArray(arguments);
@@ -1438,6 +1571,10 @@ defun("array", function () {
 /**
  * Returns a value from an object given a key (will work with
  * array indices as well).
+ * 
+ * @function
+ * @name getkey
+ * @memberOf lisp.functions
  */
 defun("getkey", function (key, object) {
 	if (arguments.length !== 2) {
@@ -1449,6 +1586,10 @@ defun("getkey", function (key, object) {
 
 /**
  * Sets a value on the given object using the given key.
+ * 
+ * @function
+ * @name setkey
+ * @memberOf lisp.functions
  */
 defun("setkey", function (key, object, value) {
 	if (arguments.length !== 3) {
@@ -1461,7 +1602,11 @@ defun("setkey", function (key, object, value) {
 /**
  * Prints the given arguments to the console.
  * 
- * @return nil.
+ * @function
+ * @name print
+ * @memberOf lisp.functions
+ * 
+ * @returns nil.
  * 
  * @tested
  */
@@ -1474,7 +1619,11 @@ defun("print", function () {
 /**
  * Joins the given arguments together into one string.
  * 
- * @return The string result of the joined arguments.
+ * @function
+ * @name concat
+ * @memberOf lisp.functions
+ * 
+ * @returns The string result of the joined arguments.
  * 
  * @tested
  */
@@ -1486,7 +1635,11 @@ defun("concat", function () {
  * Joins the given arguments together into one string, using
  * the first argument as the separator.
  * 
- * @return The string result of the joined arguments.
+ * @function
+ * @name join
+ * @memberOf lisp.functions
+ * 
+ * @returns The string result of the joined arguments.
  * 
  * @tested
  * 
@@ -1521,6 +1674,10 @@ defun("join", function () {
 /**
  * Returns the type of the given value.
  * 
+ * @function
+ * @name typeof
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("typeof", function (value) {
@@ -1533,6 +1690,10 @@ defun("typeof", function (value) {
 
 /**
  * Converts the given value to a string.
+ * 
+ * @function
+ * @name to-string
+ * @memberOf lisp.functions
  * 
  * @tested
  */
@@ -1547,6 +1708,10 @@ defun("to-string", function (value) {
 /**
  * Converts the given value to a number.
  * 
+ * @function
+ * @name to-number
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("to-number", function (value) {
@@ -1560,6 +1725,10 @@ defun("to-number", function (value) {
 /**
  * Converts the given value to a number.
  * 
+ * @function
+ * @name to-boolean
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("to-boolean", function (value) {
@@ -1572,6 +1741,10 @@ defun("to-boolean", function (value) {
 
 /**
  * Converts the given value to a json representation of that value.
+ * 
+ * @function
+ * @name to-json
+ * @memberOf lisp.functions
  */
 defun("to-json", function (object) {
 	if (arguments.length !== 1) {
@@ -1583,6 +1756,10 @@ defun("to-json", function (object) {
 
 /**
  * Converts the given string to uppercase.
+ * 
+ * @function
+ * @name to-upper
+ * @memberOf lisp.functions
  * 
  * @tested
  */
@@ -1600,6 +1777,10 @@ defun("to-upper", function (value) {
 /**
  * Converts the given string to uppercase.
  * 
+ * @function
+ * @name to-lower
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("to-lower", function (value) {
@@ -1615,6 +1796,10 @@ defun("to-lower", function (value) {
 
 /**
  * Reduces the given arguments on the / operator.
+ * 
+ * @function
+ * @name /
+ * @memberOf lisp.functions
  * 
  * @tested
  */
@@ -1636,6 +1821,10 @@ defun("/", function () {
 /**
  * Reduces the given arguments on the * operator.
  * 
+ * @function
+ * @name *
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("*", function () {
@@ -1651,6 +1840,10 @@ defun("*", function () {
 /**
  * Reduces the given arguments on the + operator.
  * 
+ * @function
+ * @name +
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("+", function () {
@@ -1665,6 +1858,10 @@ defun("+", function () {
 
 /**
  * Reduces the given arguments on the - operator.
+ * 
+ * @function
+ * @name -
+ * @memberOf lisp.functions
  * 
  * @tested
  */
@@ -1684,6 +1881,10 @@ defun("-", function () {
 /**
  * Reduces the given arguments on the % operator.
  * 
+ * @function
+ * @name %
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("%", function () {
@@ -1698,6 +1899,10 @@ defun("%", function () {
 
 /**
  * Adds 1 to the given value.
+ * 
+ * @function
+ * @name 1+
+ * @memberOf lisp.functions
  * 
  * @tested
  */
@@ -1716,6 +1921,10 @@ defun("1+", function (value) {
 /**
  * Subtracts 1 from the given value.
  * 
+ * @function
+ * @name 1-
+ * @memberOf lisp.functions
+ * 
  * @tested
  */
 defun("1-", function (value) {
@@ -1731,8 +1940,12 @@ defun("1-", function (value) {
 });
 
 /**
- * Calls sprintf (found in the vendor section) with the
+ * Calls {@link sprintf} (found in the vendor section) with the
  * supplied arguments.
+ * 
+ * @function
+ * @name format
+ * @memberOf lisp.functions
  * 
  * @tested
  */
