@@ -71,8 +71,8 @@ JSTest.TestCase({
 	},
 	
 	testBasicSet: function () {
-		this.env.set("name", "Bill");
-		this.assertEqual(this.env.get("name"), "Bill");
+		this.env.set("aname", "Bill");
+		this.assertEqual(this.env.get("aname"), "Bill");
 	},
 	
 	testGlobalGet: function () {

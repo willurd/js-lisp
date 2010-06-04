@@ -340,19 +340,15 @@ function makeRequest (url, successCallback) {
 		throw new Error("Ajax request not supported in this browser");
 	}
 	
-	request.onreadystatechange = function () {
-		if (request.readyState == 4) {
-			if (request.status == 200) {
-				successCallback(request.responseText);
-			} else if (request.status == 404) {
-				throw new Error("Trying to load lisp script that does not exist: " +
-				 	url);
-			}
-		}
-	};
-	
 	request.open("GET", url, false); // Load the script synchronously
 	request.send(null);
+	
+	if (request.status == 200) {
+		successCallback(request.responseText);
+	} else if (request.status == 404) {
+		throw new Error("Trying to load lisp script that does not exist: " +
+			url);
+	}
 }
 
 function times (string, num) {
@@ -582,11 +578,11 @@ var Env = Class.extend({
 			var name = parts.slice(0,parts.length-1).join(".");
 			object = this.get(name);
 			
-			if (!(object instanceof Object)) {
-				throw new Error(name + " is unsubscriptable");
+			try {
+				object[parts[parts.length-1]] = value;
+			} catch (e) {
+				throw new Error(name + " is unsubscriptable: " + e);
 			}
-			
-			object[parts[parts.length-1]] = value;
 		} else {
 			if (this.has(symbol)) {
 				if (this.symbols.hasOwnProperty(symbol)) {
@@ -1889,15 +1885,23 @@ return {
 		}
 	},
 	
+	load: function (source, callback) {
+		makeRequest(source, function (script) {
+			lisp.eval(script);
+			if (callback) {
+				callback(source);
+			}
+		});
+	},
+	
 	dotag: function (tag) {
 		if (tag.src) {
-			makeRequest(tag.src, function (script) {
-				lisp.eval(script);
-				lisp.eval(tag.innerText);
+			lisp.load(tag.src, function (script) {
+				lisp.eval(tag.textContent);
 				tag.parentElement.removeChild(tag);
 			});
 		} else {
-			lisp.eval(tag.innerText);
+			lisp.eval(tag.textContent);
 			tag.parentElement.removeChild(tag);
 		}
 	},

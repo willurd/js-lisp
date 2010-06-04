@@ -17,19 +17,15 @@ function makeRequest (url, successCallback) {
 		throw new Error("Ajax request not supported in this browser");
 	}
 	
-	request.onreadystatechange = function () {
-		if (request.readyState == 4) {
-			if (request.status == 200) {
-				successCallback(request.responseText);
-			} else if (request.status == 404) {
-				throw new Error("Trying to load lisp script that does not exist: " +
-				 	url);
-			}
-		}
-	};
-	
 	request.open("GET", url, false); // Load the script synchronously
 	request.send(null);
+	
+	if (request.status == 200) {
+		successCallback(request.responseText);
+	} else if (request.status == 404) {
+		throw new Error("Trying to load lisp script that does not exist: " +
+			url);
+	}
 }
 
 function times (string, num) {

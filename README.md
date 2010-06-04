@@ -92,6 +92,12 @@ Also, if you add any new javascript files, make sure to add them to the lisp.js 
 
 Ok, you misunderstood me. js-lisp is young. Really young. Having said that, it works. Pretty well actually. It's also got a pretty solid test suite, with pretty high code coverage. In fact, in terms of LOC the test-to-code ratio is almost 1:1. On top of that, 99% of the test code is actually written in lisp and interpreted by js-lisp. So use it. Do awesome things with it. Share it with your friends. Share what you're doing with me. Just don't use it in production code. Chances are there are many places in it that are weak as a feather, and I garuntee you your users would find them. And be mad at you.
 
-## Anything else?
+## Browser Support
 
-This project has only been tested in Chrome on a Mac. Like I said, don't use this in production code.
+The following is a list of browsers where all of the examples worked and all of the tests passed, the last time that browser was checked.
+
+**OS X Snow Leopard**
+
+* Chrome 5 (first stable mac release)
+* Safari 4
+* Firefox 3.5

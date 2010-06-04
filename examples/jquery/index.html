@@ -14,7 +14,9 @@ initializes the UI elements, which is now handled by lisp in ui.lisp).
 		<script type="text/javascript" src="jquery-ui-1.8.1.min.js"></script> 
 		<script type="text/javascript" src="/build/lisp.js"></script>
 		<!-- This is where the UI widgets are initialized -->
-		<script type="text/lisp" src="ui.lisp" onload="lisp.dotag(this)"></script>
+		<script type="text/javascript">
+		  lisp.load("ui.lisp");
+		</script>
 		<style type="text/css"> 
 			/*demo page css*/
 			body{ font: 62.5% "Trebuchet MS", sans-serif; margin: 50px;}

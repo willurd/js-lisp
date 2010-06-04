@@ -41,15 +41,23 @@ return {
 		}
 	},
 	
+	load: function (source, callback) {
+		makeRequest(source, function (script) {
+			lisp.eval(script);
+			if (callback) {
+				callback(source);
+			}
+		});
+	},
+	
 	dotag: function (tag) {
 		if (tag.src) {
-			makeRequest(tag.src, function (script) {
-				lisp.eval(script);
-				lisp.eval(tag.innerText);
+			lisp.load(tag.src, function (script) {
+				lisp.eval(tag.textContent);
 				tag.parentElement.removeChild(tag);
 			});
 		} else {
-			lisp.eval(tag.innerText);
+			lisp.eval(tag.textContent);
 			tag.parentElement.removeChild(tag);
 		}
 	},

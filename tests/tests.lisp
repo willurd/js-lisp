@@ -589,7 +589,7 @@ string" "a\nstring")))
 		  (try
 		      (throw)
 			(catch (e)
-			  (self.assertEqual (to-string e) "Error")))))
+			  (self.assertInstanceOf e Error)))))
 	:testSuppliedValue (lambda ()
         (let ((self this))
 		  (try

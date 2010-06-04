@@ -7,7 +7,9 @@
 		<script type="text/javascript" src="/support/vendor/JSTest/src/jstest.js"></script>
 		<script type="text/javascript" src="/build/lisp.js"></script>
 		<script type="text/javascript" src="/tests/tests.js"></script>
-		<script type="text/lisp" src="/tests/tests.lisp" onload="lisp.dotag(this)"></script>
+		<script type="text/javascript">
+		  lisp.load("/tests/tests.lisp");
+		</script>
 		<script type="text/javascript">
 		window.onload = function () {
 			var resultsDiv = document.getElementById('test-results');

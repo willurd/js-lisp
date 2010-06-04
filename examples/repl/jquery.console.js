@@ -235,21 +235,29 @@
         ////////////////////////////////////////////////////////////////////////
         // Handle console control keys
         // E.g. up, down, left, right, backspc, return, etc.
+		
+		extern.cancelKey = function (keyCode) {
+			cancelKeyPress = keyCode;
+		};
+		
         extern.defaultConsoleControl = function (e) {
             switch (e.keyCode) {
-            case extern.keyCodes.left:{ 
+            case extern.keyCodes.left:{
+				extern.cancelKey(e.keyCode);
                 moveColumn(-1);
                 updatePromptDisplay(); 
                 return false;
                 break;
             }
             case extern.keyCodes.right:{
+				extern.cancelKey(e.keyCode);
                 moveColumn(1); 
                 updatePromptDisplay();
                 return false;
                 break; 
             }
             case extern.keyCodes.back:{
+				extern.cancelKey(e.keyCode);
                 if (moveColumn(-1)){
                     deleteCharAtPos();
                     updatePromptDisplay();
@@ -258,28 +266,34 @@
                 break;
             }
             case extern.keyCodes.del:{
+				extern.cancelKey(e.keyCode);
                 if (deleteCharAtPos())
                     updatePromptDisplay();
                 return false;
                 break;
             }
             case extern.keyCodes.end:{
+				extern.cancelKey(e.keyCode);
 				extern.moveToEnd();
                 return false;
                 break;
             }
             case extern.keyCodes.start:{
+				extern.cancelKey(e.keyCode);
 				extern.moveToStart();
                 return false;
                 break;
             }
             case extern.keyCodes.ret:{
+				extern.cancelKey(e.keyCode);
                 commandTrigger(); return false;
             }
             case extern.keyCodes.up:{
+				extern.cancelKey(e.keyCode);
                 rotateHistory(-1); return false;
             }
             case extern.keyCodes.down:{
+				extern.cancelKey(e.keyCode);
                 rotateHistory(1); return false;
             }
             default: //alert("Unknown control character: " + keyCode);

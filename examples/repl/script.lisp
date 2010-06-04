@@ -46,17 +46,23 @@
 	(controller.notice "Hit Ctrl-h for help")
 	
 	(defun controller.consoleControl (event)
+		;; TODO: Make these (cond) expressions into (case) expressions
+		;; whenever (case) is written.
 		(cond (event.ctrlKey
-				;; TODO: Make me a (case) expression whenever (case) is written.
+				(controller.cancelKey event.keyCode)
 				(cond ((== event.keyCode keycodes.h) (help) (controller.commandResult))
 					  ((== event.keyCode keycodes.k) (clear))
 					  ((== event.keyCode keycodes.a) (controller.moveToStart))
 					  ((== event.keyCode keycodes.e) (controller.moveToEnd))))
 			  (event.altKey
+				(controller.cancelKey event.keyCode)
 				(cond ((== event.keyCode keycodes.left)      (controller.moveWordLeft))
 					  ((== event.keyCode keycodes.right)     (controller.moveWordRight))
 					  ((== event.keyCode keycodes.backspace) (controller.deleteWordLeft))
 					  ((== event.keyCode keycodes.delete)    (controller.deleteWordRight))))
+			  (event.metaKey
+				(controller.cancelKey event.keyCode)
+				(cond ((== event.keyCode keycodes.r) (setq window.location ""))))
 			  (t (controller.defaultConsoleControl event))))
 	
 	(defun help ()

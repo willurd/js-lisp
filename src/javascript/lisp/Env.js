@@ -60,11 +60,11 @@ var Env = Class.extend({
 			var name = parts.slice(0,parts.length-1).join(".");
 			object = this.get(name);
 			
-			if (!(object instanceof Object)) {
-				throw new Error(name + " is unsubscriptable");
+			try {
+				object[parts[parts.length-1]] = value;
+			} catch (e) {
+				throw new Error(name + " is unsubscriptable: " + e);
 			}
-			
-			object[parts[parts.length-1]] = value;
 		} else {
 			if (this.has(symbol)) {
 				if (this.symbols.hasOwnProperty(symbol)) {

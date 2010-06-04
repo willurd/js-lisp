@@ -5,16 +5,8 @@
 		<link href="/support/vendor/JSTest/src/themes/default/style.css"
 			type="text/css" rel="stylesheet" media="screen" />
 		<script type="text/javascript" src="/build/lisp.js"></script>
-		<script type="text/lisp">
-		(defun window.onload (e)
-			"Updates an HTML element using the DOM"
-			(let ((div (document.getElementById "thediv")))
-			  (print "before:" div.innerText)
-			  (setq div.innerText "it works!")
-			  (print "after:" div.innerText)))
-		</script>
 		<script type="text/javascript">
-		lisp.run();
+		  lisp.load("example1.lisp");
 		</script>
 	</head>
 	<body>
