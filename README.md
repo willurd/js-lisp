@@ -23,6 +23,10 @@ The `onload` part is the magic part. This is what evaluates the lisp code. Alter
 
 Follow the steps under the section "How do I view the tests and html documentation?" to start a simple webserver at the root of the project.
 
+Here's an example of the REPL in action:
+
+![The js-lisp REPL](/willurd/js-lisp/tree/master/docs/readme/repl1.png)
+
 The REPL is located at /examples/repl/, and works just like any other REPL. Have fun!
 
 ## What lisp are you using?
