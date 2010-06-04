@@ -33,6 +33,4 @@
 									(setq controller.promptLabel ps2))
 							  (setq ret (array (object :msg (to-string e)
 													   :className "jquery-console-message-error"))))))
-						ret))))))
-			(controller.setPromptText "(let ((name \"William\"))")
-			))))
+						ret))))))))))
