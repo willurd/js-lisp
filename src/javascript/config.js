@@ -1,4 +1,4 @@
-const WHITESPACE = " \t\n\r";
+var WHITESPACE = " \t\n\r";
 
 var ROOT_ENV = new Env(new Env(null, global), {
 	"t": true,

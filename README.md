@@ -101,3 +101,13 @@ The following is a list of browsers where all of the examples worked and all of 
 * Chrome 5 (first stable mac release)
 * Safari 4
 * Firefox 3.5
+
+**Windows Vista**
+
+* Chrome 5
+* Firefox 3.5
+
+**Linux**
+
+* Chrome 5
+* Firefox 3.7 (nightly)
