@@ -43,6 +43,7 @@
 (function($){
     $.fn.console = function(config){
 	    // External exports object
+		config = config || {};
 	    var extern = {};
 		
         ////////////////////////////////////////////////////////////////////////
@@ -64,7 +65,10 @@
         // Prompt
         extern.promptBox;
         extern.prompt;
-        extern.promptLabel = config && config.promptLabel? config.promptLabel : "> ";
+        extern.ps1 = config.ps1 || ">> "; // Input
+        extern.ps2 = config.ps2 || ".. "; // Multiline commands
+		extern.ps3 = config.ps3 || "=> "; // Return values
+		extern.promptLabel = extern.ps1; // The current label
         extern.column = 0;
         extern.promptText = '';
         extern.restoreText = '';
@@ -95,7 +99,7 @@
 	                        $(this).remove();
 	                    welcome = false;
 	                });
-	                newPromptBox();
+	                extern.newPromptBox();
 	                inner.parent().fadeIn(function(){
 	                    inner.addClass('jquery-console-focus');
 	                    extern.typer.focus();
@@ -107,7 +111,7 @@
                         $(this).remove();
                     welcome = false;
                 });
-                newPromptBox();
+                extern.newPromptBox();
 			}
         };
 
@@ -141,7 +145,7 @@
 
         ////////////////////////////////////////////////////////////////////////
         // Make a new prompt box
-        function newPromptBox() {
+        extern.newPromptBox = function () {
             extern.column = 0;
             extern.promptText = '';
             extern.promptBox = $('<div class="jquery-console-prompt-box"></div>');
@@ -176,13 +180,7 @@
 
         extern.typer.keydown(function(e){
             cancelKeyPress = 0;
-            var keyCode = e.keyCode;
-            if (isControlCharacter(keyCode)) {
-                cancelKeyPress = keyCode;
-                if (!extern.consoleControl(keyCode, e)) {
-                    return false;
-                }
-            }
+			extern.consoleControl(e);
         });
         
         ////////////////////////////////////////////////////////////////////////
@@ -201,7 +199,7 @@
 
         // Is a keycode a contorl character? 
         // E.g. up, down, left, right, backspc, return, etc.
-        function isControlCharacter(keyCode){
+        function isControlCharacter (keyCode) {
             // TODO: Make more precise/fast.
             return (
                 (keyCode >= extern.keyCodes.left && keyCode <= extern.keyCodes.down)
@@ -211,15 +209,15 @@
             );
         };
 		
-		extern.consoleControl = function (keyCode, e) {
-			return extern.defaultConsoleControl(keyCode, e);
+		extern.consoleControl = function (e) {
+			return extern.defaultConsoleControl(e);
 		};
 		
         ////////////////////////////////////////////////////////////////////////
         // Handle console control keys
         // E.g. up, down, left, right, backspc, return, etc.
-        extern.defaultConsoleControl = function(keyCode, e){
-            switch (keyCode){
+        extern.defaultConsoleControl = function (e) {
+            switch (e.keyCode) {
             case extern.keyCodes.left:{ 
                 moveColumn(-1);
                 updatePromptDisplay(); 
@@ -326,7 +324,7 @@
                         handleCommand();
                     }
                 } else {
-                    commandResult(ret,"jquery-console-message-error");
+                    extern.commandResult(ret,"jquery-console-message-error");
                 }
             } else {
                 handleCommand();
@@ -340,45 +338,50 @@
 		
         ////////////////////////////////////////////////////////////////////////
         // Handle a command
-        function handleCommand() {
+        function handleCommand () {
             if (typeof config.commandHandle == 'function') {
 				var text = extern.multiLineCommand ? extern.currentText + extern.promptText :
 													 extern.promptText;
                 var ret = config.commandHandle(text, function(msgs) {
-                    commandResult(msgs);
+                    extern.commandResult(msgs);
                 });
 				if (ret === null) { // This command needs more text
+					extern.promptLabel = extern.ps2;
 					extern.multiLineCommand = true;
 					extern.currentText = text;
 		            extern.column = -1;
 		            updatePromptDisplay();
-		            newPromptBox();
-				} else if (typeof ret == 'boolean') {
-                    if (ret) {
-                        // Command succeeded without a result.
-                        addToHistory(text);
-                        commandResult();
-                    } else {
-                        addToHistory(text);
-                        commandResult('Command failed.',
-                                      "jquery-console-message-error");
-                    }
-                } else if (typeof ret == "string") {
-                    addToHistory(text);
-                    commandResult(ret,"jquery-console-message-success");
-                } else if (typeof ret == 'undefined') {
-                    addToHistory(text);
-                } else if (ret.length) {
-                    addToHistory(text);
-                    commandResult(ret);
-                }
-            }
-        };
+		            extern.newPromptBox();
+				} else {
+					extern.promptLabel = extern.ps1;
+					
+					if (typeof ret == 'boolean') {
+	                    if (ret) {
+	                        // Command succeeded without a result.
+	                        addToHistory(text);
+	                        extern.commandResult();
+	                    } else {
+	                        addToHistory(text);
+	                        extern.commandResult('Command failed.', "jquery-console-message-error");
+	                    }
+	                } else if (typeof ret == "string") {
+	                    addToHistory(text);
+	                    extern.commandResult(ret, "jquery-console-message-success");
+	                } else if (typeof ret == 'undefined') {
+	                    addToHistory(text);
+	                } else if (ret.length) {
+	                    addToHistory(text);
+	                    extern.commandResult(ret);
+	                }
+				}
+			}
+        }
 
         ////////////////////////////////////////////////////////////////////////
         // Reset the prompt in invalid command
-        function commandResult(msg,className) {
+        extern.commandResult = function (msg,className) {
 			extern.multiLineCommand = false;
+			extern.promptLabel = extern.ps1;
 			extern.currentText = "";
             extern.column = -1;
             updatePromptDisplay();
@@ -387,10 +390,10 @@
             } else {
                 for (var x in msg) {
                     var ret = msg[x];
-                    extern.message(ret.msg,ret.className);
+                    extern.message(extern.ps3 + ret.msg, ret.className);
                 }
             }
-            newPromptBox();
+            extern.newPromptBox();
         };
 
         ////////////////////////////////////////////////////////////////////////
@@ -488,7 +491,7 @@
             extern.typer.css({position:'absolute',top:0,left:'-9999px'});
             if (config.welcomeMessage)
                 extern.message(config.welcomeMessage,'jquery-console-welcome');
-            newPromptBox();
+            extern.newPromptBox();
             if (config.autofocus) {
                 inner.addClass('jquery-console-focus');
                 extern.typer.focus();

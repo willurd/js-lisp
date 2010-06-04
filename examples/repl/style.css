@@ -64,3 +64,12 @@ html, body {
 #console .jquery-console-prompt-label {
 	font-weight: bold;
 	}
+
+#console .jquery-console-stdout {
+	background: #444;
+	color: #ccc;
+	font-size: 0.9em;
+	font-family: monospace;
+	margin: 3px 0px;
+	padding: 0.2em 0.3em;
+	}

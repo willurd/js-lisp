@@ -885,15 +885,31 @@ defmacro("lambda", function (arglist /*, ... */) {
 
 /**
  * Defines a function.
+ * 
+ * TODO: Reuse (lambda) for this.
  */
 defmacro("defun", function (name, arglist /*, ... */) {
 	var body = argsToArray(arguments).slice(2);
 	
 	lisp.env.set(name, function () {
+		var args = argsToArray(arguments);
 		var i;
 		lisp.env = new Env(lisp.env);
 		for (i = 0; i < arglist.length; i++) {
-			lisp.env.set(arglist[i], arguments[i]);
+			var argname = arglist[i];
+			if (argname == "&rest") {
+				if (i == arglist.length - 1) {
+					throw new Error("No rest argument after &rest identifier in (defun) arglist");
+				}
+				if (arglist.length > i + 2) {
+					throw new Error("Unexpected arguments (" + arglist.slice(i+1).join(" ") +
+						") after &rest argument");
+				}
+				lisp.env.let(arglist[i+1], args.slice(i));
+				break;
+			} else {
+				lisp.env.let(argname, args[i]);
+			}
 		}
 		var ret = null;
 		for (i = 0; i < body.length; i++) {
