@@ -10,12 +10,12 @@ html, body {
 	height: 100%;
 	margin: 0px;
 	padding: 0px;
+	top: 0px;
 	}
 
 #console .jquery-console-inner {
 	margin: 0px;
 	padding: 10px;
-	overflow: auto;
 	white-space: pre;
 	}
 
@@ -72,4 +72,11 @@ html, body {
 	font-family: monospace;
 	margin: 3px 0px;
 	padding: 0.2em 0.3em;
+	}
+
+#console .notice {
+	background: #373737;
+	color: #656565;
+	margin: 10px;
+	padding: 2px 5px;
 	}

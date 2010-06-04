@@ -42,6 +42,14 @@
 
 (function($){
     $.fn.console = function(config){
+		var log = function () {
+			var a = [];
+			for (var i = 0; i < arguments.length; i++) {
+				a.push(arguments[i]);
+			}
+			extern.message(a.join(" "), "jquery-console-stdout");
+		};
+		
 	    // External exports object
 		config = config || {};
 	    var extern = {};
@@ -117,7 +125,7 @@
 
         ////////////////////////////////////////////////////////////////////////
         // Reset terminal
-        extern.notice = function(msg,style){
+        extern.notice = function (msg, style, animate){
             var n = $('<div class="notice"></div>').append($('<div></div>').text(msg))
                 .css({visibility:'hidden'});
             extern.container.append(n);
@@ -135,10 +143,14 @@
                 a.click(function(){ n.fadeOut(function(){ n.remove();inner.css({opacity:1}) }); });
             }
             var h = n.height();
-            n.css({height:'0px',visibility:'visible'})
-                .animate({height:h+'px'},function(){
-                    if (!focused) inner.css({opacity:0.5});
-                });
+			if (animate) {
+    	        n.css({height:'0px',visibility:'visible'})
+	                .animate({height:h+'px'},function(){
+	                    if (!focused) inner.css({opacity:0.5});
+	                });
+			} else {
+	            n.css({height:h+'px',visibility:'visible'});
+			}
             n.css('cursor','default');
             return n;
         };
@@ -160,13 +172,20 @@
         ////////////////////////////////////////////////////////////////////////
         // Handle setting focus
         extern.container.click(function(){
+        	extern.typer.focus();
             inner.addClass('jquery-console-focus');
             inner.removeClass('jquery-console-nofocus');
-            extern.typer.focus();
             scrollToBottom();
             return false;
         });
-
+		
+        // Scroll to the bottom of the view
+		// FIXME: This is borked on Chrome.
+        function scrollToBottom () {
+			//target.offsetParent().scrollTop(target.offset().top - 50);
+			inner.attr({scrollTop: inner.attr("scrollHeight")});
+        }
+		
         ////////////////////////////////////////////////////////////////////////
         // Handle losing focus
         extern.typer.blur(function(){
@@ -245,14 +264,12 @@
                 break;
             }
             case extern.keyCodes.end:{
-                if (moveColumn(extern.promptText.length-extern.column))
-                    updatePromptDisplay();
+				extern.moveToEnd();
                 return false;
                 break;
             }
             case extern.keyCodes.start:{
-                if (moveColumn(-extern.column))
-                    updatePromptDisplay();
+				extern.moveToStart();
                 return false;
                 break;
             }
@@ -268,7 +285,56 @@
             default: //alert("Unknown control character: " + keyCode);
             }
         };
-
+		
+		extern.moveToStart = function () {
+            if (moveColumn(-extern.column))
+                updatePromptDisplay();
+		};
+		
+		extern.moveToEnd = function () {
+            if (moveColumn(extern.promptText.length-extern.column))
+                updatePromptDisplay();
+		};
+		
+		extern.moveWordLeft = function () {
+			var c = extern.column;
+			var s = extern.promptText;
+			var match = s.slice(0, c).match(/(^|\w+)\W*$/);
+			if (match && match.length >= 1) {
+				c -= match[0].length;
+				extern.column = c;
+				updatePromptDisplay();
+			}
+		};
+		
+		extern.moveWordRight = function () {
+			var c = extern.column;
+			var s = extern.promptText;
+			var match = s.slice(c).match(/^\W*(\w+|$)/);
+			if (match && match.length >= 1) {
+				c += match[0].length;
+				extern.column = c;
+				updatePromptDisplay();
+			}
+		};
+		
+		extern.deleteWordLeft = function () {
+			var c = extern.column;
+			var s = extern.promptText;
+			extern.moveWordLeft();
+			extern.promptText = s.slice(0, extern.column) + s.slice(c);
+			updatePromptDisplay();
+		};
+		
+		extern.deleteWordRight = function () {
+			var c = extern.column;
+			var s = extern.promptText;
+			extern.moveWordRight();
+			extern.promptText = s.slice(0, c) + s.slice(extern.column);
+			extern.column = c;
+			updatePromptDisplay();
+		};
+		
         ////////////////////////////////////////////////////////////////////////
         // Rotate through the command history
         function rotateHistory(n){
@@ -329,11 +395,6 @@
             } else {
                 handleCommand();
             }
-        };
-
-        // Scroll to the bottom of the view
-        function scrollToBottom () {
-            inner.attr("scrollTop", inner.attr("scrollHeight"));;
         };
 		
         ////////////////////////////////////////////////////////////////////////
