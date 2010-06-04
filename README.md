@@ -21,13 +21,15 @@ The `onload` part is the magic part. This is what evaluates the lisp code. Alter
 
 ## Playing around at the REPL
 
-The REPL is located at /examples/repl/ (follow the steps under the section "How do I view the tests and html documentation?" to start a simple webserver at the root of the project), and works just like any other REPL. The console emulator is [jquery-console][http://github.com/chrisdone/jquery-console], with a few modifications of my own.
+The REPL is located at /examples/repl/ (follow the steps under the section "How do I view the tests and html documentation?" to start a simple webserver at the root of the project), and works just like any other REPL. The console emulator is [jquery-console][0], with a few modifications of my own.
 
 Here's an example of the REPL in action:
 
-![The js-lisp REPL](/willurd/js-lisp/tree/master/docs/readme/repl1.png)
+![](http://github.com/willurd/js-lisp/raw/master/docs/readme/repl1.png)
 
 Have fun!
+
+[0]: http://github.com/chrisdone/jquery-console
 
 ## What lisp are you using?
 
