@@ -147,6 +147,7 @@ string" "a\nstring"))
 ;; TODO: Test (funcall)
 ;; TODO: Test (let)
 
+;; TODO: There are probably more things to test here
 (JSTest.TestCase (object
     :name "macro (setq)"
     :testScoping (lambda ()
@@ -158,9 +159,7 @@ string" "a\nstring"))
             (this.assertEqual x 3))
         (this.assertEqual x 1))
     :testReturnValue (lambda ()
-        (this.assertEqual (setq somevar "hello") "hello"))
-	:testMoreStuff (lambda ()
-		(this.todo "There are probably more things to test here"))))
+        (this.assertEqual (setq somevar "hello") "hello"))))
 
 (JSTest.TestCase (object
     :name "macro (progn)"
