@@ -31,3 +31,11 @@ function makeRequest (url, successCallback) {
 	request.open("GET", url, false); // Load the script synchronously
 	request.send(null);
 }
+
+function times (string, num) {
+	var ret = '';
+	for (var i = 0; i < num; i++) {
+		ret += string;
+	}
+	return ret;
+}

@@ -1,11 +1,11 @@
 html, body {
+	background: #333;
 	height: 100%;
 	margin: 0px;
 	padding: 0px;
 	}
 
 #console {
-	background: #333;
 	font-size: 14px;
 	height: 100%;
 	margin: 0px;
@@ -16,6 +16,7 @@ html, body {
 	margin: 0px;
 	padding: 10px;
 	overflow: auto;
+	white-space: pre;
 	}
 
 * html #console .jquery-console-inner {

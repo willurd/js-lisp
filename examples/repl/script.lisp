@@ -2,7 +2,12 @@
 	(cond ((is-null value) "nil")
 		  ((is-true value) "t")
 		  ((instanceof value lisp.Keyword) (concat ":" value))
-		  (t (to-json value))))
+		  (t (to-json value t))))
+
+(setq keycodes (object
+	:k 75))
+
+(setq controller nil) ;; This is a hack because js-lisp doesn't have closures yet
 
 ($ (lambda ()
 	(let ((repl-id "#console")
@@ -11,11 +16,11 @@
 		  (ps2     ".. "))
 		(when (=== repl.length 0)
 			(throw (new Error (format nil "Console with id %s does not exist" repl-id))))
-		(let ((controller (repl.console (object
+		(setq controller (repl.console (object
 				:welcomeMessage "js-lisp REPL"
 				:promptLabel ">> "
 				:autofocus t ;; Automatically sets focus on the console when the page loads
-				:animateScroll t
+				:animateScroll nil
 				:promptHistory t ;; Maintains a history of input given at the prompt
 				:historyPreserveColumn t ;; Preserves the column you were on for each history line
 				:commandValidate (lambda (line)
@@ -33,4 +38,16 @@
 									(setq controller.promptLabel ps2))
 							  (setq ret (array (object :msg (to-string e)
 													   :className "jquery-console-message-error"))))))
-						ret))))))))))
+						ret))))))
+	
+	(defun controller.consoleControl (keycode event)
+		(cond ((and event.ctrlKey (== keycode keycodes.k))
+				   (controller.reset))
+			  (t (controller.defaultConsoleControl keycode event))))
+	
+	(defun clear ()
+		(controller.reset))
+	
+	(defun refresh ()
+		(setq window.location ""))
+))

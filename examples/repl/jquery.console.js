@@ -75,7 +75,7 @@
         // triggers and sends a key character when you hit various
         // keys like PgUp, End, etc. So there is no way of knowing
         // when a user has typed '#' or End. My solution is in the
-        // typer.keydown and typer.keypress functions; I use the
+        // typer.KEYDOWN and typer.keypress functions; I use the
         // variable below to ignore the keypress event if the keydown
         // event succeeds.
         var cancelKeyPress = 0;
@@ -85,20 +85,30 @@
 		
         ////////////////////////////////////////////////////////////////////////
         // Reset terminal
-        extern.reset = function(){
+        extern.reset = function (doFade) {
             var welcome = true;
-            inner.parent().fadeOut(function(){
-                inner.find('div').each(function(){
+			doFade = doFade || false;
+			if (doFade) {
+				inner.parent().fadeOut(function(){
+	                inner.find('div').each(function(){
+	                    if (!welcome) 
+	                        $(this).remove();
+	                    welcome = false;
+	                });
+	                newPromptBox();
+	                inner.parent().fadeIn(function(){
+	                    inner.addClass('jquery-console-focus');
+	                    extern.typer.focus();
+	                });
+	            });
+			} else {
+				inner.find('div').each(function(){
                     if (!welcome) 
                         $(this).remove();
                     welcome = false;
                 });
                 newPromptBox();
-                inner.parent().fadeIn(function(){
-                    inner.addClass('jquery-console-focus');
-                    extern.typer.focus();
-                });
-            });
+			}
         };
 
         ////////////////////////////////////////////////////////////////////////
@@ -169,7 +179,7 @@
             var keyCode = e.keyCode;
             if (isControlCharacter(keyCode)) {
                 cancelKeyPress = keyCode;
-                if (!extern.typer.consoleControl(keyCode)) {
+                if (!extern.consoleControl(keyCode, e)) {
                     return false;
                 }
             }
@@ -200,11 +210,15 @@
                     || keyCode == extern.keyCodes.ret
             );
         };
-
+		
+		extern.consoleControl = function (keyCode, e) {
+			return extern.defaultConsoleControl(keyCode, e);
+		};
+		
         ////////////////////////////////////////////////////////////////////////
         // Handle console control keys
         // E.g. up, down, left, right, backspc, return, etc.
-        extern.typer.consoleControl = function(keyCode){
+        extern.defaultConsoleControl = function(keyCode, e){
             switch (keyCode){
             case extern.keyCodes.left:{ 
                 moveColumn(-1);
@@ -320,10 +334,10 @@
         };
 
         // Scroll to the bottom of the view
-        function scrollToBottom() {
-            inner.attr({ scrollTop: inner.attr("scrollHeight") });;
+        function scrollToBottom () {
+            inner.attr("scrollTop", inner.attr("scrollHeight"));;
         };
-
+		
         ////////////////////////////////////////////////////////////////////////
         // Handle a command
         function handleCommand() {

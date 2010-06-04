@@ -31,11 +31,8 @@ defmacro("lambda", function (arglist /*, ... */) {
 /**
  * Defines a function.
  */
-defmacro("defun", function () {
-	var args = argsToArray(arguments);
-	var name = args[0];
-	var arglist = args[1];
-	var body = args.slice(2);
+defmacro("defun", function (name, arglist /*, ... */) {
+	var body = argsToArray(arguments).slice(2);
 	
 	lisp.env.set(name, function () {
 		var i;
@@ -50,6 +47,8 @@ defmacro("defun", function () {
 		lisp.env = lisp.env.parent;
 		return ret;
 	});
+	
+	return null;
 });
 
 /**

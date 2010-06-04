@@ -246,7 +246,14 @@ function sprintf () {
     return format.replace(regex, doFormat);
 }
 /*jsl:end*/
-function toJSON (object) {
+function toJSON (object, pretty, levels, level) {
+	levels = levels || 2; // Default levels
+	level = level || 0;
+	var done = level >= levels;
+	var newline = pretty ? '\n' : '';
+	var singleprefix = times(' ', 2);
+	var prefix  = pretty ? times(singleprefix, level) : '';
+	
 	switch (typeof(object))
 	{
 	case 'undefined':
@@ -258,10 +265,15 @@ function toJSON (object) {
 		} else if (object instanceof Array) {
 			// 'object' is an Array.
 			var json = '[';
-
-			for (var i = 0; i < object.length; i++)
-				json += toJSON(object[i]) + ', ';
-
+			
+			if (!done) {
+				for (var i = 0; i < object.length; i++) {
+					json += toJSON(object[i], pretty, levels, level+1) + ', ';
+				}
+			} else {
+				json += ' ... ';
+			}
+			
 			return json.replace(/, $/, '') + ']';
 		} else if (object instanceof Date) {
 			// 'object' is a Date.
@@ -270,7 +282,7 @@ function toJSON (object) {
 				// Format integers to have at least two digits.
 				return n < 10 ? '0' + n : n;
 			}
-
+			
 			return '"' +
 				   object.getUTCFullYear()	   + '-' +
 				   f(object.getUTCMonth() + 1) + '-' +
@@ -281,15 +293,26 @@ function toJSON (object) {
 				   '"';
 		} else {
 			var json = '{';
-
-			for (var key in object)
-				if (object.hasOwnProperty(key))
-					json += key + ': ' + toJSON(object[key]) + ', ';
-
-			return json.replace(/, $/, '') + '}';
+			
+			if (!done) {
+				json = json + newline;
+				for (var key in object) {
+					if (object.hasOwnProperty(key)) {
+						json += prefix + singleprefix + '"' + key + '": ' +
+							((object[key] == window) ? "[window]" : toJSON(object[key], pretty, levels, level+1)) +
+							', ' + newline;
+					}
+				}
+				json = json.replace(/,\s*$/, '') + newline + prefix;
+			} else {
+				json += ' ... ';
+			}
+			
+			return json + '}';
 		}
 	case 'function':
-		return object.toString();
+		var match = object.toString().match(/[^\(]+\([^\)]*\)/);
+		return (match ? match[0] : 'function ()') + ' { ... }';
 	case 'string':
 		return '"' + object.replace(/"/g, '\\"') + '"';
 	case 'number':
@@ -330,6 +353,14 @@ function makeRequest (url, successCallback) {
 	
 	request.open("GET", url, false); // Load the script synchronously
 	request.send(null);
+}
+
+function times (string, num) {
+	var ret = '';
+	for (var i = 0; i < num; i++) {
+		ret += string;
+	}
+	return ret;
 }
 var StreamException = Class.extend({
 	init: function (message) {
@@ -855,11 +886,8 @@ defmacro("lambda", function (arglist /*, ... */) {
 /**
  * Defines a function.
  */
-defmacro("defun", function () {
-	var args = argsToArray(arguments);
-	var name = args[0];
-	var arglist = args[1];
-	var body = args.slice(2);
+defmacro("defun", function (name, arglist /*, ... */) {
+	var body = argsToArray(arguments).slice(2);
 	
 	lisp.env.set(name, function () {
 		var i;
@@ -874,6 +902,8 @@ defmacro("defun", function () {
 		lisp.env = lisp.env.parent;
 		return ret;
 	});
+	
+	return null;
 });
 
 /**
@@ -1625,12 +1655,8 @@ defun("to-boolean", function (value) {
 /**
  * Converts the given value to a json representation of that value.
  */
-defun("to-json", function (object) {
-	if (arguments.length !== 1) {
-		throw new Error("(to-json) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	return toJSON(object);
+defun("to-json", function () {
+	return toJSON.apply(null, arguments);
 });
 
 /**
