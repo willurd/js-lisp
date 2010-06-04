@@ -1,3 +1,21 @@
+var StreamException = Class.extend({
+	init: function (message) {
+		this.message = message;
+	},
+	toString: function () {
+		return "StreamException: " + this.message;
+	}
+});
+
+var StreamEOFException = StreamException.extend({
+	init: function (message) {
+		this.message = message;
+	},
+	toString: function () {
+		return "StreamEOFException: " + this.message;
+	}
+});
+
 var StringStream = Class.extend({
 	init: function (data) {
 		if (typeof(data) != "string") {
@@ -39,7 +57,7 @@ var StringStream = Class.extend({
 	
 	next: function () {
 		if (this.eof()) {
-			throw new Error("EOF reached in StringStream");
+			throw new StreamEOFException("EOF reached in StringStream");
 		}
 		
 		var c = this.charAt(this.position);

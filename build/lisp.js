@@ -331,6 +331,24 @@ function makeRequest (url, successCallback) {
 	request.open("GET", url, false); // Load the script synchronously
 	request.send(null);
 }
+var StreamException = Class.extend({
+	init: function (message) {
+		this.message = message;
+	},
+	toString: function () {
+		return "StreamException: " + this.message;
+	}
+});
+
+var StreamEOFException = StreamException.extend({
+	init: function (message) {
+		this.message = message;
+	},
+	toString: function () {
+		return "StreamEOFException: " + this.message;
+	}
+});
+
 var StringStream = Class.extend({
 	init: function (data) {
 		if (typeof(data) != "string") {
@@ -372,7 +390,7 @@ var StringStream = Class.extend({
 	
 	next: function () {
 		if (this.eof()) {
-			throw new Error("EOF reached in StringStream");
+			throw new StreamEOFException("EOF reached in StringStream");
 		}
 		
 		var c = this.charAt(this.position);
@@ -952,11 +970,11 @@ defmacro("try", function () {
 	} catch (e) {
 		// Evaluate the `catch` expression if there is one.
 		if (catchExpression) {
-			catchExpression[0] = new Symbol("lambda"); // Just make it a lambda
-			if (catchExpression.length === 1) { // Add an arglist if there isn't one
-				catchExpression.push([]);
+			var expression = [new Symbol("lambda")].concat(catchExpression.slice(1));
+			if (expression.length === 1) { // Add an arglist if there isn't one
+				expression.push([]);
 			}
-			var callback = resolve(catchExpression);
+			var callback = resolve(expression);
 			callback(e);
 		} else {
 			// If there is no catch expression, throw the error for something
@@ -1076,6 +1094,29 @@ defmacro("progn", function (/* .. */) {
 		ret = resolve(arguments[i]);
 	}
 	return ret;
+});
+
+/**
+ * @return The value of the evaluated expression, or nil.
+ * 
+ * TODO: Needs testing
+ */
+defmacro("cond", function () {
+	for (var i = 0; i < arguments.length; i++) {
+		var clause = arguments[i];
+		if (clause.length === 0) {
+			throw new Error("(cond) clauses must contain an expression to evaluate");
+		}
+		var condition = clause[0];
+		if (!!resolve(condition)) {
+			var ret;
+			for (var j = 1; j < clause.length; j++) {
+				ret = resolve(clause[j]);
+			}
+			return ret;
+		}
+	}
+	return null;
 });
 
 /**
@@ -1363,6 +1404,17 @@ defun("new", function (Class) {
 	var args = argsToArray(arguments).slice(1);
 	var argnames = args.map(function (item, i, thisObject) { return "args[" + i + "]"; });
 	return eval("new Class(" + argnames.join(",") + ")");
+});
+
+/**
+ * 
+ */
+defun("instanceof", function (object, Class) {
+	if (arguments.length !== 2) {
+		throw new Error("(instanceof) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
+	return object instanceof Class;
 });
 
 /**
@@ -1761,6 +1813,11 @@ return {
 	Keyword: Keyword,
 	
 	env: ROOT_ENV,
+	
+	exception: {
+		StreamException: StreamException,
+		StreamEOFException: StreamEOFException
+	},
 	
 	parse: parse,
 	defun: defun,

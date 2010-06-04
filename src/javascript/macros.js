@@ -146,11 +146,11 @@ defmacro("try", function () {
 	} catch (e) {
 		// Evaluate the `catch` expression if there is one.
 		if (catchExpression) {
-			catchExpression[0] = new Symbol("lambda"); // Just make it a lambda
-			if (catchExpression.length === 1) { // Add an arglist if there isn't one
-				catchExpression.push([]);
+			var expression = [new Symbol("lambda")].concat(catchExpression.slice(1));
+			if (expression.length === 1) { // Add an arglist if there isn't one
+				expression.push([]);
 			}
-			var callback = resolve(catchExpression);
+			var callback = resolve(expression);
 			callback(e);
 		} else {
 			// If there is no catch expression, throw the error for something
@@ -270,6 +270,29 @@ defmacro("progn", function (/* .. */) {
 		ret = resolve(arguments[i]);
 	}
 	return ret;
+});
+
+/**
+ * @return The value of the evaluated expression, or nil.
+ * 
+ * TODO: Needs testing
+ */
+defmacro("cond", function () {
+	for (var i = 0; i < arguments.length; i++) {
+		var clause = arguments[i];
+		if (clause.length === 0) {
+			throw new Error("(cond) clauses must contain an expression to evaluate");
+		}
+		var condition = clause[0];
+		if (!!resolve(condition)) {
+			var ret;
+			for (var j = 1; j < clause.length; j++) {
+				ret = resolve(clause[j]);
+			}
+			return ret;
+		}
+	}
+	return null;
 });
 
 /**

@@ -14,6 +14,17 @@ defun("new", function (Class) {
 });
 
 /**
+ * 
+ */
+defun("instanceof", function (object, Class) {
+	if (arguments.length !== 2) {
+		throw new Error("(instanceof) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
+	return object instanceof Class;
+});
+
+/**
  * Throws the given object, or "new Error()" if no object is
  * provided.
  * 

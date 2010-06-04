@@ -8,6 +8,11 @@ return {
 	
 	env: ROOT_ENV,
 	
+	exception: {
+		StreamException: StreamException,
+		StreamEOFException: StreamEOFException
+	},
+	
 	parse: parse,
 	defun: defun,
 	defmacro: defmacro,

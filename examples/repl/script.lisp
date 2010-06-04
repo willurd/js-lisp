@@ -1,18 +1,17 @@
 (defun repl-represent (value)
-	;; TODO: Add a (cond) statement here
-	; (cond
-	; 	((is-instanceof value Keyword) (concat ":" (to-string value)))
-	; 	(t (to-json value))))
-	
-	;; TODO: Or modify (to-json) to include representations for symbols and keywords
-	(to-json value))
+	(cond ((is-null value) "nil")
+		  ((is-true value) "t")
+		  ((instanceof value lisp.Keyword) (concat ":" value))
+		  (t (to-json value))))
 
 ($ (lambda ()
-	(let ((console-id "#console")
-		  (console ($ console-id)))
-		(when (=== console.length 0)
-			(throw (new Error (format nil "Console with id %s does not exist" console-id))))
-		(let ((controller (console.console (object
+	(let ((repl-id "#console")
+		  (repl    ($ repl-id))
+		  (ps1     ">> ")
+		  (ps2     ".. "))
+		(when (=== repl.length 0)
+			(throw (new Error (format nil "Console with id %s does not exist" repl-id))))
+		(let ((controller (repl.console (object
 				:welcomeMessage "js-lisp REPL"
 				:promptLabel ">> "
 				:autofocus t ;; Automatically sets focus on the console when the page loads
@@ -26,9 +25,14 @@
 						(try
 							(setq ret (array (object :msg (repl-represent (lisp.eval line))
 													 :className "jquery-console-message-value")))
-						  (catch (e)
-							(setq ret (array (object :msg (to-json e)
-													 :className "jquery-console-message-error")))))
+							(setq controller.promptLabel ps1)
+						  (:catch (e)
+							(if (instanceof e lisp.exception.StreamEOFException)
+								(progn
+									(setq ret nil)
+									(setq controller.promptLabel ps2))
+							  (setq ret (array (object :msg (to-string e)
+													   :className "jquery-console-message-error"))))))
 						ret))))))
-			;(controller.promptText ":name")
+			(controller.setPromptText "(let ((name \"William\"))")
 			))))
