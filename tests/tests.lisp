@@ -595,13 +595,6 @@ string" "a\nstring")))
 			(this.assertEqual x 0)	
 			(this.assertEqual y 5)))))
 
-(JSTest.TestCase (object
-	:name "macro (map)"
-	;; TODO: Test error conditions
-	:testBasic (lambda ()
-		(this.assertEqual (map (lambda (x) (1+ x)) '(1 2 3))
-						  '(2 3 4) nil (getfunc equal)))))
-
 ;; ================================================================================
 ;; FUNCTIONS
 ;; ================================================================================
@@ -956,3 +949,10 @@ string" "a\nstring")))
 									  "I like apples; apples are good.")
 		(this.assertEqual (format nil "I like %1$s; %1$s are good." "apples")
 									  "I like apples; apples are good."))))
+
+(JSTest.TestCase (object
+	:name "macro (map)"
+	;; TODO: Test error conditions
+	:testBasic (lambda ()
+		(this.assertEqual (map (lambda (x) (1+ x)) '(1 2 3))
+						  '(2 3 4) nil (getfunc equal)))))

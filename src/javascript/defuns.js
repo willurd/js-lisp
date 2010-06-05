@@ -427,7 +427,6 @@ defun("format", function (print, format) {
 	}
 });
 
-
 /**
  * Run each of the items in the given list through the given
  * function and returns a new list with the given return values.

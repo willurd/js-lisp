@@ -51,7 +51,8 @@ function toJSON (object, pretty, levels, level) {
 				for (var key in object) {
 					if (object.hasOwnProperty(key)) {
 						json += prefix + singleprefix + '"' + key + '": ' +
-							((object[key] == window) ? "[window]" : toJSON(object[key], pretty, levels, level+1)) +
+							((object[key] == window) ? "[window]"
+								: toJSON(object[key], pretty, levels, level+1)) +
 							', ' + newline;
 					}
 				}

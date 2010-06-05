@@ -1,8 +1,9 @@
 (defun repl-represent (value)
+	"Returns a lispy string representation of the given value"
 	(cond ((is-null value) "nil")
 		  ((is-true value) "t")
-		  ((instanceof value lisp.Symbol) value)
-		  ((instanceof value lisp.Keyword) (concat ":" value))
+		  ((instanceof value lisp.Symbol) (to-string value))
+		  ((instanceof value lisp.Keyword) (concat ":" (to-string value)))
 		  ((instanceof value Array)
 			(concat "(" (join " " (map repl-represent value)) ")"))
 		  (t (to-json value t))))
@@ -16,6 +17,31 @@
 	:i 73  :j 74  :k 75  :l 76  :m 77  :n 78
 	:o 79  :p 80  :q 81  :r 82  :s 83  :t 84
 	:u 85  :v 86  :w 87  :x 88  :y 89  :z 90))
+
+(defun help ()
+	"Prints the help text"
+	(print "Commands:
+        [ctrl-h] - Display this help
+        [ctrl-k] - Clear the screen
+        [ctrl-a] - Move to start of line
+        [ctrl-e] - Move to end of line
+      [alt-left] - Move left one word
+     [alt-right] - Move right one word
+ [alt-backspace] - Delete one word to the left
+    [alt-delete] - Delete one word to the right
+"))
+
+(defun clear ()
+	(controller.reset))
+
+(defun refresh ()
+	(setq window.location ""))
+
+(defun lisp.log (&rest rest)
+	(try
+		(controller.message (join " " (if rest rest (array))) "jquery-console-stdout")
+	  (:catch (e)
+		(controller.message (to-string e) "jquery-console-message-error"))))
 
 (setq controller nil) ;; This is a hack because js-lisp doesn't have closures yet
 
@@ -32,7 +58,7 @@
 				:autofocus t ;; Automatically sets focus on the console when the page loads
 				:animateScroll nil
 				:promptHistory t ;; Maintains a history of input given at the prompt
-				:historyPreserveColumn t ;; Preserves the column you were on for each history line
+				;:historyPreserveColumn t ;; Preserves the column you are on while scrolling through history
 				:commandValidate (lambda (line)
 					(!= line ""))
 				:commandHandle (lambda (line)
@@ -66,28 +92,4 @@
 			  (event.metaKey
 				(controller.cancelKey event.keyCode)
 				(cond ((== event.keyCode keycodes.r) (setq window.location ""))))
-			  (t (controller.defaultConsoleControl event))))
-	
-	(defun help ()
-		(print "Commands:
-         [ctrl-h] - Display this help
-         [ctrl-k] - Clear the screen
-         [ctrl-a] - Move to start of line
-         [ctrl-e] - Move to end of line
-       [alt-left] - Move left one word
-      [alt-right] - Move right one word
-  [alt-backspace] - Delete one word to the left
-     [alt-delete] - Delete one word to the right
-"))
-	
-	(defun clear ()
-		(controller.reset))
-	
-	(defun refresh ()
-		(setq window.location ""))
-	
-	(defun lisp.log (&rest rest)
-		(try
-			(controller.message (join " " (if rest rest (array))) "jquery-console-stdout")
-		  (:catch (e)
-			(controller.message (to-string e) "jquery-console-message-error"))))))
+			  (t (controller.defaultConsoleControl event))))))

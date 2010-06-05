@@ -300,7 +300,8 @@ function toJSON (object, pretty, levels, level) {
 				for (var key in object) {
 					if (object.hasOwnProperty(key)) {
 						json += prefix + singleprefix + '"' + key + '": ' +
-							((object[key] == window) ? "[window]" : toJSON(object[key], pretty, levels, level+1)) +
+							((object[key] == window) ? "[window]"
+								: toJSON(object[key], pretty, levels, level+1)) +
 							', ' + newline;
 					}
 				}
@@ -2089,7 +2090,6 @@ defun("format", function (print, format) {
 	}
 });
 
-
 /**
  * Run each of the items in the given list through the given
  * function and returns a new list with the given return values.
@@ -2192,10 +2192,11 @@ return {
 })(this);
 
 // Set this library up to work with node.js
-if (typeof(window) == "undefined" &&
-	typeof(global) == "object" &&
-	typeof(require) == "function" &&
-	typeof(exports) == "object") {
+if ((typeof(window) == "undefined") &&
+	(typeof(global) == "object") && global && // Make sure it isn't null
+	(typeof(require) == "function") &&
+	(typeof(exports) == "object") && exports) {
+	// We are probably running in node.js now.
 	// FIXME: Find a better way to tell we're running in node.js
 	for (var key in lisp) {
 		if (lisp.hasOwnProperty(key)) {

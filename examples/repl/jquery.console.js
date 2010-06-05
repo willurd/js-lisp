@@ -47,19 +47,19 @@
 			for (var i = 0; i < arguments.length; i++) {
 				a.push(arguments[i]);
 			}
-			extern.message(a.join(" "), "jquery-console-stdout");
+			self.message(a.join(" "), "jquery-console-stdout");
 		};
 		
 	    // External exports object
 		config = config || {};
-	    var extern = {};
+	    var self = {};
 		
         ////////////////////////////////////////////////////////////////////////
         // Constants
         // Some are enums, data types, others just for optimisation
-        extern.keyCodes = { left:37,right:39,up:38,down:40,back:8,del:46,
+        self.keyCodes = { left:37,right:39,up:38,down:40,back:8,del:46,
                             end:35,start:36,ret:13 };
-        extern.cursor = '<span class="jquery-console-cursor">&nbsp;</span>';
+        self.cursor = '<span class="jquery-console-cursor">&nbsp;</span>';
         // Opera only works with this character, not <wbr> or &shy;,
         // but IE6 displays this character, which is bad, so just use
         // it on Opera.
@@ -67,22 +67,22 @@
 
         ////////////////////////////////////////////////////////////////////////
         // Globals
-        extern.container = $(this);
+        self.container = $(this);
         var inner = $('<div class="jquery-console-inner"></div>');
-        extern.typer = $('<input class="jquery-console-typer" type="text">');
+        self.typer = $('<input class="jquery-console-typer" type="text">');
         // Prompt
-        extern.promptBox;
-        extern.prompt;
-        extern.ps1 = config.ps1 || ">> "; // Input
-        extern.ps2 = config.ps2 || ".. "; // Multiline commands
-		extern.ps3 = config.ps3 || "=> "; // Return values
-		extern.promptLabel = extern.ps1; // The current label
-        extern.column = 0;
-        extern.promptText = '';
-        extern.restoreText = '';
+        self.promptBox;
+        self.prompt;
+        self.ps1 = config.ps1 || ">> "; // Input
+        self.ps2 = config.ps2 || ".. "; // Multiline commands
+		self.ps3 = config.ps3 || "=> "; // Return values
+		self.promptLabel = self.ps1; // The current label
+        self.column = 0;
+        self.promptText = '';
+        self.restoreText = '';
         // Prompt history stack
-        extern.history = [];
-        extern.ringn = 0;
+        self.history = [];
+        self.historyCursor = 0;
         // For reasons unknown to The Sword of Michael himself, Opera
         // triggers and sends a key character when you hit various
         // keys like PgUp, End, etc. So there is no way of knowing
@@ -92,12 +92,12 @@
         // event succeeds.
         var cancelKeyPress = 0;
 		
-		extern.multiLineCommand = false;
-		extern.currentText = '';
+		self.multiLineCommand = false;
+		self.currentText = '';
 		
         ////////////////////////////////////////////////////////////////////////
         // Reset terminal
-        extern.reset = function (doFade) {
+        self.reset = function (doFade) {
             var welcome = true;
 			doFade = doFade || false;
 			if (doFade) {
@@ -107,10 +107,10 @@
 	                        $(this).remove();
 	                    welcome = false;
 	                });
-	                extern.newPromptBox();
+	                self.newPromptBox();
 	                inner.parent().fadeIn(function(){
 	                    inner.addClass('jquery-console-focus');
-	                    extern.typer.focus();
+	                    self.typer.focus();
 	                });
 	            });
 			} else {
@@ -119,16 +119,16 @@
                         $(this).remove();
                     welcome = false;
                 });
-                extern.newPromptBox();
+                self.newPromptBox();
 			}
         };
 
         ////////////////////////////////////////////////////////////////////////
         // Reset terminal
-        extern.notice = function (msg, style, animate){
+        self.notice = function (msg, style, animate){
             var n = $('<div class="notice"></div>').append($('<div></div>').text(msg))
                 .css({visibility:'hidden'});
-            extern.container.append(n);
+            self.container.append(n);
             var focused = true;
             if (style=='fadeout')
                 setTimeout(function(){
@@ -157,22 +157,22 @@
 
         ////////////////////////////////////////////////////////////////////////
         // Make a new prompt box
-        extern.newPromptBox = function () {
-            extern.column = 0;
-            extern.promptText = '';
-            extern.promptBox = $('<div class="jquery-console-prompt-box"></div>');
+        self.newPromptBox = function () {
+            self.column = 0;
+            self.promptText = '';
+            self.promptBox = $('<div class="jquery-console-prompt-box"></div>');
             var label = $('<span class="jquery-console-prompt-label"></span>');
-            extern.promptBox.append(label.text(extern.promptLabel).show());
-            extern.prompt = $('<span class="jquery-console-prompt"></span>');
-            extern.promptBox.append(extern.prompt);
-            inner.append(extern.promptBox);
+            self.promptBox.append(label.text(self.promptLabel).show());
+            self.prompt = $('<span class="jquery-console-prompt"></span>');
+            self.promptBox.append(self.prompt);
+            inner.append(self.promptBox);
             updatePromptDisplay();
         };
 
         ////////////////////////////////////////////////////////////////////////
         // Handle setting focus
-        extern.container.click(function(){
-        	extern.typer.focus();
+        self.container.click(function(){
+        	self.typer.focus();
             inner.addClass('jquery-console-focus');
             inner.removeClass('jquery-console-nofocus');
             scrollToBottom();
@@ -188,7 +188,7 @@
 		
         ////////////////////////////////////////////////////////////////////////
         // Handle losing focus
-        extern.typer.blur(function(){
+        self.typer.blur(function(){
             inner.removeClass('jquery-console-focus');
             inner.addClass('jquery-console-nofocus');
         });
@@ -197,21 +197,21 @@
         // Handle key hit before translation
         // For picking up control characters like up/left/down/right
 
-        extern.typer.keydown(function(e){
+        self.typer.keydown(function(e){
             cancelKeyPress = 0;
-			extern.consoleControl(e);
+			self.consoleControl(e);
         });
         
         ////////////////////////////////////////////////////////////////////////
         // Handle key press
-        extern.typer.keypress(function(e){
+        self.typer.keypress(function(e){
             var keyCode = e.keyCode || e.which;
             if (cancelKeyPress != keyCode && keyCode >= 32){
                 if (cancelKeyPress) return false;
                 if (typeof config.charInsertTrigger == 'undefined' ||
                     (typeof config.charInsertTrigger == 'function' &&
-                     config.charInsertTrigger(keyCode,extern.promptText)))
-                    extern.typer.consoleInsert(keyCode);
+                     config.charInsertTrigger(keyCode,self.promptText)))
+                    self.typer.consoleInsert(keyCode);
             }
             if ($.browser.webkit) return false;
         });
@@ -221,43 +221,43 @@
         function isControlCharacter (keyCode) {
             // TODO: Make more precise/fast.
             return (
-                (keyCode >= extern.keyCodes.left && keyCode <= extern.keyCodes.down)
-                    || keyCode == extern.keyCodes.back || keyCode == extern.keyCodes.del
-                    || keyCode == extern.keyCodes.end || keyCode == extern.keyCodes.start
-                    || keyCode == extern.keyCodes.ret
+                (keyCode >= self.keyCodes.left && keyCode <= self.keyCodes.down)
+                    || keyCode == self.keyCodes.back || keyCode == self.keyCodes.del
+                    || keyCode == self.keyCodes.end || keyCode == self.keyCodes.start
+                    || keyCode == self.keyCodes.ret
             );
         };
 		
-		extern.consoleControl = function (e) {
-			return extern.defaultConsoleControl(e);
+		self.consoleControl = function (e) {
+			return self.defaultConsoleControl(e);
 		};
 		
         ////////////////////////////////////////////////////////////////////////
         // Handle console control keys
         // E.g. up, down, left, right, backspc, return, etc.
 		
-		extern.cancelKey = function (keyCode) {
+		self.cancelKey = function (keyCode) {
 			cancelKeyPress = keyCode;
 		};
 		
-        extern.defaultConsoleControl = function (e) {
+        self.defaultConsoleControl = function (e) {
             switch (e.keyCode) {
-            case extern.keyCodes.left:{
-				extern.cancelKey(e.keyCode);
+            case self.keyCodes.left:{
+				self.cancelKey(e.keyCode);
                 moveColumn(-1);
                 updatePromptDisplay(); 
                 return false;
                 break;
             }
-            case extern.keyCodes.right:{
-				extern.cancelKey(e.keyCode);
+            case self.keyCodes.right:{
+				self.cancelKey(e.keyCode);
                 moveColumn(1); 
                 updatePromptDisplay();
                 return false;
                 break; 
             }
-            case extern.keyCodes.back:{
-				extern.cancelKey(e.keyCode);
+            case self.keyCodes.back:{
+				self.cancelKey(e.keyCode);
                 if (moveColumn(-1)){
                     deleteCharAtPos();
                     updatePromptDisplay();
@@ -265,188 +265,188 @@
                 return false;
                 break;
             }
-            case extern.keyCodes.del:{
-				extern.cancelKey(e.keyCode);
+            case self.keyCodes.del:{
+				self.cancelKey(e.keyCode);
                 if (deleteCharAtPos())
                     updatePromptDisplay();
                 return false;
                 break;
             }
-            case extern.keyCodes.end:{
-				extern.cancelKey(e.keyCode);
-				extern.moveToEnd();
+            case self.keyCodes.end:{
+				self.cancelKey(e.keyCode);
+				self.moveToEnd();
                 return false;
                 break;
             }
-            case extern.keyCodes.start:{
-				extern.cancelKey(e.keyCode);
-				extern.moveToStart();
+            case self.keyCodes.start:{
+				self.cancelKey(e.keyCode);
+				self.moveToStart();
                 return false;
                 break;
             }
-            case extern.keyCodes.ret:{
-				extern.cancelKey(e.keyCode);
+            case self.keyCodes.ret:{
+				self.cancelKey(e.keyCode);
                 commandTrigger(); return false;
             }
-            case extern.keyCodes.up:{
-				extern.cancelKey(e.keyCode);
+            case self.keyCodes.up:{
+				self.cancelKey(e.keyCode);
                 rotateHistory(-1); return false;
             }
-            case extern.keyCodes.down:{
-				extern.cancelKey(e.keyCode);
+            case self.keyCodes.down:{
+				self.cancelKey(e.keyCode);
                 rotateHistory(1); return false;
             }
             default: //alert("Unknown control character: " + keyCode);
             }
         };
 		
-		extern.moveToStart = function () {
-            if (moveColumn(-extern.column))
+		self.moveToStart = function () {
+            if (moveColumn(-self.column))
                 updatePromptDisplay();
 		};
 		
-		extern.moveToEnd = function () {
-            if (moveColumn(extern.promptText.length-extern.column))
+		self.moveToEnd = function () {
+            if (moveColumn(self.promptText.length-self.column))
                 updatePromptDisplay();
 		};
 		
-		extern.moveWordLeft = function () {
-			var c = extern.column;
-			var s = extern.promptText;
+		self.moveWordLeft = function () {
+			var c = self.column;
+			var s = self.promptText;
 			var match = s.slice(0, c).match(/(^|\w+)\W*$/);
 			if (match && match.length >= 1) {
 				c -= match[0].length;
-				extern.column = c;
+				self.column = c;
 				updatePromptDisplay();
 			}
 		};
 		
-		extern.moveWordRight = function () {
-			var c = extern.column;
-			var s = extern.promptText;
+		self.moveWordRight = function () {
+			var c = self.column;
+			var s = self.promptText;
 			var match = s.slice(c).match(/^\W*(\w+|$)/);
 			if (match && match.length >= 1) {
 				c += match[0].length;
-				extern.column = c;
+				self.column = c;
 				updatePromptDisplay();
 			}
 		};
 		
-		extern.deleteWordLeft = function () {
-			var c = extern.column;
-			var s = extern.promptText;
-			extern.moveWordLeft();
-			extern.promptText = s.slice(0, extern.column) + s.slice(c);
+		self.deleteWordLeft = function () {
+			var c = self.column;
+			var s = self.promptText;
+			self.moveWordLeft();
+			self.promptText = s.slice(0, self.column) + s.slice(c);
 			updatePromptDisplay();
 		};
 		
-		extern.deleteWordRight = function () {
-			var c = extern.column;
-			var s = extern.promptText;
-			extern.moveWordRight();
-			extern.promptText = s.slice(0, c) + s.slice(extern.column);
-			extern.column = c;
+		self.deleteWordRight = function () {
+			var c = self.column;
+			var s = self.promptText;
+			self.moveWordRight();
+			self.promptText = s.slice(0, c) + s.slice(self.column);
+			self.column = c;
 			updatePromptDisplay();
 		};
 		
         ////////////////////////////////////////////////////////////////////////
         // Rotate through the command history
-        function rotateHistory(n){
-            if (extern.history.length == 0) return;
-            extern.ringn += n;
-            if (extern.ringn < 0) extern.ringn = extern.history.length;
-            else if (extern.ringn > extern.history.length) extern.ringn = 0;
-            var prevText = extern.promptText;
-            if (extern.ringn == 0) {
-                extern.promptText = extern.restoreText;
-            } else {
-                extern.promptText = extern.history[extern.ringn - 1];
-            }
-            if (config.historyPreserveColumn) {
-                if (extern.promptText.length < extern.column + 1) {
-                    extern.column = extern.promptText.length;
-                } else if (extern.column == 0) {
-                    extern.column = extern.promptText.length;
-                }
-            } else if (config.historyColumnAtEnd) {
-                extern.column = extern.promptText.length;
-            } else {
-                extern.column = 0;
-            }
+		function rotateHistory (n) {
+			if (self.history.length == 0) {
+				return;
+			}
+            
+			self.historyCursor += n;
+			
+			if (self.historyCursor < 0) {
+				self.historyCursor = 0;
+			} else if (self.historyCursor > self.history.length-1) {
+				self.historyCursor = self.history.length - 1;
+			}
+			
+			self.promptText = self.history[self.historyCursor];
+			self.column = self.promptText.length;
+			
             updatePromptDisplay();
         };
 
-        // Add something to the history ring
-        function addToHistory(line){
-            extern.history.push(line);
-            extern.restoreText = '';
-        };
+		/**
+		 * Adds test to the history and resets the history cursor to
+		 * the end.
+ 		 */
+		function addToHistory (text){
+			self.history.push(text);
+			self.historyCursor = self.history.length;
+			self.restoreText = '';
+		}
 
         // Delete the character at the current position
         function deleteCharAtPos(){
-            if (extern.promptText != ''){
-                extern.promptText =
-                    extern.promptText.substring(0,extern.column) +
-                    extern.promptText.substring(extern.column+1);
-                extern.restoreText = extern.promptText;
+            if (self.promptText != ''){
+                self.promptText =
+                    self.promptText.substring(0,self.column) +
+                    self.promptText.substring(self.column+1);
+                self.restoreText = self.promptText;
                 return true;
             } else return false;
         };
-
-        ////////////////////////////////////////////////////////////////////////
-        // Validate command and trigger it if valid, or show a validation error
-        function commandTrigger() {
-            var line = extern.promptText;
-            if (typeof config.commandValidate == 'function') {
-                var ret = config.commandValidate(line);
-                if (ret == true || ret == false) {
-                    if (ret) {
-                        handleCommand();
-                    }
-                } else {
-                    extern.commandResult(ret,"jquery-console-message-error");
-                }
-            } else {
-                handleCommand();
-            }
-        };
+		
+		/**
+		 * Validate command and trigger it if valid, or show a validation error
+		 */
+		function commandTrigger () {
+			var line = self.promptText;
+			if (typeof config.commandValidate == 'function') {
+				var ret = config.commandValidate(line);
+				if (ret == true || ret == false) {
+					if (ret) {
+						handleCommand();
+					}
+				} else {
+					self.commandResult(ret, "jquery-console-message-error");
+				}
+			} else {
+				handleCommand();
+			}
+		}
 		
         ////////////////////////////////////////////////////////////////////////
         // Handle a command
         function handleCommand () {
             if (typeof config.commandHandle == 'function') {
-				var text = extern.multiLineCommand ? extern.currentText + extern.promptText :
-													 extern.promptText;
+				var text = self.multiLineCommand ? self.currentText + self.promptText :
+													 self.promptText;
                 var ret = config.commandHandle(text, function(msgs) {
-                    extern.commandResult(msgs);
+                    self.commandResult(msgs);
                 });
 				if (ret === null) { // This command needs more text
-					extern.promptLabel = extern.ps2;
-					extern.multiLineCommand = true;
-					extern.currentText = text;
-		            extern.column = -1;
+					self.promptLabel = self.ps2;
+					self.multiLineCommand = true;
+					self.currentText = text;
+		            self.column = -1;
 		            updatePromptDisplay();
-		            extern.newPromptBox();
+		            self.newPromptBox();
 				} else {
-					extern.promptLabel = extern.ps1;
+					self.promptLabel = self.ps1;
 					
 					if (typeof ret == 'boolean') {
 	                    if (ret) {
 	                        // Command succeeded without a result.
 	                        addToHistory(text);
-	                        extern.commandResult();
+	                        self.commandResult();
 	                    } else {
 	                        addToHistory(text);
-	                        extern.commandResult('Command failed.', "jquery-console-message-error");
+	                        self.commandResult('Command failed.',
+	 							"jquery-console-message-error");
 	                    }
 	                } else if (typeof ret == "string") {
 	                    addToHistory(text);
-	                    extern.commandResult(ret, "jquery-console-message-success");
+	                    self.commandResult(ret, "jquery-console-message-success");
 	                } else if (typeof ret == 'undefined') {
 	                    addToHistory(text);
 	                } else if (ret.length) {
 	                    addToHistory(text);
-	                    extern.commandResult(ret);
+	                    self.commandResult(ret);
 	                }
 				}
 			}
@@ -454,26 +454,26 @@
 
         ////////////////////////////////////////////////////////////////////////
         // Reset the prompt in invalid command
-        extern.commandResult = function (msg,className) {
-			extern.multiLineCommand = false;
-			extern.promptLabel = extern.ps1;
-			extern.currentText = "";
-            extern.column = -1;
+        self.commandResult = function (msg,className) {
+			self.multiLineCommand = false;
+			self.promptLabel = self.ps1;
+			self.currentText = "";
+            self.column = -1;
             updatePromptDisplay();
             if (typeof msg == 'string') {
-                extern.message(msg,className);
+                self.message(msg,className);
             } else {
                 for (var x in msg) {
                     var ret = msg[x];
-                    extern.message(extern.ps3 + ret.msg, ret.className);
+                    self.message(self.ps3 + ret.msg, ret.className);
                 }
             }
-            extern.newPromptBox();
+            self.newPromptBox();
         };
 
         ////////////////////////////////////////////////////////////////////////
         // Display a message
-        extern.message = function (msg,className) {
+        self.message = function (msg,className) {
             var mesg = $('<div class="jquery-console-message"></div>');
             if (className) mesg.addClass(className);
             mesg.filledText(msg).hide();
@@ -483,14 +483,14 @@
 
         ////////////////////////////////////////////////////////////////////////
         // Handle normal character insertion
-        extern.typer.consoleInsert = function(keyCode){
+        self.typer.consoleInsert = function(keyCode){
             // TODO: remove redundant indirection
             var char = String.fromCharCode(keyCode);
-            var before = extern.promptText.substring(0,extern.column);
-            var after = extern.promptText.substring(extern.column);
-            extern.promptText = before + char + after;
+            var before = self.promptText.substring(0,self.column);
+            var after = self.promptText.substring(self.column);
+            self.promptText = before + char + after;
             moveColumn(1);
-            extern.restoreText = extern.promptText;
+            self.restoreText = self.promptText;
             updatePromptDisplay();
         };
         
@@ -498,49 +498,49 @@
         // Move to another column relative to this one
         // Negative means go back, positive means go forward.
         function moveColumn(n){
-            if (extern.column + n >= 0 && extern.column + n <= extern.promptText.length){
-                extern.column += n;
+            if (self.column + n >= 0 && self.column + n <= self.promptText.length){
+                self.column += n;
                 return true;
             } else return false;
         };
 
-        extern.setPromptText = function(text){
+        self.setPromptText = function(text){
             if (text) {
-                extern.promptText = text;
-                if (extern.column > extern.promptText.length)
-                    extern.column = extern.promptText.length;
+                self.promptText = text;
+                if (self.column > self.promptText.length)
+                    self.column = self.promptText.length;
                 updatePromptDisplay();
             }
-            return extern.promptText;
+            return self.promptText;
         };
 
         ////////////////////////////////////////////////////////////////////////
         // Update the prompt display
-        function updatePromptDisplay(){
-            var line = extern.promptText;
+        function updatePromptDisplay () {
+            var line = self.promptText;
             var html = '';
-            if (extern.column > 0 && line == ''){
+            if (self.column > 0 && line == ''){
                 // When we have an empty line just display a cursor.
-                html = extern.cursor;
-            } else if (extern.column == extern.promptText.length){
+                html = self.cursor;
+            } else if (self.column == self.promptText.length){
                 // We're at the end of the line, so we need to display
                 // the text *and* cursor.
-                html = htmlEncode(line) + extern.cursor;
+                html = htmlEncode(line) + self.cursor;
             } else {
                 // Grab the current character, if there is one, and
                 // make it the current cursor.
-                var before = line.substring(0, extern.column);
-                var current = line.substring(extern.column,extern.column+1);
+                var before = line.substring(0, self.column);
+                var current = line.substring(self.column,self.column+1);
                 if (current){
                     current = 
                         '<span class="jquery-console-cursor">' +
                         htmlEncode(current) +
                         '</span>';
                 }
-                var after = line.substring(extern.column+1);
+                var after = line.substring(self.column+1);
                 html = htmlEncode(before) + current + htmlEncode(after);
             }
-            extern.prompt.html(html);
+            self.prompt.html(html);
             scrollToBottom();
         };
         
@@ -561,25 +561,25 @@
         ////////////////////////////////////////////////////////////////////////
         // Main entry point
         (function(){
-            extern.container.append(inner);
-            inner.append(extern.typer);
-            extern.typer.css({position:'absolute',top:0,left:'-9999px'});
+            self.container.append(inner);
+            inner.append(self.typer);
+            self.typer.css({position:'absolute',top:0,left:'-9999px'});
             if (config.welcomeMessage)
-                extern.message(config.welcomeMessage,'jquery-console-welcome');
-            extern.newPromptBox();
+                self.message(config.welcomeMessage,'jquery-console-welcome');
+            self.newPromptBox();
             if (config.autofocus) {
                 inner.addClass('jquery-console-focus');
-                extern.typer.focus();
+                self.typer.focus();
                 setTimeout(function(){
                     inner.addClass('jquery-console-focus');
-                    extern.typer.focus();
+                    self.typer.focus();
                 },100);
             }
-            extern.inner = inner;
-            extern.scrollToBottom = scrollToBottom;
+            self.inner = inner;
+            self.scrollToBottom = scrollToBottom;
         })();
 		
-        return extern;
+        return self;
     };
     // Simple utility for printing messages
     $.fn.filledText = function(txt){

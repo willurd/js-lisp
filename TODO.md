@@ -1,7 +1,7 @@
 # TODO
 
-* Add the "testfunc" argument to js-test equality assertions
-* Add a transcript to the repl (just use controller.history)
+* Fix how history works in the REPL
+* Add a transcript to the REPL (just use controller.history)
 * Ideas
     * Look through Practical Common Lisp for ideas on what to implement next
         * On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
