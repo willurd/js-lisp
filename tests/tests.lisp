@@ -81,7 +81,10 @@ string" "a\nstring"))
 	:testEvalQuoted (lambda ()
 		(this.assertEqual (eval (quote (format nil "%0.2f" 10.123)))
 						  (format nil "%0.2f" 10.123)))
-))
+	:testQuoteLiteral (lambda ()
+		(this.assertEqual (quote hello!) 'hello! nil (getfunc equal))
+		(this.assertEqual (quote (hello!)) '(hello!) nil (getfunc equal))
+		(this.assertEqual (quote (quote hello!)) ''hello! nil (getfunc equal)))))
 
 ;; TODO: Test (lambda)
 ;;   * Test lambdas as closures
@@ -577,6 +580,27 @@ string" "a\nstring")))
 		(let ((x 5))
 			(this.assertFalse (is-object (object) "hi" (setq x 10)))
 			(this.assertEqual x 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (dolist)"
+	;; TODO: Test error conditions
+	;; TODO: Test explicit return value
+	:testBasic (lambda ()
+		(let ((x 0)
+			  (y 0))
+			(dolist (x '(1 2 3 4 5))
+				(setq y (1+ y))
+				(this.assertTrue (is-number x))
+				(this.assertTrue (and (> x 0) (< x 6))))
+			(this.assertEqual x 0)	
+			(this.assertEqual y 5)))))
+
+(JSTest.TestCase (object
+	:name "macro (map)"
+	;; TODO: Test error conditions
+	:testBasic (lambda ()
+		(this.assertEqual (map (lambda (x) (1+ x)) '(1 2 3))
+						  '(2 3 4) nil (getfunc equal)))))
 
 ;; ================================================================================
 ;; FUNCTIONS

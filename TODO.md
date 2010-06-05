@@ -14,10 +14,9 @@
 	* Test return values of sexps (including null when there is no return)
 * Tools
     * Make a repl (using jquery-console perhaps)
-* Add the (quote) literal char "'"
 * Write better/more documentation for current functions/macros
-* Write macro: (cond)
 * Write macro: (unless) (opposite of (when))
+* Write macros: (incf), (decf)
 * Write function: (load) (loads and evaluates a lisp file inline, synchronously)
 * Think about the fact that 'nil' is actually the empty list (right now it's 'null')
 * Write macro: (defmacro) (and corresponding parsers: ",", "`", "@")

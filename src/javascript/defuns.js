@@ -426,3 +426,30 @@ defun("format", function (print, format) {
 		return output;
 	}
 });
+
+
+/**
+ * Run each of the items in the given list through the given
+ * function and returns a new list with the given return values.
+ * 
+ * TODO: Test me
+ */
+defun("map", function (func, list) {
+	if (arguments.length !== 2) {
+		throw new Error("(map) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
+	if (typeof(func) != "function") {
+		throw new Error("(map) requires a function as its first value (got " +
+			String(func) + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(map) requires a list as its second value (got " +
+			String(list) + ")");
+	}
+	var newlist = [];
+	for (var i = 0; i < list.length; i++) {
+		newlist.push(func(list[i]));
+	}
+	return newlist;
+});

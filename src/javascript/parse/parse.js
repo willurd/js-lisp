@@ -34,10 +34,14 @@ var parse = {
 	any: function (stream) {
 		stream = validateInput(stream);
 		stream.swallowWhitespace();
+		
 		switch (stream.peek())
 		{
 		case '(':
 			return parse.sexp(stream);
+		case "'":
+			stream.next();
+			return [new Symbol("quote"), parse.any(stream)];
 		case '"':
 			return parse.string(stream);
 		case ':':

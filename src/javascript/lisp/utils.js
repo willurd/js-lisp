@@ -19,6 +19,15 @@ function resolve (value) {
 }
 
 function doSExp (sexp) {
+	if (!sexp) {
+		throw new Error("doSExp got empty expression");
+	}
+	
+	if (sexp.length === 0) {
+		// An expression with no arguments, in js-lisp, is an empty list.
+		return [];
+	}
+	
 	var first = sexp[0];
 	var object = resolve(first);
 	

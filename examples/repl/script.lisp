@@ -1,7 +1,10 @@
 (defun repl-represent (value)
 	(cond ((is-null value) "nil")
 		  ((is-true value) "t")
+		  ((instanceof value lisp.Symbol) value)
 		  ((instanceof value lisp.Keyword) (concat ":" value))
+		  ((instanceof value Array)
+			(concat "(" (join " " (map repl-represent value)) ")"))
 		  (t (to-json value t))))
 
 (setq keycodes (object

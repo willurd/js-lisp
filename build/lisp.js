@@ -511,6 +511,15 @@ function resolve (value) {
 }
 
 function doSExp (sexp) {
+	if (!sexp) {
+		throw new Error("doSExp got empty expression");
+	}
+	
+	if (sexp.length === 0) {
+		// An expression with no arguments, in js-lisp, is an empty list.
+		return [];
+	}
+	
 	var first = sexp[0];
 	var object = resolve(first);
 	
@@ -719,10 +728,14 @@ var parse = {
 	any: function (stream) {
 		stream = validateInput(stream);
 		stream.swallowWhitespace();
+		
 		switch (stream.peek())
 		{
 		case '(':
 			return parse.sexp(stream);
+		case "'":
+			stream.next();
+			return [new Symbol("quote"), parse.any(stream)];
 		case '"':
 			return parse.string(stream);
 		case ':':
@@ -1600,6 +1613,53 @@ defmacro("is-object", function () {
 		return typeof(value) == "object";
 	});
 });
+
+/**
+ * An expression for basic iteration over a list.
+ * 
+ * TODO: Test me
+ */
+defmacro("dolist", function (arglist /*, ... */) {
+	if (arguments.length === 0) {
+		throw new Error("(dolist) requires at least 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(arglist instanceof Array)) {
+		throw new Error("(dolist) got invalid argument list: " + String(arglist));
+	}
+	if (arglist.length < 2 || arglist.length > 3) {
+		throw new Error("(dolist) got invalid argument list. Requires at least " +
+			"2 arguments and no more than 3 (got " + arglist.length + ")");
+	}
+	if (!(arglist[0] instanceof Symbol)) {
+		throw new Error("(dolist) got invalid argument list. First argument " +
+			"must be a symbol (got " + String(arglist[0]) + ")");
+	}
+	var symbol = arglist[0];
+	var list = resolve(arglist[1]);
+	var expressions = argsToArray(arguments).slice(1);
+	var ret;
+	if (!(list instanceof Array)) {
+		throw new Error("(dolist) got invalid list argument: " + String(list));
+	}
+	
+	lisp.env = new Env(lisp.env);
+	for (var i = 0; i < list.length; i++) {
+		lisp.env.let(symbol, list[i]);
+		for (var j = 0; j < expressions.length; j++) {
+			ret = resolve(expressions[j]);
+		}
+	}
+	lisp.env = lisp.env.parent;
+	
+	if (arglist.length === 3) {
+		return resolve(arglist[2]);
+	} else {
+		return ret;
+	}
+});
+
+// TODO: Write macro (dotimes)
 /**
  * TODO: Test me
  */
@@ -2027,6 +2087,33 @@ defun("format", function (print, format) {
 	} else {
 		return output;
 	}
+});
+
+
+/**
+ * Run each of the items in the given list through the given
+ * function and returns a new list with the given return values.
+ * 
+ * TODO: Test me
+ */
+defun("map", function (func, list) {
+	if (arguments.length !== 2) {
+		throw new Error("(map) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
+	if (typeof(func) != "function") {
+		throw new Error("(map) requires a function as its first value (got " +
+			String(func) + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(map) requires a list as its second value (got " +
+			String(list) + ")");
+	}
+	var newlist = [];
+	for (var i = 0; i < list.length; i++) {
+		newlist.push(func(list[i]));
+	}
+	return newlist;
 });
 return {
 	VERSION: "0.0.1",
