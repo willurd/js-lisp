@@ -107,7 +107,7 @@ The following is a list of browsers where all of the examples worked and all of 
 * Chrome 5
 * Firefox 3.5
 
-**Linux**
+**Linux, 2.6.33-ARCH**
 
 * Chrome 5
 * Firefox 3.7 (nightly)

@@ -1,6 +1,15 @@
 /**
+ * TODO: Test me
+ */
+defun("jseval", function () {
+	return eval(null, arguments);
+});
+
+/**
  * Returns an instance of the given class, initialized with
  * the rest of the given arguments.
+ * 
+ * TODO: Test me
  * 
  * @return The new class instance.
  */
@@ -14,7 +23,7 @@ defun("new", function (Class) {
 });
 
 /**
- * 
+ * TODO: Test me
  */
 defun("instanceof", function (object, Class) {
 	if (arguments.length !== 2) {
@@ -56,6 +65,8 @@ defun("throw", function (object) {
 
 /**
  * Returns the given arguments as a list.
+ * 
+ * TODO: Test me
  */
 defun("list", function () {
 	return argsToArray(arguments);
@@ -88,6 +99,8 @@ defun("object", function () {
 /**
  * Creates an array from the given arguments.
  * 
+ * TODO: Test me
+ * 
  * @return The new array.
  */
 defun("array", function () {
@@ -97,6 +110,8 @@ defun("array", function () {
 /**
  * Returns a value from an object given a key (will work with
  * array indices as well).
+ * 
+ * TODO: Test me
  */
 defun("getkey", function (key, object) {
 	if (arguments.length !== 2) {
@@ -108,6 +123,8 @@ defun("getkey", function (key, object) {
 
 /**
  * Sets a value on the given object using the given key.
+ * 
+ * TODO: Test me
  */
 defun("setkey", function (key, object, value) {
 	if (arguments.length !== 3) {
@@ -231,6 +248,8 @@ defun("to-boolean", function (value) {
 
 /**
  * Converts the given value to a json representation of that value.
+ * 
+ * TODO: Test me
  */
 defun("to-json", function () {
 	return toJSON.apply(null, arguments);

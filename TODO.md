@@ -1,5 +1,7 @@
 # TODO
 
+* Add the "testfunc" argument to js-test equality assertions
+* Add a transcript to the repl (just use controller.history)
 * Ideas
     * Look through Practical Common Lisp for ideas on what to implement next
         * On chapter: http://www.gigamonkeys.com/book/practical-a-simple-database.html
@@ -12,6 +14,7 @@
 	* Test return values of sexps (including null when there is no return)
 * Tools
     * Make a repl (using jquery-console perhaps)
+* Add the (quote) literal char "'"
 * Write better/more documentation for current functions/macros
 * Write macro: (cond)
 * Write macro: (unless) (opposite of (when))

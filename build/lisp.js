@@ -27,6 +27,7 @@
 // ================================================================================
 
 var lisp = (function (global) {
+	var jseval = window.eval;
 /*jsl:ignore*/ // Suppress jsl warnings
 // From: http://ejohn.org/blog/simple-javascript-inheritance/
 // Inspired by base2 and Prototype
@@ -321,6 +322,47 @@ function toJSON (object, pretty, levels, level) {
 		return object.toString();
 	}
 }
+/**
+ * The method used for (equal) equality in js-lisp.
+ * 
+ * @return Whether a and b are equal from js-lisp's perspective.
+ */
+function equal (a, b) {
+	// Test Symbol equality
+	if (a instanceof Symbol) {
+		if (!(b instanceof Symbol)) {
+			return false;
+		}
+		return a.value == b.value;
+	}
+	
+	// Test Keyword equality
+	if (a instanceof Keyword) {
+		if (!(b instanceof Keyword)) {
+			return false;
+		}
+		return a.value == b.value;
+	}
+	
+	// Test Array (list) equality
+	if (a instanceof Array) {
+		if (!(b instanceof Array)) {
+			return false;
+		}
+		if (a.length !== b.length) {
+			return false; // Return early in this easy and fast test
+		}
+		for (var i = 0; i < a.length; i++) {
+			if (!equal(a[i], b[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	return a == b;
+}
+
 function argsToArray (args) {
 	var a = [];
 	for (var i = 0; i < args.length; i++) {
@@ -847,12 +889,45 @@ var ROOT_ENV = new Env(new Env(null, global), {
 	"undefined": undefined,
 	"NaN": NaN,
 	
+	/**
+	 * This is here because values defined in the lisp env clobber the
+	 * global namespace (this is on purpose, so those values can be used
+	 * by other JavaScript code). Howver, one thing we definitely don't
+	 * want to do is clobber standard JavaScript functions, like eval.
+	 * 
+	 * TODO: Test me
+	 */
+	"eval": function (expression) {
+		if (arguments.length !== 1) {
+			throw new Error("(eval) requires 1 argument (got " +
+				arguments.length + ")");
+		}
+		return resolve(expression);
+	},
+	
 	"*features*": [new Keyword("notmuch")]
 });
+/**
+ * Takes a single lisp expression (s-expression) and returns it unevaluated.
+ * 
+ * TODO: Test me
+ * 
+ * @return The given argument, unevaluated.
+ */
+defmacro("quote", function (expression) {
+	if (arguments.length !== 1) {
+		throw new Error("(quote) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return expression;
+});
+
 /**
  * Creates an anonymous function with the first (required) expression
  * as its arglist and which executes the rest of the expressions
  * when called.
+ * 
+ * TODO: Test me
  * 
  * @return The created function.
  */
@@ -882,6 +957,7 @@ defmacro("lambda", function (arglist /*, ... */) {
 /**
  * Defines a function.
  * 
+ * TODO: Test me
  * TODO: Reuse (lambda) for this.
  */
 defmacro("defun", function (name, arglist /*, ... */) {
@@ -1038,6 +1114,8 @@ defmacro("try", function () {
 
 /**
  * Returns the function that the given symbol points to.
+ * 
+ * TODO: Test me
  */
 defmacro("getfunc", function (symbol) {
 	if (arguments.length !== 1) {
@@ -1056,6 +1134,8 @@ defmacro("getfunc", function (symbol) {
 /**
  * Takes an object and a dotpath and calls the dotpath as a function
  * on the given object (with the given arguments).
+ * 
+ * TODO: Test me
  */
 defmacro("funcall", function (object, dotpath) {
 	if (arguments.length < 2) {
@@ -1085,7 +1165,7 @@ defmacro("funcall", function (object, dotpath) {
 });
 
 /**
- * 
+ * TODO: Test me
  */
 defmacro("let", function () {
 	var args = argsToArray(arguments);
@@ -1109,7 +1189,7 @@ defmacro("let", function () {
 });
 
 /**
- * 
+ * TODO: Test me
  */
 defmacro("setq", function () {
 	var args = argsToArray(arguments);
@@ -1141,7 +1221,7 @@ defmacro("progn", function (/* .. */) {
 /**
  * @return The value of the evaluated expression, or nil.
  * 
- * TODO: Needs testing
+ * TODO: Test me
  */
 defmacro("cond", function () {
 	for (var i = 0; i < arguments.length; i++) {
@@ -1160,6 +1240,8 @@ defmacro("cond", function () {
 	}
 	return null;
 });
+
+// TODO: Create (case) or (switch) macro
 
 /**
  * If the first expression evaluates to true in a boolean context,
@@ -1226,7 +1308,7 @@ defmacro("not", function (value) {
 });
 
 /**
- * 
+ * TODO: Test me
  */
 defmacro("or", function () {
 	for (var i = 0; i < arguments.length; i++) {
@@ -1238,7 +1320,7 @@ defmacro("or", function () {
 });
 
 /**
- * 
+ * TODO: Test me
  */
 defmacro("and", function () {
 	if (arguments.length === 0) {
@@ -1250,11 +1332,38 @@ defmacro("and", function () {
 });
 
 /**
- * 
+ * TODO: Test me
+ */
+defmacro("equal", function () {
+	if (arguments.length < 2) {
+		throw new Error("(equal) requires at least 2 arguments (got "
+			+ arguments.length + ")");
+	}
+	return comparator(arguments, function (a, b) {
+		return equal(a, b);
+	});
+});
+
+/**
+ * TODO: Test me
+ */
+defmacro("not-equal", function () {
+	if (arguments.length < 2) {
+		throw new Error("(not-equal) requires at least 2 arguments (got "
+			+ arguments.length + ")");
+	}
+	return comparator(arguments, function (a, b) {
+		return !equal(a, b);
+	});
+});
+
+/**
+ * TODO: Test me
  */
 defmacro("==", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '==' requires at least 2 arguments");
+		throw new Error("(==) requires at least 2 arguments (got "
+			+ arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a == b;
@@ -1262,11 +1371,12 @@ defmacro("==", function () {
 });
 
 /**
- * 
+ * TODO: Test me
  */
 defmacro("===", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '===' requires at least 2 arguments");
+		throw new Error("(===) requires at least 2 arguments (got "
+			+ arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a === b;
@@ -1274,11 +1384,12 @@ defmacro("===", function () {
 });
 
 /**
- * 
+ * TODO: Test me
  */
 defmacro("!=", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '!=' requires at least 2 arguments");
+		throw new Error("(!=) requires at least 2 arguments (got "
+			+ arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a != b;
@@ -1286,11 +1397,12 @@ defmacro("!=", function () {
 });
 
 /**
- * 
+ * TODO: Test me
  */
 defmacro("!==", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '!==' requires at least 2 arguments");
+		throw new Error("(!==) requires at least 2 arguments (got "
+			+ arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a !== b;
@@ -1298,13 +1410,16 @@ defmacro("!==", function () {
 });
 
 /**
-* Examples:
-*    * (< x y)
-*    * (< -1 0 1 2 3)
+ * TODO: Test me
+ * 
+ * Examples:
+ *    * (< x y)
+ *    * (< -1 0 1 2 3)
  */
 defmacro("<", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '<' requires at least 2 arguments");
+		throw new Error("(<) requires at least 2 arguments (got "
+			+ arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a < b;
@@ -1312,13 +1427,16 @@ defmacro("<", function () {
 });
 
 /**
+ * TODO: Test me
+ *
  * Examples:
  *    * (> x y)
  *    * (> 3 2 1 0 -1)
  */
 defmacro(">", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '>' requires at least 2 arguments");
+		throw new Error("(>) requires at least 2 arguments (got "
+			+ arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a > b;
@@ -1326,13 +1444,16 @@ defmacro(">", function () {
 });
 
 /**
+ * TODO: Test me
+ *
  * Examples:
  *    * (<= x y)
  *    * (<= 1 1 2 3 4)
  */
 defmacro("<=", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '>' requires at least 2 arguments");
+		throw new Error("(<=) requires at least 2 arguments (got "
+			+ arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a <= b;
@@ -1340,13 +1461,16 @@ defmacro("<=", function () {
 });
 
 /**
+ * TODO: Test me
+ *
  * Examples:
  *    * (>= x y)
  *    * (>= 4 3 2 2 1)
  */
 defmacro(">=", function () {
 	if (arguments.length < 2) {
-		throw new Error("Macro '>' requires at least 2 arguments");
+		throw new Error("(>=) requires at least 2 arguments (got "
+			+ arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a >= b;
@@ -1355,8 +1479,13 @@ defmacro(">=", function () {
 
 /**
  * Returns true if the given values === true.
+ * 
+ * TODO: Test me
  */
 defmacro("is-true", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-true) requires at least 1 argument");
+	}
 	return predicate(arguments, function (value) {
 		return value === true;
 	});
@@ -1364,8 +1493,13 @@ defmacro("is-true", function () {
 
 /**
  * Returns true if the given values === false.
+ * 
+ * TODO: Test me
  */
 defmacro("is-false", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-false) requires at least 1 argument");
+	}
 	return predicate(arguments, function (value) {
 		return value === false;
 	});
@@ -1373,17 +1507,25 @@ defmacro("is-false", function () {
 
 /**
  * Returns true if the given values === null.
+ * 
+ * TODO: Test me
  */
 defmacro("is-null", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-null) requires at least 1 argument");
+	}
 	return predicate(arguments, function (value) {
 		return value === null;
 	});
 });
 
 /**
- * 
+ * TODO: Test me
  */
 defmacro("is-undefined", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-undefined) requires at least 1 argument");
+	}
 	return predicate(arguments, function (value) {
 		return value === undefined;
 	});
@@ -1391,8 +1533,13 @@ defmacro("is-undefined", function () {
 
 /**
  * Returns true if the given values are strings.
+ * 
+ * TODO: Test me
  */
 defmacro("is-string", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-string) requires at least 1 argument");
+	}
 	return predicate(arguments, function (value) {
 		return typeof(value) == "string";
 	});
@@ -1400,8 +1547,13 @@ defmacro("is-string", function () {
 
 /**
  * Returns true if the given values are numbers.
+ * 
+ * TODO: Test me
  */
 defmacro("is-number", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-number) requires at least 1 argument");
+	}
 	return predicate(arguments, function (value) {
 		return typeof(value) == "number";
 	});
@@ -1409,8 +1561,13 @@ defmacro("is-number", function () {
 
 /**
  * Returns true if the given values are booleans.
+ * 
+ * TODO: Test me
  */
 defmacro("is-boolean", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-boolean) requires at least 1 argument");
+	}
 	return predicate(arguments, function (value) {
 		return typeof(value) == "boolean";
 	});
@@ -1418,8 +1575,13 @@ defmacro("is-boolean", function () {
 
 /**
  * Returns true if the given values are functions.
+ * 
+ * TODO: Test me
  */
 defmacro("is-function", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-function) requires at least 1 argument");
+	}
 	return predicate(arguments, function (value) {
 		return typeof(value) == "function";
 	});
@@ -1427,15 +1589,29 @@ defmacro("is-function", function () {
 
 /**
  * Returns true if the given values are objects.
+ * 
+ * TODO: Test me
  */
 defmacro("is-object", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-object) requires at least 1 argument");
+	}
 	return predicate(arguments, function (value) {
 		return typeof(value) == "object";
 	});
 });
 /**
+ * TODO: Test me
+ */
+defun("jseval", function () {
+	return eval(null, arguments);
+});
+
+/**
  * Returns an instance of the given class, initialized with
  * the rest of the given arguments.
+ * 
+ * TODO: Test me
  * 
  * @return The new class instance.
  */
@@ -1449,7 +1625,7 @@ defun("new", function (Class) {
 });
 
 /**
- * 
+ * TODO: Test me
  */
 defun("instanceof", function (object, Class) {
 	if (arguments.length !== 2) {
@@ -1491,6 +1667,8 @@ defun("throw", function (object) {
 
 /**
  * Returns the given arguments as a list.
+ * 
+ * TODO: Test me
  */
 defun("list", function () {
 	return argsToArray(arguments);
@@ -1523,6 +1701,8 @@ defun("object", function () {
 /**
  * Creates an array from the given arguments.
  * 
+ * TODO: Test me
+ * 
  * @return The new array.
  */
 defun("array", function () {
@@ -1532,6 +1712,8 @@ defun("array", function () {
 /**
  * Returns a value from an object given a key (will work with
  * array indices as well).
+ * 
+ * TODO: Test me
  */
 defun("getkey", function (key, object) {
 	if (arguments.length !== 2) {
@@ -1543,6 +1725,8 @@ defun("getkey", function (key, object) {
 
 /**
  * Sets a value on the given object using the given key.
+ * 
+ * TODO: Test me
  */
 defun("setkey", function (key, object, value) {
 	if (arguments.length !== 3) {
@@ -1666,6 +1850,8 @@ defun("to-boolean", function (value) {
 
 /**
  * Converts the given value to a json representation of that value.
+ * 
+ * TODO: Test me
  */
 defun("to-json", function () {
 	return toJSON.apply(null, arguments);

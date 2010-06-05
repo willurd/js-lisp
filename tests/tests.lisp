@@ -61,6 +61,28 @@ string" "a\nstring"))
 
 (JSTest.Divider "macros")
 
+(JSTest.TestCase (object
+	:name "macro (quote)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error (getfunc quote) nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error (getfunc quote) nil good))
+	:testManyArguments (lambda ()
+		(this.assertRaises Error (getfunc quote) nil))
+	:testQuoteSymbol (lambda ()
+		(this.assertEqual (quote hello) (quote hello) nil (getfunc equal))
+		(this.assertEqual (quote hello) (lisp.parse.any "hello") nil (getfunc equal))
+		(this.assertEqual (quote hello) (new lisp.Symbol "hello") nil (getfunc equal))
+		(this.assertNotEqual (quote hello) (quote goodbye)) nil (getfunc not-equal))
+	:testQuoteList (lambda ()
+		(this.assertEqual (quote (one two)) (quote (one two)) nil (getfunc equal))
+		(this.assertEqual (quote (one two)) (lisp.parse.any "(one two)") nil (getfunc equal))
+		(this.assertEqual (quote (one two)) (list "one" "two")) nil (getfunc equal))
+	:testEvalQuoted (lambda ()
+		(this.assertEqual (eval (quote (format nil "%0.2f" 10.123)))
+						  (format nil "%0.2f" 10.123)))
+))
+
 ;; TODO: Test (lambda)
 ;;   * Test lambdas as closures
 ;; TODO: Test (defun)
