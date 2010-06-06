@@ -91,7 +91,7 @@ Also, if you add any new javascript files, make sure to add them to the lisp.js 
 
 ## You said js-lisp is so buggy I shouldn't use it in production code. What gives?
 
-Ok, you misunderstood me. js-lisp is young. Really young. Having said that, it works. Pretty well actually. It's also got a pretty solid test suite, with pretty a lot of code coverage. On top of that, 99% of the test code is actually written in lisp and interpreted by js-lisp. So use it. Do awesome things with it. Share it with your friends. Share what you're doing with me. Just don't use it in production code. Chances are there are many places in it that are weak as a feather, and I garuntee you your users would find them. And be mad at you.
+Ok, you misunderstood me. js-lisp is young. Really young. Having said that, it works. Pretty well actually. It's also got a pretty solid test suite, with a lot of code coverage. On top of that, 99% of the test code is actually written in lisp and interpreted by js-lisp. So use it. Do awesome things with it. Share it with your friends. Share what you're doing with me. Just don't use it in production code. Chances are there are many places in it that are weak as a feather, and I garuntee you your users would find them. And be mad at you.
 
 ## Browser Support
 
