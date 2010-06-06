@@ -43,7 +43,7 @@
 	  (:catch (e)
 		(controller.message (to-string e) "jquery-console-message-error"))))
 
-(setq controller nil) ;; This is a hack because js-lisp doesn't have closures yet
+(setq controller nil) ;; This is how we control the repl
 
 ($ (lambda ()
 	(let ((repl-id "#console")
