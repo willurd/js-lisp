@@ -6,18 +6,16 @@ Disclaimer: DO NOT attempt to use this project for any production code whatsoeve
 
 *Step 1: Include js-lisp*
 
-Include the js-lisp code (either lisp.js or lisp.min.js from inside /build/) _before_ you try to evaluate any of your lisp code.
+Include the js-lisp code (lisp.js inside /build).
 
     <script src="/path/to/lisp.js"></script>
 
 *Step 2: Include your lisp code*
 
-    <script type="text/lisp" src="/path/to/code.lisp" onload="lisp.dotag(this)">
-    ; Lisp code can go here too. It will be evaluated after the lisp code
-    ; pointed to in 'src' (if there is any).
-    </script>
-
-The `onload` part is the magic part. This is what evaluates the lisp code. Alternatively, if you really want to, you can call `lisp.run()` in JavaScript (again, _after_ including lisp.js) which will evaluate all script tags with `type="text/lisp"` that haven't been evaluated yet. It's important to note that `lisp.dotag()` and `lisp.run()` both remove each tag they evaluate from the page so those tags won't get evaluated again.
+	<script type="text/javascript">
+	  lisp.load("/path/to/code.lisp");
+	  lisp.load("/path/to/more-code.lisp");
+	</script>
 
 ## Playing around at the REPL
 
@@ -49,10 +47,6 @@ The options are to make a lisp just for JavaScript, as Clojure has done for Java
 Unless you want to make modifications to js-lisp, the file you care about is:
 
 * /build/lisp.js
-
-or if you don't care about looking at the code:
-
-* /build/lisp.min.js
 
 ## How do I view the tests and html documentation?
 
