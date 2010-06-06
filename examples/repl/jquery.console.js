@@ -419,8 +419,8 @@
         // Handle a command
         function handleCommand () {
             if (typeof config.commandHandle == 'function') {
-				var text = self.multiLineCommand ? self.currentText + self.promptText :
-													 self.promptText;
+				var text = self.multiLineCommand ? self.currentText + ' ' + self.promptText
+					: self.promptText;
                 var ret = config.commandHandle(text, function(msgs) {
                     self.commandResult(msgs);
                 });
