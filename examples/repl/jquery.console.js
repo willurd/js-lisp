@@ -359,12 +359,17 @@
 			self.historyCursor += n;
 			
 			if (self.historyCursor < 0) {
-				self.historyCursor = 0;
-			} else if (self.historyCursor > self.history.length-1) {
-				self.historyCursor = self.history.length - 1;
+				self.historyCursor = -1;
+			} else if (self.historyCursor > self.history.length) {
+				self.historyCursor = self.history.length;
 			}
 			
-			self.promptText = self.history[self.historyCursor];
+			if (self.historyCursor == self.history.length ||
+				self.historyCursor == -1) {
+				self.promptText = '';
+			} else {
+				self.promptText = self.history[self.historyCursor];
+			}
 			self.column = self.promptText.length;
 			
             updatePromptDisplay();
