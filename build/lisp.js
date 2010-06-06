@@ -257,6 +257,7 @@ function toJSON (object, pretty, levels, level) {
 	var prefix  = pretty ? times(singleprefix, level) : '';
 	
 	var json;
+	var value;
 	
 	switch (typeof(object))
 	{
@@ -271,14 +272,22 @@ function toJSON (object, pretty, levels, level) {
 			json = '[';
 			
 			if (!done) {
+				json += newline;
+				value = null;
 				for (var i = 0; i < object.length; i++) {
-					json += toJSON(object[i], pretty, levels, level+1) + ', ';
+					value = toJSON(object[i], pretty, levels, level+1);
+					json += prefix + singleprefix + value + ', ' + newline;
+				}
+				json = json.replace(/[\s\n]*$/g, '');
+				json = json.replace(/,$/, '');
+				if (object.length > 0) {
+					json += newline + prefix;
 				}
 			} else {
 				json += ' ... ';
 			}
 			
-			return json.replace(/, $/, '') + ']';
+			return json + ']';
 		} else if (object instanceof Date) {
 			// 'object' is a Date.
 			// Taken from http://www.json.org/json2.js
@@ -300,8 +309,8 @@ function toJSON (object, pretty, levels, level) {
 			
 			if (!done) {
 				json = json + newline;
-				var count = 0;
-				var value;
+				count = 0;
+				value = null;
 				for (var key in object) {
 					count++;
 					if (object.hasOwnProperty(key)) {
@@ -316,7 +325,9 @@ function toJSON (object, pretty, levels, level) {
 				}
 				json = json.replace(/[\s\n]*$/g, '');
 				json = json.replace(/,$/, '');
-				json = json + (count > 0 ? (newline + prefix) : '');
+				if (count > 0) {
+					json += newline + prefix;
+				}
 			} else {
 				json += ' ... ';
 			}
