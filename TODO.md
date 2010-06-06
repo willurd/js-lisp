@@ -1,6 +1,5 @@
 # TODO
 
-* Fix how history works in the REPL
 * Add a transcript to the REPL (just use controller.history)
 * Ideas
     * Look through Practical Common Lisp for ideas on what to implement next
