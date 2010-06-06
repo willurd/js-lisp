@@ -41,7 +41,7 @@
 //   Firefox 3.5.8
 
 (function($){
-    $.fn.console = function(config){
+    $.fn.console = function (config) {
 		var log = function () {
 			var a = [];
 			for (var i = 0; i < arguments.length; i++) {
@@ -183,7 +183,7 @@
 		// FIXME: This is borked on Chrome.
         function scrollToBottom () {
 			//target.offsetParent().scrollTop(target.offset().top - 50);
-			inner.attr({scrollTop: inner.attr("scrollHeight")});
+			self.container.attr({scrollTop: self.container.attr("scrollHeight")});
         }
 		
         ////////////////////////////////////////////////////////////////////////

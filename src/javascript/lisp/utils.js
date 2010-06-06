@@ -1,3 +1,7 @@
+function _S (name) {
+	return new Symbol(name);
+}
+
 function defun (name, func) {
 	var env = (lisp && lisp.env) || ROOT_ENV;
 	env.set(name, func);

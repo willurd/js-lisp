@@ -2,6 +2,7 @@ html, body {
 	background: #333;
 	height: 100%;
 	margin: 0px;
+	overflow: hidden;
 	padding: 0px;
 	}
 
@@ -9,6 +10,7 @@ html, body {
 	font-size: 14px;
 	height: 100%;
 	margin: 0px;
+	overflow: auto;
 	padding: 0px;
 	top: 0px;
 	}

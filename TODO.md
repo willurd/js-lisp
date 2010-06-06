@@ -1,5 +1,6 @@
 # TODO
 
+* Make the REPL evaluate expressions each on their own line if it receives more than one
 * Add a transcript to the REPL (just use controller.history)
 * Ideas
     * Look through Practical Common Lisp for ideas on what to implement next

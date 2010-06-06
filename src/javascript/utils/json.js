@@ -1,10 +1,13 @@
 function toJSON (object, pretty, levels, level) {
 	levels = levels || 2; // Default levels
 	level = level || 0;
+	
 	var done = level >= levels;
 	var newline = pretty ? '\n' : '';
-	var singleprefix = times(' ', 2);
+	var singleprefix = pretty ? times(' ', 2) : '';
 	var prefix  = pretty ? times(singleprefix, level) : '';
+	
+	var json;
 	
 	switch (typeof(object))
 	{
@@ -16,7 +19,7 @@ function toJSON (object, pretty, levels, level) {
 			return 'null';
 		} else if (object instanceof Array) {
 			// 'object' is an Array.
-			var json = '[';
+			json = '[';
 			
 			if (!done) {
 				for (var i = 0; i < object.length; i++) {
@@ -44,19 +47,27 @@ function toJSON (object, pretty, levels, level) {
 				   f(object.getUTCSeconds())   +
 				   '"';
 		} else {
-			var json = '{';
+			json = '{';
 			
 			if (!done) {
 				json = json + newline;
+				var count = 0;
+				var value;
 				for (var key in object) {
+					count++;
 					if (object.hasOwnProperty(key)) {
-						json += prefix + singleprefix + '"' + key + '": ' +
-							((object[key] == window) ? "[window]"
-								: toJSON(object[key], pretty, levels, level+1)) +
-							', ' + newline;
+						if (object[key] == window) {
+							value = "[window]";
+						} else {
+							value = toJSON(object[key], pretty, levels, level+1);
+						}
+						json += prefix + singleprefix + '"' + key + '": ' + value;
+						json += ', ' + newline;
 					}
 				}
-				json = json.replace(/,\s*$/, '') + newline + prefix;
+				json = json.replace(/[\s\n]*$/g, '');
+				json = json.replace(/,$/, '');
+				json = json + (count > 0 ? (newline + prefix) : '');
 			} else {
 				json += ' ... ';
 			}
@@ -70,7 +81,8 @@ function toJSON (object, pretty, levels, level) {
 		return '"' + object.replace(/"/g, '\\"') + '"';
 	case 'number':
 		return object;
-	case 'boolean':
+	case 'boolean':	
+	default:
 		return object.toString();
 	}
 }

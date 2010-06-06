@@ -86,8 +86,19 @@ string" "a\nstring"))
 		(this.assertEqual (quote (hello!)) '(hello!) nil (getfunc equal))
 		(this.assertEqual (quote (quote hello!)) ''hello! nil (getfunc equal)))))
 
-;; TODO: Test (lambda)
-;;   * Test lambdas as closures
+(JSTest.TestCase (object
+	:name "macro (lambda)"
+	:testNoArguments (lambda ()
+		(this.assertNotRaises Error (getfunc lambda) nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error (getfunc lambda) nil '()))
+	:testManyArguments (lambda ()
+		(this.assertNotRaises Error (getfunc lambda) nil '() 'hello 'joe))
+	:testNonListFirstExpression (lambda ()
+		(this.assertRaises Error (getfunc lambda) nil 'hello))
+	:testEmptyLambda (lambda ()
+		(this.assertType (lambda) "function"))))
+
 ;; TODO: Test (defun)
 ;;   * Test defuns as closures
 

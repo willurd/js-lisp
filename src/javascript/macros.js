@@ -25,15 +25,38 @@ defmacro("quote", function (expression) {
 defmacro("lambda", function (arglist /*, ... */) {
 	var env  = new Env(lisp.env);
 	var args = argsToArray(arguments);
+	
+	if (arguments.length > 0 && !(arglist instanceof Array)) {
+		throw new Error("(lambda) requires a list as its first expression");
+	}
+	
 	return (function (env, args) {
 		var body = args.slice(1);
 		return function () {
+			if (args.length < 2) {
+				return null; // This function does nothing
+			}
+			var largs = argsToArray(arguments);
 			var tempEnv = lisp.env;
 			var i;
 			lisp.env = env;
 			lisp.env.let("this", this);
 			for (i = 0; i < arglist.length; i++) {
-				lisp.env.let(arglist[i], arguments[i]);
+				var argname = arglist[i];
+				if (argname == "&rest") {
+					if (i == arglist.length - 1) {
+						throw new Error("No rest argument after &rest identifier in " +
+							"(defun) arglist");
+					}
+					if (arglist.length > i + 2) {
+						throw new Error("Unexpected arguments (" +
+							arglist.slice(i+1).join(" ") + ") after &rest argument");
+					}
+					lisp.env.let(arglist[i+1], largs.slice(i));
+					break;
+				} else {
+					lisp.env.let(argname, largs[i]);
+				}
 			}
 			var ret = null;
 			for (i = 0; i < body.length; i++) {
@@ -46,42 +69,21 @@ defmacro("lambda", function (arglist /*, ... */) {
 });
 
 /**
- * Defines a function.
+ * Defines a function. This is shorthand for (setq name (lambda ...)).
  * 
  * TODO: Test me
- * TODO: Reuse (lambda) for this.
  */
 defmacro("defun", function (name, arglist /*, ... */) {
+	if (arguments.length === 0) {
+		throw new Error("(defun) requires at least 1 argument.");
+	}
+	if (!(name instanceof Symbol)) {
+		throw new Error("(defun) requires a symbol as its first argument (got " +
+			String(name) + ")");
+	}
 	var body = argsToArray(arguments).slice(2);
-	
-	lisp.env.set(name, function () {
-		var args = argsToArray(arguments);
-		var i;
-		lisp.env = new Env(lisp.env);
-		for (i = 0; i < arglist.length; i++) {
-			var argname = arglist[i];
-			if (argname == "&rest") {
-				if (i == arglist.length - 1) {
-					throw new Error("No rest argument after &rest identifier in (defun) arglist");
-				}
-				if (arglist.length > i + 2) {
-					throw new Error("Unexpected arguments (" + arglist.slice(i+1).join(" ") +
-						") after &rest argument");
-				}
-				lisp.env.let(arglist[i+1], args.slice(i));
-				break;
-			} else {
-				lisp.env.let(argname, args[i]);
-			}
-		}
-		var ret = null;
-		for (i = 0; i < body.length; i++) {
-			ret = resolve(body[i]);
-		}
-		lisp.env = lisp.env.parent;
-		return ret;
-	});
-	
+	var lambda = [_S("lambda"), arglist].concat(body);
+	resolve([_S("setq"), name, lambda]);
 	return null;
 });
 
@@ -179,7 +181,7 @@ defmacro("try", function () {
 	} catch (e) {
 		// Evaluate the `catch` expression if there is one.
 		if (catchExpression) {
-			var expression = [new Symbol("lambda")].concat(catchExpression.slice(1));
+			var expression = [_S("lambda")].concat(catchExpression.slice(1));
 			if (expression.length === 1) { // Add an arglist if there isn't one
 				expression.push([]);
 			}
@@ -427,8 +429,8 @@ defmacro("and", function () {
  */
 defmacro("equal", function () {
 	if (arguments.length < 2) {
-		throw new Error("(equal) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(equal) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return equal(a, b);
@@ -440,8 +442,8 @@ defmacro("equal", function () {
  */
 defmacro("not-equal", function () {
 	if (arguments.length < 2) {
-		throw new Error("(not-equal) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(not-equal) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return !equal(a, b);
@@ -453,8 +455,8 @@ defmacro("not-equal", function () {
  */
 defmacro("==", function () {
 	if (arguments.length < 2) {
-		throw new Error("(==) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(==) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a == b;
@@ -466,8 +468,8 @@ defmacro("==", function () {
  */
 defmacro("===", function () {
 	if (arguments.length < 2) {
-		throw new Error("(===) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(===) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a === b;
@@ -479,8 +481,8 @@ defmacro("===", function () {
  */
 defmacro("!=", function () {
 	if (arguments.length < 2) {
-		throw new Error("(!=) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(!=) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a != b;
@@ -492,8 +494,8 @@ defmacro("!=", function () {
  */
 defmacro("!==", function () {
 	if (arguments.length < 2) {
-		throw new Error("(!==) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(!==) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a !== b;
@@ -509,8 +511,8 @@ defmacro("!==", function () {
  */
 defmacro("<", function () {
 	if (arguments.length < 2) {
-		throw new Error("(<) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(<) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a < b;
@@ -526,8 +528,8 @@ defmacro("<", function () {
  */
 defmacro(">", function () {
 	if (arguments.length < 2) {
-		throw new Error("(>) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(>) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a > b;
@@ -543,8 +545,8 @@ defmacro(">", function () {
  */
 defmacro("<=", function () {
 	if (arguments.length < 2) {
-		throw new Error("(<=) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(<=) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a <= b;
@@ -560,8 +562,8 @@ defmacro("<=", function () {
  */
 defmacro(">=", function () {
 	if (arguments.length < 2) {
-		throw new Error("(>=) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(>=) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a >= b;

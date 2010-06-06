@@ -250,10 +250,13 @@ function sprintf () {
 function toJSON (object, pretty, levels, level) {
 	levels = levels || 2; // Default levels
 	level = level || 0;
+	
 	var done = level >= levels;
 	var newline = pretty ? '\n' : '';
-	var singleprefix = times(' ', 2);
+	var singleprefix = pretty ? times(' ', 2) : '';
 	var prefix  = pretty ? times(singleprefix, level) : '';
+	
+	var json;
 	
 	switch (typeof(object))
 	{
@@ -265,7 +268,7 @@ function toJSON (object, pretty, levels, level) {
 			return 'null';
 		} else if (object instanceof Array) {
 			// 'object' is an Array.
-			var json = '[';
+			json = '[';
 			
 			if (!done) {
 				for (var i = 0; i < object.length; i++) {
@@ -293,19 +296,27 @@ function toJSON (object, pretty, levels, level) {
 				   f(object.getUTCSeconds())   +
 				   '"';
 		} else {
-			var json = '{';
+			json = '{';
 			
 			if (!done) {
 				json = json + newline;
+				var count = 0;
+				var value;
 				for (var key in object) {
+					count++;
 					if (object.hasOwnProperty(key)) {
-						json += prefix + singleprefix + '"' + key + '": ' +
-							((object[key] == window) ? "[window]"
-								: toJSON(object[key], pretty, levels, level+1)) +
-							', ' + newline;
+						if (object[key] == window) {
+							value = "[window]";
+						} else {
+							value = toJSON(object[key], pretty, levels, level+1);
+						}
+						json += prefix + singleprefix + '"' + key + '": ' + value;
+						json += ', ' + newline;
 					}
 				}
-				json = json.replace(/,\s*$/, '') + newline + prefix;
+				json = json.replace(/[\s\n]*$/g, '');
+				json = json.replace(/,$/, '');
+				json = json + (count > 0 ? (newline + prefix) : '');
 			} else {
 				json += ' ... ';
 			}
@@ -319,7 +330,8 @@ function toJSON (object, pretty, levels, level) {
 		return '"' + object.replace(/"/g, '\\"') + '"';
 	case 'number':
 		return object;
-	case 'boolean':
+	case 'boolean':	
+	default:
 		return object.toString();
 	}
 }
@@ -491,6 +503,10 @@ var StringStream = Class.extend({
 		}
 	}
 });
+function _S (name) {
+	return new Symbol(name);
+}
+
 function defun (name, func) {
 	var env = (lisp && lisp.env) || ROOT_ENV;
 	env.set(name, func);
@@ -736,7 +752,7 @@ var parse = {
 			return parse.sexp(stream);
 		case "'":
 			stream.next();
-			return [new Symbol("quote"), parse.any(stream)];
+			return [_S("quote"), parse.any(stream)];
 		case '"':
 			return parse.string(stream);
 		case ':':
@@ -807,7 +823,7 @@ var parse = {
 		while (badChars.indexOf(stream.peek()) == -1 && !stream.eof()) {
 			symbol += stream.next();
 		}
-		return new Symbol(symbol);
+		return _S(symbol);
 	},
 	
 	keyword: function (stream) {
@@ -889,7 +905,9 @@ var parse = {
 		 	   stream.slice(stream.position, stream.position+2) != '\n\r') {
 			c += stream.next();
 		}
-		stream.next();
+		if (!stream.eof()) {
+			stream.next();
+		}
 	}
 };
 var WHITESPACE = " \t\n\r";
@@ -948,15 +966,38 @@ defmacro("quote", function (expression) {
 defmacro("lambda", function (arglist /*, ... */) {
 	var env  = new Env(lisp.env);
 	var args = argsToArray(arguments);
+	
+	if (arguments.length > 0 && !(arglist instanceof Array)) {
+		throw new Error("(lambda) requires a list as its first expression");
+	}
+	
 	return (function (env, args) {
 		var body = args.slice(1);
 		return function () {
+			if (args.length < 2) {
+				return null; // This function does nothing
+			}
+			var largs = argsToArray(arguments);
 			var tempEnv = lisp.env;
 			var i;
 			lisp.env = env;
 			lisp.env.let("this", this);
 			for (i = 0; i < arglist.length; i++) {
-				lisp.env.let(arglist[i], arguments[i]);
+				var argname = arglist[i];
+				if (argname == "&rest") {
+					if (i == arglist.length - 1) {
+						throw new Error("No rest argument after &rest identifier in " +
+							"(defun) arglist");
+					}
+					if (arglist.length > i + 2) {
+						throw new Error("Unexpected arguments (" +
+							arglist.slice(i+1).join(" ") + ") after &rest argument");
+					}
+					lisp.env.let(arglist[i+1], largs.slice(i));
+					break;
+				} else {
+					lisp.env.let(argname, largs[i]);
+				}
 			}
 			var ret = null;
 			for (i = 0; i < body.length; i++) {
@@ -969,42 +1010,21 @@ defmacro("lambda", function (arglist /*, ... */) {
 });
 
 /**
- * Defines a function.
+ * Defines a function. This is shorthand for (setq name (lambda ...)).
  * 
  * TODO: Test me
- * TODO: Reuse (lambda) for this.
  */
 defmacro("defun", function (name, arglist /*, ... */) {
+	if (arguments.length === 0) {
+		throw new Error("(defun) requires at least 1 argument.");
+	}
+	if (!(name instanceof Symbol)) {
+		throw new Error("(defun) requires a symbol as its first argument (got " +
+			String(name) + ")");
+	}
 	var body = argsToArray(arguments).slice(2);
-	
-	lisp.env.set(name, function () {
-		var args = argsToArray(arguments);
-		var i;
-		lisp.env = new Env(lisp.env);
-		for (i = 0; i < arglist.length; i++) {
-			var argname = arglist[i];
-			if (argname == "&rest") {
-				if (i == arglist.length - 1) {
-					throw new Error("No rest argument after &rest identifier in (defun) arglist");
-				}
-				if (arglist.length > i + 2) {
-					throw new Error("Unexpected arguments (" + arglist.slice(i+1).join(" ") +
-						") after &rest argument");
-				}
-				lisp.env.let(arglist[i+1], args.slice(i));
-				break;
-			} else {
-				lisp.env.let(argname, args[i]);
-			}
-		}
-		var ret = null;
-		for (i = 0; i < body.length; i++) {
-			ret = resolve(body[i]);
-		}
-		lisp.env = lisp.env.parent;
-		return ret;
-	});
-	
+	var lambda = [_S("lambda"), arglist].concat(body);
+	resolve([_S("setq"), name, lambda]);
 	return null;
 });
 
@@ -1102,7 +1122,7 @@ defmacro("try", function () {
 	} catch (e) {
 		// Evaluate the `catch` expression if there is one.
 		if (catchExpression) {
-			var expression = [new Symbol("lambda")].concat(catchExpression.slice(1));
+			var expression = [_S("lambda")].concat(catchExpression.slice(1));
 			if (expression.length === 1) { // Add an arglist if there isn't one
 				expression.push([]);
 			}
@@ -1350,8 +1370,8 @@ defmacro("and", function () {
  */
 defmacro("equal", function () {
 	if (arguments.length < 2) {
-		throw new Error("(equal) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(equal) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return equal(a, b);
@@ -1363,8 +1383,8 @@ defmacro("equal", function () {
  */
 defmacro("not-equal", function () {
 	if (arguments.length < 2) {
-		throw new Error("(not-equal) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(not-equal) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return !equal(a, b);
@@ -1376,8 +1396,8 @@ defmacro("not-equal", function () {
  */
 defmacro("==", function () {
 	if (arguments.length < 2) {
-		throw new Error("(==) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(==) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a == b;
@@ -1389,8 +1409,8 @@ defmacro("==", function () {
  */
 defmacro("===", function () {
 	if (arguments.length < 2) {
-		throw new Error("(===) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(===) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a === b;
@@ -1402,8 +1422,8 @@ defmacro("===", function () {
  */
 defmacro("!=", function () {
 	if (arguments.length < 2) {
-		throw new Error("(!=) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(!=) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a != b;
@@ -1415,8 +1435,8 @@ defmacro("!=", function () {
  */
 defmacro("!==", function () {
 	if (arguments.length < 2) {
-		throw new Error("(!==) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(!==) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a !== b;
@@ -1432,8 +1452,8 @@ defmacro("!==", function () {
  */
 defmacro("<", function () {
 	if (arguments.length < 2) {
-		throw new Error("(<) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(<) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a < b;
@@ -1449,8 +1469,8 @@ defmacro("<", function () {
  */
 defmacro(">", function () {
 	if (arguments.length < 2) {
-		throw new Error("(>) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(>) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a > b;
@@ -1466,8 +1486,8 @@ defmacro(">", function () {
  */
 defmacro("<=", function () {
 	if (arguments.length < 2) {
-		throw new Error("(<=) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(<=) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a <= b;
@@ -1483,8 +1503,8 @@ defmacro("<=", function () {
  */
 defmacro(">=", function () {
 	if (arguments.length < 2) {
-		throw new Error("(>=) requires at least 2 arguments (got "
-			+ arguments.length + ")");
+		throw new Error("(>=) requires at least 2 arguments (got " +
+			arguments.length + ")");
 	}
 	return comparator(arguments, function (a, b) {
 		return a >= b;

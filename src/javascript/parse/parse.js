@@ -41,7 +41,7 @@ var parse = {
 			return parse.sexp(stream);
 		case "'":
 			stream.next();
-			return [new Symbol("quote"), parse.any(stream)];
+			return [_S("quote"), parse.any(stream)];
 		case '"':
 			return parse.string(stream);
 		case ':':
@@ -112,7 +112,7 @@ var parse = {
 		while (badChars.indexOf(stream.peek()) == -1 && !stream.eof()) {
 			symbol += stream.next();
 		}
-		return new Symbol(symbol);
+		return _S(symbol);
 	},
 	
 	keyword: function (stream) {
@@ -194,6 +194,8 @@ var parse = {
 		 	   stream.slice(stream.position, stream.position+2) != '\n\r') {
 			c += stream.next();
 		}
-		stream.next();
+		if (!stream.eof()) {
+			stream.next();
+		}
 	}
 };
