@@ -1,7 +1,28 @@
 /*jsl:ignore*/ // Suppress jsl warnings
-// From: http://phpjs.org/functions/sprintf:522
-// More info: http://php.net/manual/en/function.sprintf.php
-function sprintf () {
+
+/**
+ * <p>Formats the string 'format' with the given arguments. Uses the
+ * php formatting style, defined at
+ * http://php.net/manual/en/function.sprintf.php.</p>
+ * 
+ * <p>From: http://phpjs.org/functions/sprintf:522.</p>
+ * 
+ * @param {string} format
+ *     The string to be formatted with the given arguments.
+ * @param {[mixed]} rest
+ *     The rest of the arguments with which to format the given string.
+ * 
+ * @example
+ *     >> sprintf("%01.2f", 123.1)
+ *     => 123.10
+ * @example
+ *     >> sprintf("[%10s]", 'monkey')
+ *     => "[    monkey]"
+ * @example
+ *     >> sprintf("[%'#10s]", 'monkey')
+ *     => "[####monkey]"
+ */
+function sprintf (format /*, ... */) {
     // http://kevin.vanzonneveld.net
     // +   original by: Ash Searle (http://hexmen.com/blog/)
     // + namespaced by: Michael White (http://getsprink.com)
@@ -11,24 +32,16 @@ function sprintf () {
     // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
     // +      input by: Brett Zamir (http://brett-zamir.me)
     // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // *     example 1: sprintf("%01.2f", 123.1);
-    // *     returns 1: 123.10
-    // *     example 2: sprintf("[%10s]", 'monkey');
-    // *     returns 2: '[    monkey]'
-    // *     example 3: sprintf("[%'#10s]", 'monkey');
-    // *     returns 3: '[####monkey]'
 
     var regex = /%%|%(\d+\$)?([-+\'#0 ]*)(\*\d+\$|\*|\d+)?(\.(\*\d+\$|\*|\d+))?([scboxXuidfegEG])/g;
     var a = arguments, i = 0, format = a[i++];
-
-    // pad()
+	
     var pad = function (str, len, chr, leftJustify) {
         if (!chr) {chr = ' ';}
         var padding = (str.length >= len) ? '' : Array(1 + len - str.length >>> 0).join(chr);
         return leftJustify ? str + padding : padding + str;
     };
-
-    // justify()
+	
     var justify = function (value, prefix, leftJustify, minWidth, zeroPad, customPadChar) {
         var diff = minWidth - value.length;
         if (diff > 0) {
@@ -40,8 +53,7 @@ function sprintf () {
         }
         return value;
     };
-
-    // formatBaseX()
+	
     var formatBaseX = function (value, base, prefix, leftJustify, minWidth, precision, zeroPad) {
         // Note: casts negative numbers to positive ones
         var number = value >>> 0;
@@ -149,4 +161,5 @@ function sprintf () {
 
     return format.replace(regex, doFormat);
 }
+
 /*jsl:end*/

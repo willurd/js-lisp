@@ -1,7 +1,7 @@
 /**
  * The method used for (equal) equality in js-lisp.
  * 
- * @return Whether a and b are equal from js-lisp's perspective.
+ * @returns Whether a and b are equal from js-lisp's perspective.
  */
 function equal (a, b) {
 	// Test Symbol equality

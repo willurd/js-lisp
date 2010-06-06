@@ -1,5 +1,19 @@
 /**
+ * Functions that are defined for the lisp environment.
+ * 
+ * @name lisp.functions
+ * @namespace
+ */
+var functions = {}; // This is just for documentation. It doesn't get used.
+
+/**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name jseval
+ * @member lisp.functions
  */
 defun("jseval", function () {
 	return eval.apply(null, arguments);
@@ -11,9 +25,26 @@ defun("jseval", function () {
  * 
  * TODO: Test me
  * 
- * @return The new class instance.
+ * @function
+ * @name new
+ * @member lisp.functions
+ * 
+ * @param {Class} Class
+ *     The class to create a new instance of.
+ * @param {[mixed]} rest
+ *     The arguments to be passed to the class constructor.
+ * 
+ * @returns The new class instance.
+ * 
+ * @example Instantiate a class
+ *     >> (new MyClass)
+ *     => ; the MyClass instance
+ * 
+ * @example Instantiate a class with constructor arguments
+ *     >> (to-string (new Error "My error message"))
+ *     => "Error: My error message"
  */
-defun("new", function (Class) {
+defun("new", function (Class /*, ... */) {
 	if (arguments.length === 0) {
 		throw new Error("(new) requires at least 1 argument");
 	}
@@ -24,6 +55,12 @@ defun("new", function (Class) {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name instanceof
+ * @member lisp.functions
  */
 defun("instanceof", function (object, Class) {
 	if (arguments.length !== 2) {
@@ -34,25 +71,30 @@ defun("instanceof", function (object, Class) {
 });
 
 /**
- * Throws the given object, or "new Error()" if no object is
- * provided.
- * 
- * @return Nothing. After throw'ing the stack is unwided to the
- *         nearest 'catch' block.
+ * Throws the given object, or "new Error()" if no object is provided.
  * 
  * @tested
  * 
+ * @function
+ * @name throw
+ * @member lisp.functions
+ * 
+ * @param {mixed} object The object to throw. Defaults to new Error().
+ * 
+ * @returns Nothing. After throw'ing the stack is unwided to the
+ *          nearest 'catch' block.
+ * 
  * @example Basic Error
- *   >> (throw) ; Throws "new Error()"
+ *     >> (throw) ; Throws "new Error()"
  * 
  * @example Custom Error
- *   >> (throw (new Error "My Custom Error"))
+ *     >> (throw (new Error "My Custom Error"))
  * 
  * @example Anything else you can normally throw
- *   >> (throw "a string")
- *   >> (throw 12)
- *   >> (throw (object :type "MyError"))
- *   >> (throw (array 1 2 3))
+ *     >> (throw "a string")
+ *     >> (throw 12)
+ *     >> (throw (object :type "MyError"))
+ *     >> (throw (array 1 2 3))
  */
 defun("throw", function (object) {
 	if (arguments.length > 1) {
@@ -64,11 +106,46 @@ defun("throw", function (object) {
 });
 
 /**
- * Returns the given arguments as a list.
+ * Creates an array from the given arguments.
  * 
  * TODO: Test me
+ * 
+ * @function
+ * @name array
+ * @alias list
+ * @member lisp.functions
+ * 
+ * @returns The new array.
+ * 
+ * @example An empty array
+ *     >> (array)
+ *     => []
+ * 
+ * @example An array with some elements
+ *     >> (array 1 2 "three")
+ *     => [1, 2, "three"]
+ * 
+ * @example A compound array
+ *     >> (array (array 1 2) (array 3 4))
+ *     => [[1, 2], [3, 4]]
  */
-defun("list", function () {
+defun("array", function () {
+	return argsToArray(arguments);
+});
+
+/**
+ * Returns the given arguments as an array (this is an alias
+ * for (array)).
+ * 
+ * TODO: Test me
+ * 
+ * @function
+ * @name list
+ * @member lisp.functions
+ * 
+ * @returns The new array.
+ */
+defun("list", function (/* ... */) {
 	return argsToArray(arguments);
 });
 
@@ -77,9 +154,33 @@ defun("list", function () {
  * property list to initialize the object. There must be an even
  * number of arguments -- one value for every key.
  * 
- * @return The new object.
- * 
  * @tested
+ * 
+ * @function
+ * @name object
+ * @member lisp.functions
+ * 
+ * @returns The new object.
+ * 
+ * @example An empty object
+ *     >> (object)
+ *     => {}
+ * 
+ * @example An object using keywords as keys
+ *     >> (object :start 0 :end 10)
+ *     => {start: 0, end: 10}
+ * 
+ * @example An object using strings as keys
+ *     >> (object "start" 0 "end" 10)
+ *     => {start: 0, end: 10}
+ * 
+ * @example A compound object
+ *     >> (object :name "Joe"
+ *                :parents (array (object :name "John")
+ *                                (object :name "Jane")))
+ *     => {name: "Joe",
+ *         parents: [{name: "John"},
+ *                   {name: "Jane"}]}
  */
 defun("object", function () {
 	var args = argsToArray(arguments);
@@ -97,21 +198,15 @@ defun("object", function () {
 });
 
 /**
- * Creates an array from the given arguments.
- * 
- * TODO: Test me
- * 
- * @return The new array.
- */
-defun("array", function () {
-	return argsToArray(arguments);
-});
-
-/**
  * Returns a value from an object given a key (will work with
  * array indices as well).
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name getkey
+ * @member lisp.functions
  */
 defun("getkey", function (key, object) {
 	if (arguments.length !== 2) {
@@ -125,6 +220,11 @@ defun("getkey", function (key, object) {
  * Sets a value on the given object using the given key.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name setkey
+ * @member lisp.functions
  */
 defun("setkey", function (key, object, value) {
 	if (arguments.length !== 3) {
@@ -137,9 +237,18 @@ defun("setkey", function (key, object, value) {
 /**
  * Prints the given arguments to the console.
  * 
- * @return nil.
- * 
  * @tested
+ * 
+ * @function
+ * @name print
+ * @member lisp.functions
+ * 
+ * @returns nil.
+ * 
+ * @example Basic (print) expression
+ *     >> (print "Hello" "Lisp")
+ *     Hello Lisp
+ *     => nil
  */
 defun("print", function () {
 	// Do not remove this. This is not a debug statement.
@@ -150,9 +259,22 @@ defun("print", function () {
 /**
  * Joins the given arguments together into one string.
  * 
- * @return The string result of the joined arguments.
- * 
  * @tested
+ * 
+ * @function
+ * @name concat
+ * @member lisp.functions
+ * 
+ * @returns The string result of the joined arguments.
+ * 
+ * @example Concatenate a single object (if you really want to)
+ *     >> (concat "Hello")
+ *     => "Hello"
+ * 
+ * @example Concatenate many objects
+ *     >> (let ((name "Lisp"))
+ *          (concat "Hello: " name))
+ *     => "Hello: Lisp"
  */
 defun("concat", function () {
 	return argsToArray(arguments).join("");
@@ -162,19 +284,23 @@ defun("concat", function () {
  * Joins the given arguments together into one string, using
  * the first argument as the separator.
  * 
- * @return The string result of the joined arguments.
- * 
  * @tested
  * 
+ * @function
+ * @name join
+ * @member lisp.functions
+ * 
+ * @returns The string result of the joined arguments.
+ * 
  * @example Join items from a single list
- *   >> (join ", " (list "one" "two"))
- *   => "one, two"
+ *     >> (join ", " (list "one" "two"))
+ *     => "one, two"
  * 
  * @example Join items from multiple lists
- *   >> (let ((l1 (list "one" "two"))
- *            (l2 (list "three")))
- *        (join ", " l1 l2))
- *   => "one, two, three"
+ *     >> (let ((l1 (list "one" "two"))
+ *              (l2 (list "three")))
+ *          (join ", " l1 l2))
+ *     => "one, two, three"
  */
 defun("join", function () {
 	if (arguments.length === 0) {
@@ -195,9 +321,16 @@ defun("join", function () {
 });
 
 /**
- * Returns the type of the given value.
+ * Returns the type of the given value (the result of
+ * "typeof(value)").
+ * 
+ * TODO: Add examples
  * 
  * @tested
+ * 
+ * @function
+ * @name typeof
+ * @member lisp.functions
  */
 defun("typeof", function (value) {
 	if (arguments.length !== 1) {
@@ -210,7 +343,13 @@ defun("typeof", function (value) {
 /**
  * Converts the given value to a string.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name to-string
+ * @member lisp.functions
  */
 defun("to-string", function (value) {
 	if (arguments.length !== 1) {
@@ -223,7 +362,13 @@ defun("to-string", function (value) {
 /**
  * Converts the given value to a number.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name to-number
+ * @member lisp.functions
  */
 defun("to-number", function (value) {
 	if (arguments.length !== 1) {
@@ -236,7 +381,13 @@ defun("to-number", function (value) {
 /**
  * Converts the given value to a number.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name to-boolean
+ * @member lisp.functions
  */
 defun("to-boolean", function (value) {
 	if (arguments.length !== 1) {
@@ -250,6 +401,11 @@ defun("to-boolean", function (value) {
  * Converts the given value to a json representation of that value.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name to-json
+ * @member lisp.functions
  */
 defun("to-json", function () {
 	return toJSON.apply(null, arguments);
@@ -258,7 +414,13 @@ defun("to-json", function () {
 /**
  * Converts the given string to uppercase.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name to-upper
+ * @member lisp.functions
  */
 defun("to-upper", function (value) {
 	if (arguments.length !== 1) {
@@ -274,7 +436,13 @@ defun("to-upper", function (value) {
 /**
  * Converts the given string to uppercase.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name to-lower
+ * @member lisp.functions
  */
 defun("to-lower", function (value) {
 	if (arguments.length !== 1) {
@@ -290,7 +458,13 @@ defun("to-lower", function (value) {
 /**
  * Reduces the given arguments on the / operator.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name /
+ * @member lisp.functions
  */
 defun("/", function () {
 	if (arguments.length === 0) {
@@ -310,7 +484,13 @@ defun("/", function () {
 /**
  * Reduces the given arguments on the * operator.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name *
+ * @member lisp.functions
  */
 defun("*", function () {
 	var args = argsToArray(arguments);
@@ -325,7 +505,13 @@ defun("*", function () {
 /**
  * Reduces the given arguments on the + operator.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name +
+ * @member lisp.functions
  */
 defun("+", function () {
 	var args = argsToArray(arguments);
@@ -340,7 +526,13 @@ defun("+", function () {
 /**
  * Reduces the given arguments on the - operator.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name -
+ * @member lisp.functions
  */
 defun("-", function () {
 	if (arguments.length === 0) {
@@ -358,7 +550,13 @@ defun("-", function () {
 /**
  * Reduces the given arguments on the % operator.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name %
+ * @member lisp.functions
  */
 defun("%", function () {
 	if (arguments.length !== 2) {
@@ -373,7 +571,13 @@ defun("%", function () {
 /**
  * Adds 1 to the given value.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name 1+
+ * @member lisp.functions
  */
 defun("1+", function (value) {
 	if (arguments.length !== 1) {
@@ -390,7 +594,13 @@ defun("1+", function (value) {
 /**
  * Subtracts 1 from the given value.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name 1-
+ * @member lisp.functions
  */
 defun("1-", function (value) {
 	if (arguments.length !== 1) {
@@ -405,10 +615,16 @@ defun("1-", function (value) {
 });
 
 /**
- * Calls sprintf (found in the vendor section) with the
+ * Calls {@link sprintf} (found in the vendor section) with the
  * supplied arguments.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name format
+ * @member lisp.functions
  */
 defun("format", function (print, format) {
 	if (arguments.length < 2) {
@@ -432,6 +648,11 @@ defun("format", function (print, format) {
  * function and returns a new list with the given return values.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name map
+ * @member lisp.functions
  */
 defun("map", function (func, list) {
 	if (arguments.length !== 2) {
@@ -458,6 +679,11 @@ defun("map", function (func, list) {
  * in the given list on the given object.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name props
+ * @member lisp.functions
  */
 defun("props", function (object, list) {
 	if (arguments.length !== 2) {

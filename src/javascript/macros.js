@@ -1,7 +1,22 @@
 /**
+ * Macros that are defined for the lisp environment.
+ * 
+ * @name lisp.macros
+ * @namespace
+ */
+var macros = {}; // This is just for documentation. It doesn't get used.
+
+/**
  * Takes a single lisp expression (s-expression) and returns it unevaluated.
  * 
- * @return The given argument, unevaluated.
+ * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name quote
+ * @member lisp.macros
+ * 
+ * @returns The given argument, unevaluated.
  */
 defmacro("quote", function (expression) {
 	if (arguments.length !== 1) {
@@ -17,15 +32,21 @@ defmacro("quote", function (expression) {
  * when called.
  * 
  * TODO: Test me more
+ * TODO: Add examples
  * 
- * @return The created function.
+ * @function
+ * @name lambda
+ * @member lisp.macros
+ * 
+ * @returns The created function.
  */
 defmacro("lambda", function (arglist /*, ... */) {
 	var env  = new Env(lisp.env);
 	var args = argsToArray(arguments);
 	
 	if (arguments.length > 0 && !(arglist instanceof Array)) {
-		throw new Error("(lambda) requires a list as its first expression");
+		throw new Error("(lambda) requires a list as its first expression " +
+			"(got " + String(arglist) + ")");
 	}
 	
 	return (function (env, args) {
@@ -70,6 +91,11 @@ defmacro("lambda", function (arglist /*, ... */) {
  * Defines a function. This is shorthand for (setq name (lambda ...)).
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name defun
+ * @member lisp.macros
  */
 defmacro("defun", function (name, arglist /*, ... */) {
 	if (arguments.length === 0) {
@@ -78,6 +104,10 @@ defmacro("defun", function (name, arglist /*, ... */) {
 	if (!(name instanceof Symbol)) {
 		throw new Error("(defun) requires a symbol as its first argument (got " +
 			String(name) + ")");
+	}
+	if (arguments.length > 1 && !(arglist instanceof Array)) {
+		throw new Error("(defun) requires a list of symbols as its second " +
+			"expression (got " + String(arglist) + ")");
 	}
 	var body = argsToArray(arguments).slice(2);
 	var lambda = [_S("lambda"), arglist].concat(body);
@@ -97,9 +127,14 @@ defmacro("defun", function (name, arglist /*, ... */) {
  *     - (try ... (finally ...))
  *     - (try ... (catch ...) (finally ...))
  * 
- * @return The return value of the last evaluated expression.
- * 
  * @tested
+ * 
+ * @function
+ * @name try
+ * @member lisp.macros
+ * 
+ * @returns The return value of the last evaluated body expression
+ *          (i.e. non-catch, non-finally expression).
  * 
  * @example Empty try block
  *   >> (try)
@@ -207,6 +242,11 @@ defmacro("try", function () {
  * Returns the function that the given symbol points to.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name getfunc
+ * @member lisp.macros
  */
 defmacro("getfunc", function (symbol) {
 	if (arguments.length !== 1) {
@@ -227,6 +267,11 @@ defmacro("getfunc", function (symbol) {
  * on the given object (with the given arguments).
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name funcall
+ * @member lisp.macros
  */
 defmacro("funcall", function (object, dotpath) {
 	if (arguments.length < 2) {
@@ -257,6 +302,12 @@ defmacro("funcall", function (object, dotpath) {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name let
+ * @member lisp.macros
  */
 defmacro("let", function () {
 	var args = argsToArray(arguments);
@@ -280,8 +331,13 @@ defmacro("let", function () {
 });
 
 /**
- * TODO: Document me
  * TODO: Test me more
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name setq
+ * @member lisp.macros
  */
 defmacro("setq", function () {
 	var args = argsToArray(arguments);
@@ -297,10 +353,16 @@ defmacro("setq", function () {
  * of places in other macros/functions where only one expression
  * can go.
  * 
- * @return The return value of the last expression, or nil if there
- *         are no expression.
+ * TODO: Add examples
  * 
  * @tested
+ * 
+ * @function
+ * @name progn
+ * @member lisp.macros
+ * 
+ * @returns The return value of the last expression, or nil if there
+ *          are no expression.
  */
 defmacro("progn", function (/* .. */) {
 	var ret = null;
@@ -311,10 +373,15 @@ defmacro("progn", function (/* .. */) {
 });
 
 /**
- * @return The value of the evaluated expression, or nil.
- * 
- * TODO: Document me
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name cond
+ * @member lisp.macros
+ * 
+ * @returns The value of the last evaluated expression, or nil.
  */
 defmacro("cond", function () {
 	for (var i = 0; i < arguments.length; i++) {
@@ -342,11 +409,17 @@ defmacro("cond", function () {
  * expression, otherwise it evaluates all of the remaining expression
  * and returns the return value of the last one.
  * 
- * @return The return value of either the second or last expression, or
- *         nil if testExpression evaluates to false and there are no
- *         remaining expressions to evaluate.
+ * TODO: Add examples
  * 
  * @tested
+ * 
+ * @function
+ * @name if
+ * @member lisp.macros
+ * 
+ * @returns The return value of either the second or last expression, or
+ *          nil if testExpression evaluates to false and there are no
+ *          remaining expressions to evaluate.
  */
 defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
 	if (arguments.length < 2) {
@@ -370,9 +443,15 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
  * Executes the rest of the arguments if the first argument
  * is true.
  * 
- * @return The return value of the last expression.
+ * TODO: Add examples
  * 
  * @tested
+ * 
+ * @function
+ * @name when
+ * @member lisp.macros
+ * 
+ * @returns The return value of the last expression.
  */
 defmacro("when", function () {
 	if (arguments.length === 0) {
@@ -389,7 +468,13 @@ defmacro("when", function () {
 /**
  * Performs a logical negation on the given value.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name not
+ * @member lisp.macros
  */
 defmacro("not", function (value) {	
 	if (arguments.length === 0) {
@@ -402,6 +487,12 @@ defmacro("not", function (value) {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name or
+ * @member lisp.macros
  */
 defmacro("or", function () {
 	for (var i = 0; i < arguments.length; i++) {
@@ -414,6 +505,12 @@ defmacro("or", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name and
+ * @member lisp.macros
  */
 defmacro("and", function () {
 	if (arguments.length === 0) {
@@ -426,6 +523,12 @@ defmacro("and", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name equal
+ * @member lisp.macros
  */
 defmacro("equal", function () {
 	if (arguments.length < 2) {
@@ -439,6 +542,12 @@ defmacro("equal", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name not-equal
+ * @member lisp.macros
  */
 defmacro("not-equal", function () {
 	if (arguments.length < 2) {
@@ -452,6 +561,12 @@ defmacro("not-equal", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name ==
+ * @member lisp.macros
  */
 defmacro("==", function () {
 	if (arguments.length < 2) {
@@ -465,6 +580,12 @@ defmacro("==", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name ===
+ * @member lisp.macros
  */
 defmacro("===", function () {
 	if (arguments.length < 2) {
@@ -478,6 +599,12 @@ defmacro("===", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name !=
+ * @member lisp.macros
  */
 defmacro("!=", function () {
 	if (arguments.length < 2) {
@@ -491,6 +618,12 @@ defmacro("!=", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name !==
+ * @member lisp.macros
  */
 defmacro("!==", function () {
 	if (arguments.length < 2) {
@@ -504,10 +637,19 @@ defmacro("!==", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
  * 
- * Examples:
- *    * (< x y)
- *    * (< -1 0 1 2 3)
+ * @function
+ * @name <
+ * @member lisp.macros
+ * 
+ * @example Comparing two arguments
+ *     >> (< 3 4)
+ *     => t
+ * 
+ * @example Comparing many arguments
+ *     >> (< 3 4 5 1)
+ *     => false
  */
 defmacro("<", function () {
 	if (arguments.length < 2) {
@@ -521,10 +663,19 @@ defmacro("<", function () {
 
 /**
  * TODO: Test me
- *
- * Examples:
- *    * (> x y)
- *    * (> 3 2 1 0 -1)
+ * TODO: Document me
+ * 
+ * @function
+ * @name >
+ * @member lisp.macros
+ * 
+ * @example Comparing two arguments
+ *     >> (> 4 3)
+ *     => t
+ * 
+ * @example Comparing many arguments
+ *     >> (> 4 3 2 8)
+ *     => false
  */
 defmacro(">", function () {
 	if (arguments.length < 2) {
@@ -538,10 +689,19 @@ defmacro(">", function () {
 
 /**
  * TODO: Test me
- *
- * Examples:
- *    * (<= x y)
- *    * (<= 1 1 2 3 4)
+ * TODO: Document me
+ * 
+ * @function
+ * @name <=
+ * @member lisp.macros
+ * 
+ * @example Comparing two arguments
+ *     >> (<= 3 4 4)
+ *     => t
+ * 
+ * @example Comparing many arguments
+ *     >> (<= 3 4 4 3)
+ *     => false
  */
 defmacro("<=", function () {
 	if (arguments.length < 2) {
@@ -555,10 +715,19 @@ defmacro("<=", function () {
 
 /**
  * TODO: Test me
- *
- * Examples:
- *    * (>= x y)
- *    * (>= 4 3 2 2 1)
+ * TODO: Document me
+ * 
+ * @function
+ * @name >=
+ * @member lisp.macros
+ * 
+ * @example Comparing two arguments
+ *     >> (>= 4 3 3)
+ *     => t
+ * 
+ * @example Comparing many arguments
+ *     >> (>= 4 3 3 4)
+ *     => false
  */
 defmacro(">=", function () {
 	if (arguments.length < 2) {
@@ -574,6 +743,11 @@ defmacro(">=", function () {
  * Returns true if the given values === true.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-true
+ * @member lisp.macros
  */
 defmacro("is-true", function () {
 	if (arguments.length === 0) {
@@ -588,6 +762,11 @@ defmacro("is-true", function () {
  * Returns true if the given values === false.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-false
+ * @member lisp.macros
  */
 defmacro("is-false", function () {
 	if (arguments.length === 0) {
@@ -602,6 +781,11 @@ defmacro("is-false", function () {
  * Returns true if the given values === null.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-null
+ * @member lisp.macros
  */
 defmacro("is-null", function () {
 	if (arguments.length === 0) {
@@ -614,6 +798,11 @@ defmacro("is-null", function () {
 
 /**
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-undefined
+ * @member lisp.macros
  */
 defmacro("is-undefined", function () {
 	if (arguments.length === 0) {
@@ -628,6 +817,11 @@ defmacro("is-undefined", function () {
  * Returns true if the given values are strings.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-string
+ * @member lisp.macros
  */
 defmacro("is-string", function () {
 	if (arguments.length === 0) {
@@ -642,6 +836,11 @@ defmacro("is-string", function () {
  * Returns true if the given values are numbers.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-number
+ * @member lisp.macros
  */
 defmacro("is-number", function () {
 	if (arguments.length === 0) {
@@ -656,6 +855,11 @@ defmacro("is-number", function () {
  * Returns true if the given values are booleans.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-boolean
+ * @member lisp.macros
  */
 defmacro("is-boolean", function () {
 	if (arguments.length === 0) {
@@ -670,6 +874,11 @@ defmacro("is-boolean", function () {
  * Returns true if the given values are functions.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-function
+ * @member lisp.macros
  */
 defmacro("is-function", function () {
 	if (arguments.length === 0) {
@@ -684,6 +893,11 @@ defmacro("is-function", function () {
  * Returns true if the given values are objects.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-object
+ * @member lisp.macros
  */
 defmacro("is-object", function () {
 	if (arguments.length === 0) {
@@ -698,6 +912,12 @@ defmacro("is-object", function () {
  * Returns true if the given values are arrays.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-array
+ * @alias is-list
+ * @member lisp.macros
  */
 defmacro("is-array", function () {
 	if (arguments.length === 0) {
@@ -709,9 +929,15 @@ defmacro("is-array", function () {
 });
 
 /**
- * Returns true if the given values are arrays.
+ * Returns true if the given values are arrays (this is an alias
+ * for (is-array)).
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-list
+ * @member lisp.macros
  */
 defmacro("is-list", function () {
 	if (arguments.length === 0) {
@@ -726,6 +952,11 @@ defmacro("is-list", function () {
  * An expression for basic iteration over a list.
  * 
  * TODO: Test me more
+ * TODO: Add examples
+ * 
+ * @function
+ * @name dolist
+ * @member lisp.macros
  */
 defmacro("dolist", function (arglist /*, ... */) {
 	if (arguments.length === 0) {

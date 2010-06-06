@@ -26,79 +26,121 @@
 // Author: William Bowers <william.bowers@gmail.com>
 // ================================================================================
 
+/**
+ * @namespace
+ */
 var lisp = (function (global) {
 	var jseval = window.eval;
 /*jsl:ignore*/ // Suppress jsl warnings
-// From: http://ejohn.org/blog/simple-javascript-inheritance/
-// Inspired by base2 and Prototype
-(function(){
-  var initializing = false, fnTest = (/xyz/).test(function(){xyz;}) ? (/\b_super\b/) : /.*/;
-  // The base Class implementation (does nothing)
-  this.Class = function(){};
 
-  // Create a new Class that inherits from this class
-  Class.extend = function (classNameOrProp, prop) {
-    var _super = this.prototype;
-
-	var className = prop ? classNameOrProp : "Class";
-	prop = prop || classNameOrProp;
-
-    // Instantiate a base class (but only create the instance,
-    // don't run the init constructor)
-    initializing = true;
-    var prototype = new this();
-    initializing = false;
-
-    // Copy the properties over onto the new prototype
-    for (var name in prop) {
-      // Check if we're overwriting an existing function
-      prototype[name] = typeof prop[name] == "function" && 
-        typeof _super[name] == "function" && fnTest.test(prop[name]) ?
-        (function(name, fn){
-          return function() {
-            var tmp = this._super;
-
-            // Add a new ._super() method that is the same method
-            // but on the super-class
-            this._super = _super[name];
-
-            // The method only need to be bound temporarily, so we
-            // remove it when we're done executing
-            var ret = fn.apply(this, arguments);        
-            this._super = tmp;
-
-            return ret;
-          };
-        })(name, prop[name]) :
-        prop[name];
-    }
-
-    // The dummy class constructor
-    function Class() {
-      // All construction is actually done in the init method
-      if ( !initializing && this.init )
-        this.init.apply(this, arguments);
-    }
-
-	Class.className = className;
-
-    // Populate our constructed prototype object
-    Class.prototype = prototype;
-
-    // Enforce the constructor to be what we expect
-    Class.constructor = Class;
-
-    // And make this class extendable
-    Class.extend = arguments.callee;
-
-    return Class;
-  };
+(function () {
+	var initializing = false;
+	var fnTest = (/xyz/).test(function(){xyz;}) ? (/\b_super\b/) : /.*/;
+	
+	/**
+	 * <p>Defines a base class from which to create new classes that can be
+	 * extended into new classes as well.</p>
+	 * 
+	 * <p>This constructor does nothing.</p>
+	 * 
+	 * <p>Modified from: http://ejohn.org/blog/simple-javascript-inheritance/</p>
+	 * 
+	 * @class
+	 * @name Class
+	 */
+	this.Class = function () {};
+	
+	/**
+	 * <p>Creates a new class that inherits from the calling class.</p>
+	 * 
+	 * @function
+	 * 
+	 * @param {string, object} classNameOrProps
+	 *     Either the name of the class, or an object containing the class' properties.
+	 * @param {object} props
+	 *     An object containing the class' properties (only if classNameOrProps
+	 *     specifies the class name).
+	 */
+	Class.extend = function (classNameOrProps, props) {
+		var _super = this.prototype;
+		var className = props ? classNameOrProps : "Class";
+		props = props || classNameOrProps;
+		
+		// Instantiate a base class (but only create the instance,
+		// don't run the init constructor)
+		initializing = true;
+		var prototype = new this();
+		initializing = false;
+		
+		// Copy the properties over onto the new prototype
+		for (var name in props) {
+			// Check if we're overwriting an existing function
+			if (typeof props[name] == "function" &&
+				typeof _super[name] == "function" &&
+				fnTest.test(props[name])) {
+				prototype[name] = (function(name, fn){
+					return function() {
+					var tmp = this._super;
+					
+					// Add a new ._super() method that is the same method
+					// but on the super-class
+					this._super = _super[name];
+					
+					// The method only need to be bound temporarily, so we
+					// remove it when we're done executing
+					var ret = fn.apply(this, arguments);        
+					this._super = tmp;
+					
+					return ret;
+					};
+				})(name, props[name]);
+			} else {
+				prototype[name] = props[name];
+			}
+		}
+		
+		// The new class
+		var NewClass = function () {
+			// All construction is actually done in the init method
+			if (!initializing && this.init)
+				this.init.apply(this, arguments);
+		}
+		
+		NewClass.className = className;
+		NewClass.prototype = prototype;
+		NewClass.constructor = Class;
+		NewClass.extend = arguments.callee;
+		
+		return NewClass;
+	};
 })();
+
 /*jsl:end*/
 /*jsl:ignore*/ // Suppress jsl warnings
-// From: http://phpjs.org/functions/sprintf:522
-// More info: http://php.net/manual/en/function.sprintf.php
-function sprintf () {
+
+/**
+ * <p>Formats the string 'format' with the given arguments. Uses the
+ * php formatting style, defined at
+ * http://php.net/manual/en/function.sprintf.php.</p>
+ * 
+ * <p>From: http://phpjs.org/functions/sprintf:522.</p>
+ * 
+ * @param {string} format
+ *     The string to be formatted with the given arguments.
+ * @param {[mixed]} rest
+ *     The rest of the arguments with which to format the given string.
+ * 
+ * @example
+ *     >> sprintf("%01.2f", 123.1)
+ *     => 123.10
+ * @example
+ *     >> sprintf("[%10s]", 'monkey')
+ *     => "[    monkey]"
+ * @example
+ *     >> sprintf("[%'#10s]", 'monkey')
+ *     => "[####monkey]"
+ */
+function sprintf (format /*, ... */) {
     // http://kevin.vanzonneveld.net
     // +   original by: Ash Searle (http://hexmen.com/blog/)
     // + namespaced by: Michael White (http://getsprink.com)
@@ -108,24 +150,16 @@ function sprintf () {
     // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
     // +      input by: Brett Zamir (http://brett-zamir.me)
     // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-    // *     example 1: sprintf("%01.2f", 123.1);
-    // *     returns 1: 123.10
-    // *     example 2: sprintf("[%10s]", 'monkey');
-    // *     returns 2: '[    monkey]'
-    // *     example 3: sprintf("[%'#10s]", 'monkey');
-    // *     returns 3: '[####monkey]'
 
     var regex = /%%|%(\d+\$)?([-+\'#0 ]*)(\*\d+\$|\*|\d+)?(\.(\*\d+\$|\*|\d+))?([scboxXuidfegEG])/g;
     var a = arguments, i = 0, format = a[i++];
-
-    // pad()
+	
     var pad = function (str, len, chr, leftJustify) {
         if (!chr) {chr = ' ';}
         var padding = (str.length >= len) ? '' : Array(1 + len - str.length >>> 0).join(chr);
         return leftJustify ? str + padding : padding + str;
     };
-
-    // justify()
+	
     var justify = function (value, prefix, leftJustify, minWidth, zeroPad, customPadChar) {
         var diff = minWidth - value.length;
         if (diff > 0) {
@@ -137,8 +171,7 @@ function sprintf () {
         }
         return value;
     };
-
-    // formatBaseX()
+	
     var formatBaseX = function (value, base, prefix, leftJustify, minWidth, precision, zeroPad) {
         // Note: casts negative numbers to positive ones
         var number = value >>> 0;
@@ -246,6 +279,7 @@ function sprintf () {
 
     return format.replace(regex, doFormat);
 }
+
 /*jsl:end*/
 function toJSON (object, pretty, levels, level) {
 	levels = levels || 2; // Default levels
@@ -349,7 +383,7 @@ function toJSON (object, pretty, levels, level) {
 /**
  * The method used for (equal) equality in js-lisp.
  * 
- * @return Whether a and b are equal from js-lisp's perspective.
+ * @returns Whether a and b are equal from js-lisp's perspective.
  */
 function equal (a, b) {
 	// Test Symbol equality
@@ -956,9 +990,24 @@ var ROOT_ENV = new Env(new Env(null, global), {
 	"*features*": [_K("notmuch")]
 });
 /**
+ * Macros that are defined for the lisp environment.
+ * 
+ * @name lisp.macros
+ * @namespace
+ */
+var macros = {}; // This is just for documentation. It doesn't get used.
+
+/**
  * Takes a single lisp expression (s-expression) and returns it unevaluated.
  * 
- * @return The given argument, unevaluated.
+ * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name quote
+ * @member lisp.macros
+ * 
+ * @returns The given argument, unevaluated.
  */
 defmacro("quote", function (expression) {
 	if (arguments.length !== 1) {
@@ -974,15 +1023,21 @@ defmacro("quote", function (expression) {
  * when called.
  * 
  * TODO: Test me more
+ * TODO: Add examples
  * 
- * @return The created function.
+ * @function
+ * @name lambda
+ * @member lisp.macros
+ * 
+ * @returns The created function.
  */
 defmacro("lambda", function (arglist /*, ... */) {
 	var env  = new Env(lisp.env);
 	var args = argsToArray(arguments);
 	
 	if (arguments.length > 0 && !(arglist instanceof Array)) {
-		throw new Error("(lambda) requires a list as its first expression");
+		throw new Error("(lambda) requires a list as its first expression " +
+			"(got " + String(arglist) + ")");
 	}
 	
 	return (function (env, args) {
@@ -1027,6 +1082,11 @@ defmacro("lambda", function (arglist /*, ... */) {
  * Defines a function. This is shorthand for (setq name (lambda ...)).
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name defun
+ * @member lisp.macros
  */
 defmacro("defun", function (name, arglist /*, ... */) {
 	if (arguments.length === 0) {
@@ -1035,6 +1095,10 @@ defmacro("defun", function (name, arglist /*, ... */) {
 	if (!(name instanceof Symbol)) {
 		throw new Error("(defun) requires a symbol as its first argument (got " +
 			String(name) + ")");
+	}
+	if (arguments.length > 1 && !(arglist instanceof Array)) {
+		throw new Error("(defun) requires a list of symbols as its second " +
+			"expression (got " + String(arglist) + ")");
 	}
 	var body = argsToArray(arguments).slice(2);
 	var lambda = [_S("lambda"), arglist].concat(body);
@@ -1054,9 +1118,14 @@ defmacro("defun", function (name, arglist /*, ... */) {
  *     - (try ... (finally ...))
  *     - (try ... (catch ...) (finally ...))
  * 
- * @return The return value of the last evaluated expression.
- * 
  * @tested
+ * 
+ * @function
+ * @name try
+ * @member lisp.macros
+ * 
+ * @returns The return value of the last evaluated body expression
+ *          (i.e. non-catch, non-finally expression).
  * 
  * @example Empty try block
  *   >> (try)
@@ -1164,6 +1233,11 @@ defmacro("try", function () {
  * Returns the function that the given symbol points to.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name getfunc
+ * @member lisp.macros
  */
 defmacro("getfunc", function (symbol) {
 	if (arguments.length !== 1) {
@@ -1184,6 +1258,11 @@ defmacro("getfunc", function (symbol) {
  * on the given object (with the given arguments).
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name funcall
+ * @member lisp.macros
  */
 defmacro("funcall", function (object, dotpath) {
 	if (arguments.length < 2) {
@@ -1214,6 +1293,12 @@ defmacro("funcall", function (object, dotpath) {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name let
+ * @member lisp.macros
  */
 defmacro("let", function () {
 	var args = argsToArray(arguments);
@@ -1237,8 +1322,13 @@ defmacro("let", function () {
 });
 
 /**
- * TODO: Document me
  * TODO: Test me more
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name setq
+ * @member lisp.macros
  */
 defmacro("setq", function () {
 	var args = argsToArray(arguments);
@@ -1254,10 +1344,16 @@ defmacro("setq", function () {
  * of places in other macros/functions where only one expression
  * can go.
  * 
- * @return The return value of the last expression, or nil if there
- *         are no expression.
+ * TODO: Add examples
  * 
  * @tested
+ * 
+ * @function
+ * @name progn
+ * @member lisp.macros
+ * 
+ * @returns The return value of the last expression, or nil if there
+ *          are no expression.
  */
 defmacro("progn", function (/* .. */) {
 	var ret = null;
@@ -1268,10 +1364,15 @@ defmacro("progn", function (/* .. */) {
 });
 
 /**
- * @return The value of the evaluated expression, or nil.
- * 
- * TODO: Document me
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name cond
+ * @member lisp.macros
+ * 
+ * @returns The value of the last evaluated expression, or nil.
  */
 defmacro("cond", function () {
 	for (var i = 0; i < arguments.length; i++) {
@@ -1299,11 +1400,17 @@ defmacro("cond", function () {
  * expression, otherwise it evaluates all of the remaining expression
  * and returns the return value of the last one.
  * 
- * @return The return value of either the second or last expression, or
- *         nil if testExpression evaluates to false and there are no
- *         remaining expressions to evaluate.
+ * TODO: Add examples
  * 
  * @tested
+ * 
+ * @function
+ * @name if
+ * @member lisp.macros
+ * 
+ * @returns The return value of either the second or last expression, or
+ *          nil if testExpression evaluates to false and there are no
+ *          remaining expressions to evaluate.
  */
 defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
 	if (arguments.length < 2) {
@@ -1327,9 +1434,15 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
  * Executes the rest of the arguments if the first argument
  * is true.
  * 
- * @return The return value of the last expression.
+ * TODO: Add examples
  * 
  * @tested
+ * 
+ * @function
+ * @name when
+ * @member lisp.macros
+ * 
+ * @returns The return value of the last expression.
  */
 defmacro("when", function () {
 	if (arguments.length === 0) {
@@ -1346,7 +1459,13 @@ defmacro("when", function () {
 /**
  * Performs a logical negation on the given value.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name not
+ * @member lisp.macros
  */
 defmacro("not", function (value) {	
 	if (arguments.length === 0) {
@@ -1359,6 +1478,12 @@ defmacro("not", function (value) {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name or
+ * @member lisp.macros
  */
 defmacro("or", function () {
 	for (var i = 0; i < arguments.length; i++) {
@@ -1371,6 +1496,12 @@ defmacro("or", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name and
+ * @member lisp.macros
  */
 defmacro("and", function () {
 	if (arguments.length === 0) {
@@ -1383,6 +1514,12 @@ defmacro("and", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name equal
+ * @member lisp.macros
  */
 defmacro("equal", function () {
 	if (arguments.length < 2) {
@@ -1396,6 +1533,12 @@ defmacro("equal", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name not-equal
+ * @member lisp.macros
  */
 defmacro("not-equal", function () {
 	if (arguments.length < 2) {
@@ -1409,6 +1552,12 @@ defmacro("not-equal", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name ==
+ * @member lisp.macros
  */
 defmacro("==", function () {
 	if (arguments.length < 2) {
@@ -1422,6 +1571,12 @@ defmacro("==", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name ===
+ * @member lisp.macros
  */
 defmacro("===", function () {
 	if (arguments.length < 2) {
@@ -1435,6 +1590,12 @@ defmacro("===", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name !=
+ * @member lisp.macros
  */
 defmacro("!=", function () {
 	if (arguments.length < 2) {
@@ -1448,6 +1609,12 @@ defmacro("!=", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name !==
+ * @member lisp.macros
  */
 defmacro("!==", function () {
 	if (arguments.length < 2) {
@@ -1461,10 +1628,19 @@ defmacro("!==", function () {
 
 /**
  * TODO: Test me
+ * TODO: Document me
  * 
- * Examples:
- *    * (< x y)
- *    * (< -1 0 1 2 3)
+ * @function
+ * @name <
+ * @member lisp.macros
+ * 
+ * @example Comparing two arguments
+ *     >> (< 3 4)
+ *     => t
+ * 
+ * @example Comparing many arguments
+ *     >> (< 3 4 5 1)
+ *     => false
  */
 defmacro("<", function () {
 	if (arguments.length < 2) {
@@ -1478,10 +1654,19 @@ defmacro("<", function () {
 
 /**
  * TODO: Test me
- *
- * Examples:
- *    * (> x y)
- *    * (> 3 2 1 0 -1)
+ * TODO: Document me
+ * 
+ * @function
+ * @name >
+ * @member lisp.macros
+ * 
+ * @example Comparing two arguments
+ *     >> (> 4 3)
+ *     => t
+ * 
+ * @example Comparing many arguments
+ *     >> (> 4 3 2 8)
+ *     => false
  */
 defmacro(">", function () {
 	if (arguments.length < 2) {
@@ -1495,10 +1680,19 @@ defmacro(">", function () {
 
 /**
  * TODO: Test me
- *
- * Examples:
- *    * (<= x y)
- *    * (<= 1 1 2 3 4)
+ * TODO: Document me
+ * 
+ * @function
+ * @name <=
+ * @member lisp.macros
+ * 
+ * @example Comparing two arguments
+ *     >> (<= 3 4 4)
+ *     => t
+ * 
+ * @example Comparing many arguments
+ *     >> (<= 3 4 4 3)
+ *     => false
  */
 defmacro("<=", function () {
 	if (arguments.length < 2) {
@@ -1512,10 +1706,19 @@ defmacro("<=", function () {
 
 /**
  * TODO: Test me
- *
- * Examples:
- *    * (>= x y)
- *    * (>= 4 3 2 2 1)
+ * TODO: Document me
+ * 
+ * @function
+ * @name >=
+ * @member lisp.macros
+ * 
+ * @example Comparing two arguments
+ *     >> (>= 4 3 3)
+ *     => t
+ * 
+ * @example Comparing many arguments
+ *     >> (>= 4 3 3 4)
+ *     => false
  */
 defmacro(">=", function () {
 	if (arguments.length < 2) {
@@ -1531,6 +1734,11 @@ defmacro(">=", function () {
  * Returns true if the given values === true.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-true
+ * @member lisp.macros
  */
 defmacro("is-true", function () {
 	if (arguments.length === 0) {
@@ -1545,6 +1753,11 @@ defmacro("is-true", function () {
  * Returns true if the given values === false.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-false
+ * @member lisp.macros
  */
 defmacro("is-false", function () {
 	if (arguments.length === 0) {
@@ -1559,6 +1772,11 @@ defmacro("is-false", function () {
  * Returns true if the given values === null.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-null
+ * @member lisp.macros
  */
 defmacro("is-null", function () {
 	if (arguments.length === 0) {
@@ -1571,6 +1789,11 @@ defmacro("is-null", function () {
 
 /**
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-undefined
+ * @member lisp.macros
  */
 defmacro("is-undefined", function () {
 	if (arguments.length === 0) {
@@ -1585,6 +1808,11 @@ defmacro("is-undefined", function () {
  * Returns true if the given values are strings.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-string
+ * @member lisp.macros
  */
 defmacro("is-string", function () {
 	if (arguments.length === 0) {
@@ -1599,6 +1827,11 @@ defmacro("is-string", function () {
  * Returns true if the given values are numbers.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-number
+ * @member lisp.macros
  */
 defmacro("is-number", function () {
 	if (arguments.length === 0) {
@@ -1613,6 +1846,11 @@ defmacro("is-number", function () {
  * Returns true if the given values are booleans.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-boolean
+ * @member lisp.macros
  */
 defmacro("is-boolean", function () {
 	if (arguments.length === 0) {
@@ -1627,6 +1865,11 @@ defmacro("is-boolean", function () {
  * Returns true if the given values are functions.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-function
+ * @member lisp.macros
  */
 defmacro("is-function", function () {
 	if (arguments.length === 0) {
@@ -1641,6 +1884,11 @@ defmacro("is-function", function () {
  * Returns true if the given values are objects.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-object
+ * @member lisp.macros
  */
 defmacro("is-object", function () {
 	if (arguments.length === 0) {
@@ -1655,6 +1903,12 @@ defmacro("is-object", function () {
  * Returns true if the given values are arrays.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-array
+ * @alias is-list
+ * @member lisp.macros
  */
 defmacro("is-array", function () {
 	if (arguments.length === 0) {
@@ -1666,9 +1920,15 @@ defmacro("is-array", function () {
 });
 
 /**
- * Returns true if the given values are arrays.
+ * Returns true if the given values are arrays (this is an alias
+ * for (is-array)).
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name is-list
+ * @member lisp.macros
  */
 defmacro("is-list", function () {
 	if (arguments.length === 0) {
@@ -1683,6 +1943,11 @@ defmacro("is-list", function () {
  * An expression for basic iteration over a list.
  * 
  * TODO: Test me more
+ * TODO: Add examples
+ * 
+ * @function
+ * @name dolist
+ * @member lisp.macros
  */
 defmacro("dolist", function (arglist /*, ... */) {
 	if (arguments.length === 0) {
@@ -1726,7 +1991,21 @@ defmacro("dolist", function (arglist /*, ... */) {
 
 // TODO: Write macro (dotimes)
 /**
+ * Functions that are defined for the lisp environment.
+ * 
+ * @name lisp.functions
+ * @namespace
+ */
+var functions = {}; // This is just for documentation. It doesn't get used.
+
+/**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name jseval
+ * @member lisp.functions
  */
 defun("jseval", function () {
 	return eval.apply(null, arguments);
@@ -1738,9 +2017,26 @@ defun("jseval", function () {
  * 
  * TODO: Test me
  * 
- * @return The new class instance.
+ * @function
+ * @name new
+ * @member lisp.functions
+ * 
+ * @param {Class} Class
+ *     The class to create a new instance of.
+ * @param {[mixed]} rest
+ *     The arguments to be passed to the class constructor.
+ * 
+ * @returns The new class instance.
+ * 
+ * @example Instantiate a class
+ *     >> (new MyClass)
+ *     => ; the MyClass instance
+ * 
+ * @example Instantiate a class with constructor arguments
+ *     >> (to-string (new Error "My error message"))
+ *     => "Error: My error message"
  */
-defun("new", function (Class) {
+defun("new", function (Class /*, ... */) {
 	if (arguments.length === 0) {
 		throw new Error("(new) requires at least 1 argument");
 	}
@@ -1751,6 +2047,12 @@ defun("new", function (Class) {
 
 /**
  * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name instanceof
+ * @member lisp.functions
  */
 defun("instanceof", function (object, Class) {
 	if (arguments.length !== 2) {
@@ -1761,25 +2063,30 @@ defun("instanceof", function (object, Class) {
 });
 
 /**
- * Throws the given object, or "new Error()" if no object is
- * provided.
- * 
- * @return Nothing. After throw'ing the stack is unwided to the
- *         nearest 'catch' block.
+ * Throws the given object, or "new Error()" if no object is provided.
  * 
  * @tested
  * 
+ * @function
+ * @name throw
+ * @member lisp.functions
+ * 
+ * @param {mixed} object The object to throw. Defaults to new Error().
+ * 
+ * @returns Nothing. After throw'ing the stack is unwided to the
+ *          nearest 'catch' block.
+ * 
  * @example Basic Error
- *   >> (throw) ; Throws "new Error()"
+ *     >> (throw) ; Throws "new Error()"
  * 
  * @example Custom Error
- *   >> (throw (new Error "My Custom Error"))
+ *     >> (throw (new Error "My Custom Error"))
  * 
  * @example Anything else you can normally throw
- *   >> (throw "a string")
- *   >> (throw 12)
- *   >> (throw (object :type "MyError"))
- *   >> (throw (array 1 2 3))
+ *     >> (throw "a string")
+ *     >> (throw 12)
+ *     >> (throw (object :type "MyError"))
+ *     >> (throw (array 1 2 3))
  */
 defun("throw", function (object) {
 	if (arguments.length > 1) {
@@ -1791,11 +2098,46 @@ defun("throw", function (object) {
 });
 
 /**
- * Returns the given arguments as a list.
+ * Creates an array from the given arguments.
  * 
  * TODO: Test me
+ * 
+ * @function
+ * @name array
+ * @alias list
+ * @member lisp.functions
+ * 
+ * @returns The new array.
+ * 
+ * @example An empty array
+ *     >> (array)
+ *     => []
+ * 
+ * @example An array with some elements
+ *     >> (array 1 2 "three")
+ *     => [1, 2, "three"]
+ * 
+ * @example A compound array
+ *     >> (array (array 1 2) (array 3 4))
+ *     => [[1, 2], [3, 4]]
  */
-defun("list", function () {
+defun("array", function () {
+	return argsToArray(arguments);
+});
+
+/**
+ * Returns the given arguments as an array (this is an alias
+ * for (array)).
+ * 
+ * TODO: Test me
+ * 
+ * @function
+ * @name list
+ * @member lisp.functions
+ * 
+ * @returns The new array.
+ */
+defun("list", function (/* ... */) {
 	return argsToArray(arguments);
 });
 
@@ -1804,9 +2146,33 @@ defun("list", function () {
  * property list to initialize the object. There must be an even
  * number of arguments -- one value for every key.
  * 
- * @return The new object.
- * 
  * @tested
+ * 
+ * @function
+ * @name object
+ * @member lisp.functions
+ * 
+ * @returns The new object.
+ * 
+ * @example An empty object
+ *     >> (object)
+ *     => {}
+ * 
+ * @example An object using keywords as keys
+ *     >> (object :start 0 :end 10)
+ *     => {start: 0, end: 10}
+ * 
+ * @example An object using strings as keys
+ *     >> (object "start" 0 "end" 10)
+ *     => {start: 0, end: 10}
+ * 
+ * @example A compound object
+ *     >> (object :name "Joe"
+ *                :parents (array (object :name "John")
+ *                                (object :name "Jane")))
+ *     => {name: "Joe",
+ *         parents: [{name: "John"},
+ *                   {name: "Jane"}]}
  */
 defun("object", function () {
 	var args = argsToArray(arguments);
@@ -1824,21 +2190,15 @@ defun("object", function () {
 });
 
 /**
- * Creates an array from the given arguments.
- * 
- * TODO: Test me
- * 
- * @return The new array.
- */
-defun("array", function () {
-	return argsToArray(arguments);
-});
-
-/**
  * Returns a value from an object given a key (will work with
  * array indices as well).
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name getkey
+ * @member lisp.functions
  */
 defun("getkey", function (key, object) {
 	if (arguments.length !== 2) {
@@ -1852,6 +2212,11 @@ defun("getkey", function (key, object) {
  * Sets a value on the given object using the given key.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name setkey
+ * @member lisp.functions
  */
 defun("setkey", function (key, object, value) {
 	if (arguments.length !== 3) {
@@ -1864,9 +2229,18 @@ defun("setkey", function (key, object, value) {
 /**
  * Prints the given arguments to the console.
  * 
- * @return nil.
- * 
  * @tested
+ * 
+ * @function
+ * @name print
+ * @member lisp.functions
+ * 
+ * @returns nil.
+ * 
+ * @example Basic (print) expression
+ *     >> (print "Hello" "Lisp")
+ *     Hello Lisp
+ *     => nil
  */
 defun("print", function () {
 	// Do not remove this. This is not a debug statement.
@@ -1877,9 +2251,22 @@ defun("print", function () {
 /**
  * Joins the given arguments together into one string.
  * 
- * @return The string result of the joined arguments.
- * 
  * @tested
+ * 
+ * @function
+ * @name concat
+ * @member lisp.functions
+ * 
+ * @returns The string result of the joined arguments.
+ * 
+ * @example Concatenate a single object (if you really want to)
+ *     >> (concat "Hello")
+ *     => "Hello"
+ * 
+ * @example Concatenate many objects
+ *     >> (let ((name "Lisp"))
+ *          (concat "Hello: " name))
+ *     => "Hello: Lisp"
  */
 defun("concat", function () {
 	return argsToArray(arguments).join("");
@@ -1889,19 +2276,23 @@ defun("concat", function () {
  * Joins the given arguments together into one string, using
  * the first argument as the separator.
  * 
- * @return The string result of the joined arguments.
- * 
  * @tested
  * 
+ * @function
+ * @name join
+ * @member lisp.functions
+ * 
+ * @returns The string result of the joined arguments.
+ * 
  * @example Join items from a single list
- *   >> (join ", " (list "one" "two"))
- *   => "one, two"
+ *     >> (join ", " (list "one" "two"))
+ *     => "one, two"
  * 
  * @example Join items from multiple lists
- *   >> (let ((l1 (list "one" "two"))
- *            (l2 (list "three")))
- *        (join ", " l1 l2))
- *   => "one, two, three"
+ *     >> (let ((l1 (list "one" "two"))
+ *              (l2 (list "three")))
+ *          (join ", " l1 l2))
+ *     => "one, two, three"
  */
 defun("join", function () {
 	if (arguments.length === 0) {
@@ -1922,9 +2313,16 @@ defun("join", function () {
 });
 
 /**
- * Returns the type of the given value.
+ * Returns the type of the given value (the result of
+ * "typeof(value)").
+ * 
+ * TODO: Add examples
  * 
  * @tested
+ * 
+ * @function
+ * @name typeof
+ * @member lisp.functions
  */
 defun("typeof", function (value) {
 	if (arguments.length !== 1) {
@@ -1937,7 +2335,13 @@ defun("typeof", function (value) {
 /**
  * Converts the given value to a string.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name to-string
+ * @member lisp.functions
  */
 defun("to-string", function (value) {
 	if (arguments.length !== 1) {
@@ -1950,7 +2354,13 @@ defun("to-string", function (value) {
 /**
  * Converts the given value to a number.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name to-number
+ * @member lisp.functions
  */
 defun("to-number", function (value) {
 	if (arguments.length !== 1) {
@@ -1963,7 +2373,13 @@ defun("to-number", function (value) {
 /**
  * Converts the given value to a number.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name to-boolean
+ * @member lisp.functions
  */
 defun("to-boolean", function (value) {
 	if (arguments.length !== 1) {
@@ -1977,6 +2393,11 @@ defun("to-boolean", function (value) {
  * Converts the given value to a json representation of that value.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name to-json
+ * @member lisp.functions
  */
 defun("to-json", function () {
 	return toJSON.apply(null, arguments);
@@ -1985,7 +2406,13 @@ defun("to-json", function () {
 /**
  * Converts the given string to uppercase.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name to-upper
+ * @member lisp.functions
  */
 defun("to-upper", function (value) {
 	if (arguments.length !== 1) {
@@ -2001,7 +2428,13 @@ defun("to-upper", function (value) {
 /**
  * Converts the given string to uppercase.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name to-lower
+ * @member lisp.functions
  */
 defun("to-lower", function (value) {
 	if (arguments.length !== 1) {
@@ -2017,7 +2450,13 @@ defun("to-lower", function (value) {
 /**
  * Reduces the given arguments on the / operator.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name /
+ * @member lisp.functions
  */
 defun("/", function () {
 	if (arguments.length === 0) {
@@ -2037,7 +2476,13 @@ defun("/", function () {
 /**
  * Reduces the given arguments on the * operator.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name *
+ * @member lisp.functions
  */
 defun("*", function () {
 	var args = argsToArray(arguments);
@@ -2052,7 +2497,13 @@ defun("*", function () {
 /**
  * Reduces the given arguments on the + operator.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name +
+ * @member lisp.functions
  */
 defun("+", function () {
 	var args = argsToArray(arguments);
@@ -2067,7 +2518,13 @@ defun("+", function () {
 /**
  * Reduces the given arguments on the - operator.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name -
+ * @member lisp.functions
  */
 defun("-", function () {
 	if (arguments.length === 0) {
@@ -2085,7 +2542,13 @@ defun("-", function () {
 /**
  * Reduces the given arguments on the % operator.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name %
+ * @member lisp.functions
  */
 defun("%", function () {
 	if (arguments.length !== 2) {
@@ -2100,7 +2563,13 @@ defun("%", function () {
 /**
  * Adds 1 to the given value.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name 1+
+ * @member lisp.functions
  */
 defun("1+", function (value) {
 	if (arguments.length !== 1) {
@@ -2117,7 +2586,13 @@ defun("1+", function (value) {
 /**
  * Subtracts 1 from the given value.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name 1-
+ * @member lisp.functions
  */
 defun("1-", function (value) {
 	if (arguments.length !== 1) {
@@ -2132,10 +2607,16 @@ defun("1-", function (value) {
 });
 
 /**
- * Calls sprintf (found in the vendor section) with the
+ * Calls {@link sprintf} (found in the vendor section) with the
  * supplied arguments.
  * 
+ * TODO: Add examples
+ * 
  * @tested
+ * 
+ * @function
+ * @name format
+ * @member lisp.functions
  */
 defun("format", function (print, format) {
 	if (arguments.length < 2) {
@@ -2159,6 +2640,11 @@ defun("format", function (print, format) {
  * function and returns a new list with the given return values.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name map
+ * @member lisp.functions
  */
 defun("map", function (func, list) {
 	if (arguments.length !== 2) {
@@ -2185,6 +2671,11 @@ defun("map", function (func, list) {
  * in the given list on the given object.
  * 
  * TODO: Test me
+ * TODO: Add examples
+ * 
+ * @function
+ * @name props
+ * @member lisp.functions
  */
 defun("props", function (object, list) {
 	if (arguments.length !== 2) {
