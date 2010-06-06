@@ -1,8 +1,6 @@
 /**
  * Takes a single lisp expression (s-expression) and returns it unevaluated.
  * 
- * TODO: Test me
- * 
  * @return The given argument, unevaluated.
  */
 defmacro("quote", function (expression) {
@@ -18,7 +16,7 @@ defmacro("quote", function (expression) {
  * as its arglist and which executes the rest of the expressions
  * when called.
  * 
- * TODO: Test me
+ * TODO: Test me more
  * 
  * @return The created function.
  */
@@ -282,7 +280,8 @@ defmacro("let", function () {
 });
 
 /**
- * TODO: Test me
+ * TODO: Document me
+ * TODO: Test me more
  */
 defmacro("setq", function () {
 	var args = argsToArray(arguments);
@@ -314,6 +313,7 @@ defmacro("progn", function (/* .. */) {
 /**
  * @return The value of the evaluated expression, or nil.
  * 
+ * TODO: Document me
  * TODO: Test me
  */
 defmacro("cond", function () {
@@ -725,7 +725,7 @@ defmacro("is-list", function () {
 /**
  * An expression for basic iteration over a list.
  * 
- * TODO: Test me
+ * TODO: Test me more
  */
 defmacro("dolist", function (arglist /*, ... */) {
 	if (arguments.length === 0) {

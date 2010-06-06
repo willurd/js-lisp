@@ -94,33 +94,32 @@
 		self.multiLineCommand = false;
 		self.currentText = '';
 		
-        ////////////////////////////////////////////////////////////////////////
-        // Reset terminal
-        self.reset = function (doFade) {
-            var welcome = true;
+		/**
+		 * Clears all commands from the session (except for the last one,
+		 * which may have some user text in it).
+		 */
+		self.reset = function (doFade) {
 			doFade = doFade || false;
+			var doRemove = function () {
+				var divs = inner.find('div');
+				// Remove all but the first and last divs (the welcome message
+				// and current prompt).
+				for (var i = 1; i < divs.length-1; i++) {
+					$(divs[i]).remove();
+				}
+			};
 			if (doFade) {
 				inner.parent().fadeOut(function(){
-	                inner.find('div').each(function(){
-	                    if (!welcome) 
-	                        $(this).remove();
-	                    welcome = false;
-	                });
-	                self.newPromptBox();
-	                inner.parent().fadeIn(function(){
-	                    inner.addClass('jquery-console-focus');
-	                    self.typer.focus();
-	                });
-	            });
+					doRemove();
+					inner.parent().fadeIn(function(){
+						inner.addClass('jquery-console-focus');
+						self.typer.focus();
+					});
+				});
 			} else {
-				inner.find('div').each(function(){
-                    if (!welcome) 
-                        $(this).remove();
-                    welcome = false;
-                });
-                self.newPromptBox();
+				doRemove();
 			}
-        };
+		};
 
         ////////////////////////////////////////////////////////////////////////
         // Reset terminal
