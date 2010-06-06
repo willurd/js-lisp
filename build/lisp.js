@@ -518,6 +518,10 @@ function _S (name) {
 	return new Symbol(name);
 }
 
+function _K (name) {
+	return new Keyword(name);
+}
+
 function defun (name, func) {
 	var env = (lisp && lisp.env) || ROOT_ENV;
 	env.set(name, func);
@@ -926,6 +930,7 @@ var WHITESPACE = " \t\n\r";
 var ROOT_ENV = new Env(new Env(null, global), {
 	"t": true,
 	"true": true,
+	"f": false,
 	"false": false,
 	"nil": null,
 	"null": null,
@@ -948,7 +953,7 @@ var ROOT_ENV = new Env(new Env(null, global), {
 		return resolve(expression);
 	},
 	
-	"*features*": [new Keyword("notmuch")]
+	"*features*": [_K("notmuch")]
 });
 /**
  * Takes a single lisp expression (s-expression) and returns it unevaluated.
@@ -1647,6 +1652,34 @@ defmacro("is-object", function () {
 });
 
 /**
+ * Returns true if the given values are arrays.
+ * 
+ * TODO: Test me
+ */
+defmacro("is-array", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-array) requires at least 1 argument");
+	}
+	return predicate(arguments, function (value) {
+		return value instanceof Array;
+	});
+});
+
+/**
+ * Returns true if the given values are arrays.
+ * 
+ * TODO: Test me
+ */
+defmacro("is-list", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-list) requires at least 1 argument");
+	}
+	return predicate(arguments, function (value) {
+		return value instanceof Array;
+	});
+});
+
+/**
  * An expression for basic iteration over a list.
  * 
  * TODO: Test me
@@ -1696,7 +1729,7 @@ defmacro("dolist", function (arglist /*, ... */) {
  * TODO: Test me
  */
 defun("jseval", function () {
-	return eval(null, arguments);
+	return eval.apply(null, arguments);
 });
 
 /**

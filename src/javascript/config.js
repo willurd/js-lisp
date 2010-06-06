@@ -3,6 +3,7 @@ var WHITESPACE = " \t\n\r";
 var ROOT_ENV = new Env(new Env(null, global), {
 	"t": true,
 	"true": true,
+	"f": false,
 	"false": false,
 	"nil": null,
 	"null": null,
@@ -25,5 +26,5 @@ var ROOT_ENV = new Env(new Env(null, global), {
 		return resolve(expression);
 	},
 	
-	"*features*": [new Keyword("notmuch")]
+	"*features*": [_K("notmuch")]
 });

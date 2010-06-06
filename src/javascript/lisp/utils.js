@@ -2,6 +2,10 @@ function _S (name) {
 	return new Symbol(name);
 }
 
+function _K (name) {
+	return new Keyword(name);
+}
+
 function defun (name, func) {
 	var env = (lisp && lisp.env) || ROOT_ENV;
 	env.set(name, func);

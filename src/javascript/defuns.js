@@ -2,7 +2,7 @@
  * TODO: Test me
  */
 defun("jseval", function () {
-	return eval(null, arguments);
+	return eval.apply(null, arguments);
 });
 
 /**

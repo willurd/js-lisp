@@ -695,6 +695,34 @@ defmacro("is-object", function () {
 });
 
 /**
+ * Returns true if the given values are arrays.
+ * 
+ * TODO: Test me
+ */
+defmacro("is-array", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-array) requires at least 1 argument");
+	}
+	return predicate(arguments, function (value) {
+		return value instanceof Array;
+	});
+});
+
+/**
+ * Returns true if the given values are arrays.
+ * 
+ * TODO: Test me
+ */
+defmacro("is-list", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-list) requires at least 1 argument");
+	}
+	return predicate(arguments, function (value) {
+		return value instanceof Array;
+	});
+});
+
+/**
  * An expression for basic iteration over a list.
  * 
  * TODO: Test me
