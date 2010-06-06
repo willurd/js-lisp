@@ -51,26 +51,27 @@
 		(when (=== repl.length 0)
 			(throw (new Error (format nil "Console with id %s does not exist" repl-id))))
 		(setq controller (repl.console (object
-				:welcomeMessage "js-lisp REPL"
-				:ps1 ">> "
-				:ps2 ".. "
-				:ps3 "=> "
-				:autofocus t ;; Automatically sets focus on the console when the page loads
-				:animateScroll nil
-				:promptHistory t ;; Maintains a history of input given at the prompt
-				;:historyPreserveColumn t ;; Preserves the column you are on while scrolling through history
-				:commandValidate (lambda (line)
-					(!= line ""))
-				:commandHandle (lambda (line)
-					(let ((ret nil))
-						(try
-							(setq ret (array (object :msg (repl-represent (lisp.eval line))
-													 :className "jquery-console-message-value")))
-						  (:catch (e)
-							(setq ret (when (not (instanceof e lisp.exception.StreamEOFException))
-										(controller.message (to-string e) "jquery-console-message-error")
-										t))))
-						ret))))))
+			:welcomeMessage "js-lisp REPL"
+			:ps1 ">> "
+			:ps2 ".. "
+			:ps3 "=> "
+			:autofocus t ;; Automatically sets focus on the console when the page loads
+			:animateScroll nil
+			:promptHistory t ;; Maintains a history of input given at the prompt
+			;:historyPreserveColumn t ;; Preserves the column you are on while scrolling through history
+			:commandValidate (lambda (line)
+				(!= line ""))
+			:commandHandle (lambda (line)
+				(let ((this controller)
+					  (ret nil))
+					(try
+						(setq ret (array (object :msg (repl-represent (lisp.eval line))
+												 :className "jquery-console-message-value")))
+					  (:catch (e)
+						(setq ret (when (not (instanceof e lisp.exception.StreamEOFException))
+									(controller.message (to-string e) "jquery-console-message-error")
+									t))))
+					ret))))))
 	
 	(controller.notice "Hit Ctrl-h for help")
 	

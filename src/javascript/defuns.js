@@ -439,11 +439,11 @@ defun("map", function (func, list) {
 			arguments.length + ")");
 	}
 	if (typeof(func) != "function") {
-		throw new Error("(map) requires a function as its first value (got " +
+		throw new Error("(map) requires a function as its first argument (got " +
 			String(func) + ")");
 	}
 	if (!(list instanceof Array)) {
-		throw new Error("(map) requires a list as its second value (got " +
+		throw new Error("(map) requires a list as its second argument (got " +
 			String(list) + ")");
 	}
 	var newlist = [];
@@ -451,4 +451,27 @@ defun("map", function (func, list) {
 		newlist.push(func(list[i]));
 	}
 	return newlist;
+});
+
+/**
+ * Returns an object containing the values of each property
+ * in the given list on the given object.
+ * 
+ * TODO: Test me
+ */
+defun("props", function (object, list) {
+	if (arguments.length !== 2) {
+		throw new Error("(props) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(props) requires a list as its second argument " +
+			"(got " + String(list) + ")");
+	}
+	var newObject = {};
+	for (var i = 0; i < list.length; i++) {
+		var key = list[i];
+		newObject[key] = object[key];
+	}
+	return newObject;
 });

@@ -76,7 +76,6 @@
         self.ps1 = config.ps1 || ">> "; // Input
         self.ps2 = config.ps2 || ".. "; // Multiline commands
 		self.ps3 = config.ps3 || "=> "; // Return values
-		self.promptLabel = self.ps1; // The current label
         self.column = 0;
         self.promptText = '';
         self.restoreText = '';
@@ -158,11 +157,12 @@
         ////////////////////////////////////////////////////////////////////////
         // Make a new prompt box
         self.newPromptBox = function () {
+			var promptLabel = self.multiLineCommand ? self.ps2 : self.ps1;
             self.column = 0;
             self.promptText = '';
             self.promptBox = $('<div class="jquery-console-prompt-box"></div>');
             var label = $('<span class="jquery-console-prompt-label"></span>');
-            self.promptBox.append(label.text(self.promptLabel).show());
+            self.promptBox.append(label.text(promptLabel).show());
             self.prompt = $('<span class="jquery-console-prompt"></span>');
             self.promptBox.append(self.prompt);
             inner.append(self.promptBox);
@@ -419,21 +419,18 @@
         // Handle a command
         function handleCommand () {
             if (typeof config.commandHandle == 'function') {
-				var text = self.multiLineCommand ? self.currentText + ' ' + self.promptText
+				var text = self.multiLineCommand ? self.currentText + '\n' + self.promptText
 					: self.promptText;
                 var ret = config.commandHandle(text, function(msgs) {
                     self.commandResult(msgs);
                 });
 				if (ret === null) { // This command needs more text
-					self.promptLabel = self.ps2;
 					self.multiLineCommand = true;
 					self.currentText = text;
 		            self.column = -1;
 		            updatePromptDisplay();
 		            self.newPromptBox();
 				} else {
-					self.promptLabel = self.ps1;
-					
 					if (typeof ret == 'boolean') {
 	                    if (ret) {
 	                        // Command succeeded without a result.
@@ -461,7 +458,6 @@
         // Reset the prompt in invalid command
         self.commandResult = function (msg,className) {
 			self.multiLineCommand = false;
-			self.promptLabel = self.ps1;
 			self.currentText = "";
             self.column = -1;
             updatePromptDisplay();
