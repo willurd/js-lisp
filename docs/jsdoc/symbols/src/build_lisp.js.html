@@ -3040,7 +3040,7 @@
 <span class='line'>3033</span>  * @function
 <span class='line'>3034</span>  * @member lisp.functions
 <span class='line'>3035</span>  * 
-<span class='line'>3036</span>  * @return The result of subtracting 1 from the given number.
+<span class='line'>3036</span>  * @returns The result of subtracting 1 from the given number.
 <span class='line'>3037</span>  * 
 <span class='line'>3038</span>  * @param {number} number
 <span class='line'>3039</span>  *     The number to subtract 1 from.
@@ -3071,9 +3071,9 @@
 <span class='line'>3064</span>  * @function
 <span class='line'>3065</span>  * @member lisp.functions
 <span class='line'>3066</span>  * 
-<span class='line'>3067</span>  * @return The result of applying the given arguments to sprintf
-<span class='line'>3068</span>  *         (in the vendor section) if print evaluates to true,
-<span class='line'>3069</span>  *         otherwise nil.
+<span class='line'>3067</span>  * @returns The result of applying the given arguments to sprintf
+<span class='line'>3068</span>  *          (in the vendor section) if print evaluates to true,
+<span class='line'>3069</span>  *          otherwise nil.
 <span class='line'>3070</span>  * 
 <span class='line'>3071</span>  * @param {boolean} print
 <span class='line'>3072</span>  *     Whether to print the result, or return it.
@@ -3102,177 +3102,221 @@
 <span class='line'>3095</span> 
 <span class='line'>3096</span> </span><span class="COMM">/**
 <span class='line'>3097</span>  * &lt;pre>
-<span class='line'>3098</span>  * Run each of the items in the given list through the given
-<span class='line'>3099</span>  * function and returns a new list with the given return values.
-<span class='line'>3100</span>  * 
-<span class='line'>3101</span>  * TODO: Test me
-<span class='line'>3102</span>  * TODO: Add examples
-<span class='line'>3103</span>  * &lt;/pre>
-<span class='line'>3104</span>  * 
-<span class='line'>3105</span>  * @name map
-<span class='line'>3106</span>  * @lisp
-<span class='line'>3107</span>  * @function
-<span class='line'>3108</span>  * @member lisp.functions
+<span class='line'>3098</span>  * Calls apply on the given function and passes in the given
+<span class='line'>3099</span>  * list as arguments.
+<span class='line'>3100</span>  * &lt;/pre>
+<span class='line'>3101</span>  * 
+<span class='line'>3102</span>  * @name apply
+<span class='line'>3103</span>  * @lisp
+<span class='line'>3104</span>  * @function
+<span class='line'>3105</span>  * @member lisp.functions
+<span class='line'>3106</span>  * 
+<span class='line'>3107</span>  * @returns The result of applying the given list as the arguments to
+<span class='line'>3108</span>  *          the given function.
 <span class='line'>3109</span>  * 
-<span class='line'>3110</span>  * @return The result of mapping the given list to the given function.
-<span class='line'>3111</span>  * 
-<span class='line'>3112</span>  * @param {function} func
-<span class='line'>3113</span>  *     The function to apply to each object in the given list.
-<span class='line'>3114</span>  * @param {Array} list
-<span class='line'>3115</span>  *     The list of items to pass to the given function.
-<span class='line'>3116</span>  */</span><span class="WHIT">
-<span class='line'>3117</span> </span><span class="NAME">defun</span><span class="PUNC">(</span><span class="STRN">"map"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">list</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3118</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">arguments.length</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="NUMB">2</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3119</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(map) requires 2 arguments (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
-<span class='line'>3120</span> </span><span class="WHIT">			</span><span class="NAME">arguments.length</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3121</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3122</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="STRN">"function"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3123</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(map) requires a function as its first argument (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
-<span class='line'>3124</span> </span><span class="WHIT">			</span><span class="NAME">String</span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3125</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3126</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">list</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3127</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(map) requires a list as its second argument (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
-<span class='line'>3128</span> </span><span class="WHIT">			</span><span class="NAME">String</span><span class="PUNC">(</span><span class="NAME">list</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3129</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3130</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">newlist</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3131</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">list.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3132</span> </span><span class="WHIT">		</span><span class="NAME">newlist.push</span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">(</span><span class="NAME">list</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3133</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3134</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">newlist</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3135</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3136</span> 
-<span class='line'>3137</span> </span><span class="COMM">/**
-<span class='line'>3138</span>  * &lt;pre>
-<span class='line'>3139</span>  * Returns an object containing the values of each property
-<span class='line'>3140</span>  * in the given list on the given object.
-<span class='line'>3141</span>  * 
-<span class='line'>3142</span>  * TODO: Test me
-<span class='line'>3143</span>  * TODO: Add examples
-<span class='line'>3144</span>  * &lt;/pre>
-<span class='line'>3145</span>  * 
-<span class='line'>3146</span>  * @name props
-<span class='line'>3147</span>  * @lisp
-<span class='line'>3148</span>  * @function
-<span class='line'>3149</span>  * @member lisp.functions
-<span class='line'>3150</span>  * 
-<span class='line'>3151</span>  * @return A new object containing only the values on the given
-<span class='line'>3152</span>  *         object specified by the list of keys.
+<span class='line'>3110</span>  * @param {function} func
+<span class='line'>3111</span>  *     The function to apply the list of arguments to.
+<span class='line'>3112</span>  * @param {Array} list
+<span class='line'>3113</span>  *     The list to give as arguments to the given function.
+<span class='line'>3114</span>  * 
+<span class='line'>3115</span>  * @example Add a list of numbers together
+<span class='line'>3116</span>  *     >> (apply + '(1 2 3))
+<span class='line'>3117</span>  *     => 6
+<span class='line'>3118</span>  * 
+<span class='line'>3119</span>  * @example Print a list of values
+<span class='line'>3120</span>  *     >> (apply print '("arg1", "arg2", '("a" "list")))
+<span class='line'>3121</span>  *     arg1 , arg2 , quote,a,list
+<span class='line'>3122</span>  *     => nil
+<span class='line'>3123</span>  */</span><span class="WHIT">
+<span class='line'>3124</span> </span><span class="NAME">defun</span><span class="PUNC">(</span><span class="STRN">"apply"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">list</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3125</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">arguments.length</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="NUMB">2</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3126</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(apply) requires 2 arguments (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
+<span class='line'>3127</span> </span><span class="WHIT">			</span><span class="NAME">arguments.length</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3128</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3129</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="STRN">"function"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3130</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(apply) requires a function as its "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
+<span class='line'>3131</span> </span><span class="WHIT">			</span><span class="STRN">"first argument (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">String</span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3132</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3133</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">list</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3134</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(apply) requires a list as its second "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
+<span class='line'>3135</span> </span><span class="WHIT">			</span><span class="STRN">"argument (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">String</span><span class="PUNC">(</span><span class="NAME">list</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3136</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3137</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">func.apply</span><span class="PUNC">(</span><span class="KEYW">null</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">list</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3138</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3139</span> 
+<span class='line'>3140</span> </span><span class="COMM">/**
+<span class='line'>3141</span>  * &lt;pre>
+<span class='line'>3142</span>  * Run each of the items in the given list through the given
+<span class='line'>3143</span>  * function and returns a new list with the given return values.
+<span class='line'>3144</span>  * 
+<span class='line'>3145</span>  * TODO: Test me
+<span class='line'>3146</span>  * TODO: Add examples
+<span class='line'>3147</span>  * &lt;/pre>
+<span class='line'>3148</span>  * 
+<span class='line'>3149</span>  * @name map
+<span class='line'>3150</span>  * @lisp
+<span class='line'>3151</span>  * @function
+<span class='line'>3152</span>  * @member lisp.functions
 <span class='line'>3153</span>  * 
-<span class='line'>3154</span>  * @param {object} object
-<span class='line'>3155</span>  *     The object containing the values to return (specified by the
-<span class='line'>3156</span>  *     given list of keys).
-<span class='line'>3157</span>  * @param {Array} list
-<span class='line'>3158</span>  *     The list of keys specifying which values to return in the
-<span class='line'>3159</span>  *     resulting object.
+<span class='line'>3154</span>  * @returns The result of mapping the given list to the given function.
+<span class='line'>3155</span>  * 
+<span class='line'>3156</span>  * @param {function} func
+<span class='line'>3157</span>  *     The function which gets passed each value in the given list.
+<span class='line'>3158</span>  * @param {Array} list
+<span class='line'>3159</span>  *     The list of values to pass to the given function.
 <span class='line'>3160</span>  */</span><span class="WHIT">
-<span class='line'>3161</span> </span><span class="NAME">defun</span><span class="PUNC">(</span><span class="STRN">"props"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">object</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">list</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3161</span> </span><span class="NAME">defun</span><span class="PUNC">(</span><span class="STRN">"map"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">list</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>3162</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">arguments.length</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="NUMB">2</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3163</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(props) requires 2 arguments (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
+<span class='line'>3163</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(map) requires 2 arguments (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
 <span class='line'>3164</span> </span><span class="WHIT">			</span><span class="NAME">arguments.length</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>3165</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3166</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">list</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3167</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(props) requires a list as its second argument "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
-<span class='line'>3168</span> </span><span class="WHIT">			</span><span class="STRN">"(got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">String</span><span class="PUNC">(</span><span class="NAME">list</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3166</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">!=</span><span class="WHIT"> </span><span class="STRN">"function"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3167</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(map) requires a function as its first argument (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
+<span class='line'>3168</span> </span><span class="WHIT">			</span><span class="NAME">String</span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>3169</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3170</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">newObject</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3171</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">list.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3172</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">key</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">list</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3173</span> </span><span class="WHIT">		</span><span class="NAME">newObject</span><span class="PUNC">[</span><span class="NAME">key</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">object</span><span class="PUNC">[</span><span class="NAME">key</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3174</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3175</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">newObject</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3176</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3177</span> 
-<span class='line'>3178</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3179</span> </span><span class="WHIT">	</span><span class="NAME">VERSION</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">"0.0.1"</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3180</span> </span><span class="WHIT">	
-<span class='line'>3181</span> 	</span><span class="NAME">Env</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">Env</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3182</span> </span><span class="WHIT">	</span><span class="NAME">Macro</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">Macro</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3183</span> </span><span class="WHIT">	</span><span class="NAME">Symbol</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">Symbol</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3184</span> </span><span class="WHIT">	</span><span class="NAME">Keyword</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">Keyword</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3185</span> </span><span class="WHIT">	
-<span class='line'>3186</span> 	</span><span class="NAME">env</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">ROOT_ENV</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3187</span> </span><span class="WHIT">	
-<span class='line'>3188</span> 	</span><span class="NAME">exception</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3189</span> </span><span class="WHIT">		</span><span class="NAME">StreamException</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">StreamException</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3190</span> </span><span class="WHIT">		</span><span class="NAME">StreamEOFException</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">StreamEOFException</span><span class="WHIT">
-<span class='line'>3191</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3192</span> </span><span class="WHIT">	
-<span class='line'>3193</span> 	</span><span class="NAME">parse</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">parse</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3194</span> </span><span class="WHIT">	</span><span class="NAME">defun</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">defun</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3195</span> </span><span class="WHIT">	</span><span class="NAME">defmacro</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">defmacro</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3196</span> </span><span class="WHIT">	
-<span class='line'>3197</span> 	</span><span class="NAME">eval</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">string</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">env</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3198</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">tempEnv</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">lisp.env</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3199</span> </span><span class="WHIT">		</span><span class="NAME">lisp.env</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">env</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">lisp.env</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3200</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">expressions</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parse.script</span><span class="PUNC">(</span><span class="NAME">string</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3201</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">ret</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3202</span> </span><span class="WHIT">		</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">expressions.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3203</span> </span><span class="WHIT">			</span><span class="NAME">ret</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">resolve</span><span class="PUNC">(</span><span class="NAME">expressions</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3204</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3205</span> </span><span class="WHIT">		</span><span class="NAME">lisp.env</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tempEnv</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3206</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">ret</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3207</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3208</span> </span><span class="WHIT">	
-<span class='line'>3209</span> 	</span><span class="COMM">/**
-<span class='line'>3210</span> 	 * This method is here so lisp.log can be called in code and it
-<span class='line'>3211</span> 	 * will work regardless of if we're being called in a browser (with
-<span class='line'>3212</span> 	 * or without "console") or in node.js (if we're in node.js, this
-<span class='line'>3213</span> 	 * will be replaced with sys.puts).
-<span class='line'>3214</span> 	*/</span><span class="WHIT">
-<span class='line'>3215</span> </span><span class="WHIT">	</span><span class="NAME">log</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3216</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">console</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"object"</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">console.log</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3217</span> </span><span class="WHIT">			</span><span class="NAME">console.log.apply</span><span class="PUNC">(</span><span class="NAME">console</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">arguments</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3218</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3219</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3220</span> </span><span class="WHIT">	
-<span class='line'>3221</span> 	</span><span class="NAME">load</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">source</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">callback</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3222</span> </span><span class="WHIT">		</span><span class="NAME">makeRequest</span><span class="PUNC">(</span><span class="NAME">source</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">script</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3223</span> </span><span class="WHIT">			</span><span class="NAME">lisp.eval</span><span class="PUNC">(</span><span class="NAME">script</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3224</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">callback</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3225</span> </span><span class="WHIT">				</span><span class="NAME">callback</span><span class="PUNC">(</span><span class="NAME">source</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3226</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3227</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3228</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3170</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">list</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3171</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(map) requires a list as its second argument (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
+<span class='line'>3172</span> </span><span class="WHIT">			</span><span class="NAME">String</span><span class="PUNC">(</span><span class="NAME">list</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3173</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3174</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">newlist</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3175</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">list.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3176</span> </span><span class="WHIT">		</span><span class="NAME">newlist.push</span><span class="PUNC">(</span><span class="NAME">func</span><span class="PUNC">(</span><span class="NAME">list</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3177</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3178</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">newlist</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3179</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3180</span> 
+<span class='line'>3181</span> </span><span class="COMM">/**
+<span class='line'>3182</span>  * &lt;pre>
+<span class='line'>3183</span>  * Returns an object containing the values of each property
+<span class='line'>3184</span>  * in the given list on the given object.
+<span class='line'>3185</span>  * 
+<span class='line'>3186</span>  * TODO: Test me
+<span class='line'>3187</span>  * TODO: Add examples
+<span class='line'>3188</span>  * &lt;/pre>
+<span class='line'>3189</span>  * 
+<span class='line'>3190</span>  * @name props
+<span class='line'>3191</span>  * @lisp
+<span class='line'>3192</span>  * @function
+<span class='line'>3193</span>  * @member lisp.functions
+<span class='line'>3194</span>  * 
+<span class='line'>3195</span>  * @returns A new object containing only the values on the given
+<span class='line'>3196</span>  *          object specified by the list of keys.
+<span class='line'>3197</span>  * 
+<span class='line'>3198</span>  * @param {object} object
+<span class='line'>3199</span>  *     The object containing the values to return (specified by the
+<span class='line'>3200</span>  *     given list of keys).
+<span class='line'>3201</span>  * @param {Array} list
+<span class='line'>3202</span>  *     The list of keys specifying which values to return in the
+<span class='line'>3203</span>  *     resulting object.
+<span class='line'>3204</span>  */</span><span class="WHIT">
+<span class='line'>3205</span> </span><span class="NAME">defun</span><span class="PUNC">(</span><span class="STRN">"props"</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">object</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">list</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3206</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">arguments.length</span><span class="WHIT"> </span><span class="PUNC">!==</span><span class="WHIT"> </span><span class="NUMB">2</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3207</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(props) requires 2 arguments (got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
+<span class='line'>3208</span> </span><span class="WHIT">			</span><span class="NAME">arguments.length</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3209</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3210</span> </span><span class="WHIT">	</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">!</span><span class="PUNC">(</span><span class="NAME">list</span><span class="WHIT"> </span><span class="KEYW">instanceof</span><span class="WHIT"> </span><span class="NAME">Array</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3211</span> </span><span class="WHIT">		</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">Error</span><span class="PUNC">(</span><span class="STRN">"(props) requires a list as its second argument "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT">
+<span class='line'>3212</span> </span><span class="WHIT">			</span><span class="STRN">"(got "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">String</span><span class="PUNC">(</span><span class="NAME">list</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">")"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3213</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3214</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">newObject</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3215</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">list.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3216</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">key</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">list</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3217</span> </span><span class="WHIT">		</span><span class="NAME">newObject</span><span class="PUNC">[</span><span class="NAME">key</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">object</span><span class="PUNC">[</span><span class="NAME">key</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3218</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3219</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">newObject</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3220</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3221</span> 
+<span class='line'>3222</span> </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3223</span> </span><span class="WHIT">	</span><span class="NAME">VERSION</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="STRN">"0.0.1"</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3224</span> </span><span class="WHIT">	
+<span class='line'>3225</span> 	</span><span class="NAME">Env</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">Env</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3226</span> </span><span class="WHIT">	</span><span class="NAME">Macro</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">Macro</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3227</span> </span><span class="WHIT">	</span><span class="NAME">Symbol</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">Symbol</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3228</span> </span><span class="WHIT">	</span><span class="NAME">Keyword</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">Keyword</span><span class="PUNC">,</span><span class="WHIT">
 <span class='line'>3229</span> </span><span class="WHIT">	
-<span class='line'>3230</span> 	</span><span class="NAME">dotag</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">tag</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3231</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">tag.src</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3232</span> </span><span class="WHIT">			</span><span class="NAME">lisp.load</span><span class="PUNC">(</span><span class="NAME">tag.src</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">script</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3233</span> </span><span class="WHIT">				</span><span class="NAME">lisp.eval</span><span class="PUNC">(</span><span class="NAME">tag.textContent</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3234</span> </span><span class="WHIT">				</span><span class="NAME">tag.parentElement.removeChild</span><span class="PUNC">(</span><span class="NAME">tag</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3235</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3236</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3237</span> </span><span class="WHIT">			</span><span class="NAME">lisp.eval</span><span class="PUNC">(</span><span class="NAME">tag.textContent</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3238</span> </span><span class="WHIT">			</span><span class="NAME">tag.parentElement.removeChild</span><span class="PUNC">(</span><span class="NAME">tag</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3239</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3240</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
-<span class='line'>3241</span> </span><span class="WHIT">	
-<span class='line'>3242</span> 	</span><span class="NAME">run</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3243</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">tags</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">document.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"script"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3244</span> </span><span class="WHIT">		</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">tags.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3245</span> </span><span class="WHIT">			</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">tag</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tags</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3246</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">tag.type</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"text/lisp"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3247</span> </span><span class="WHIT">				</span><span class="NAME">lisp.dotag</span><span class="PUNC">(</span><span class="NAME">tag</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3248</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3249</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3250</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3251</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3252</span> 
-<span class='line'>3253</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">(</span><span class="KEYW">this</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3254</span> 
-<span class='line'>3255</span> </span><span class="COMM">// Set this library up to work with node.js</span><span class="WHIT">
-<span class='line'>3256</span> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">window</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"undefined"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT">
-<span class='line'>3257</span> </span><span class="WHIT">	</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">global</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"object"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">global</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="COMM">// Make sure it isn't null</span><span class="WHIT">
-<span class='line'>3258</span> </span><span class="WHIT">	</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">require</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"function"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT">
-<span class='line'>3259</span> </span><span class="WHIT">	</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">exports</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"object"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">exports</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3260</span> </span><span class="WHIT">	</span><span class="COMM">// We are probably running in node.js now.</span><span class="WHIT">
-<span class='line'>3261</span> </span><span class="WHIT">	</span><span class="COMM">// FIXME: Find a better way to tell we're running in node.js</span><span class="WHIT">
-<span class='line'>3262</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">key</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">lisp</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3263</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">lisp.hasOwnProperty</span><span class="PUNC">(</span><span class="NAME">key</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>3264</span> </span><span class="WHIT">			</span><span class="NAME">exports</span><span class="PUNC">[</span><span class="NAME">key</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">lisp</span><span class="PUNC">[</span><span class="NAME">key</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3265</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3266</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3267</span> </span><span class="WHIT">	
-<span class='line'>3268</span> 	</span><span class="NAME">lisp.log</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">require</span><span class="PUNC">(</span><span class="STRN">"sys"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">puts</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>3269</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>3270</span> 
-<span class='line'>3271</span> </span></pre></body></html>
+<span class='line'>3230</span> 	</span><span class="NAME">env</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">ROOT_ENV</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3231</span> </span><span class="WHIT">	
+<span class='line'>3232</span> 	</span><span class="NAME">exception</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3233</span> </span><span class="WHIT">		</span><span class="NAME">StreamException</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">StreamException</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3234</span> </span><span class="WHIT">		</span><span class="NAME">StreamEOFException</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">StreamEOFException</span><span class="WHIT">
+<span class='line'>3235</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3236</span> </span><span class="WHIT">	
+<span class='line'>3237</span> 	</span><span class="NAME">parse</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">parse</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3238</span> </span><span class="WHIT">	</span><span class="NAME">defun</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">defun</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3239</span> </span><span class="WHIT">	</span><span class="NAME">defmacro</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">defmacro</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3240</span> </span><span class="WHIT">	
+<span class='line'>3241</span> 	</span><span class="NAME">eval</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">string</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">env</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3242</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">tempEnv</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">lisp.env</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3243</span> </span><span class="WHIT">		</span><span class="NAME">lisp.env</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">env</span><span class="WHIT"> </span><span class="PUNC">||</span><span class="WHIT"> </span><span class="NAME">lisp.env</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3244</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">expressions</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parse.script</span><span class="PUNC">(</span><span class="NAME">string</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3245</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">ret</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3246</span> </span><span class="WHIT">		</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">expressions.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3247</span> </span><span class="WHIT">			</span><span class="NAME">ret</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">resolve</span><span class="PUNC">(</span><span class="NAME">expressions</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3248</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3249</span> </span><span class="WHIT">		</span><span class="NAME">lisp.env</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tempEnv</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3250</span> </span><span class="WHIT">		</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">ret</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3251</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3252</span> </span><span class="WHIT">	
+<span class='line'>3253</span> 	</span><span class="COMM">/**
+<span class='line'>3254</span> 	 * This method is here so lisp.log can be called in code and it
+<span class='line'>3255</span> 	 * will work regardless of if we're being called in a browser (with
+<span class='line'>3256</span> 	 * or without "console") or in node.js (if we're in node.js, this
+<span class='line'>3257</span> 	 * will be replaced with sys.puts).
+<span class='line'>3258</span> 	*/</span><span class="WHIT">
+<span class='line'>3259</span> </span><span class="WHIT">	</span><span class="NAME">log</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3260</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">console</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"object"</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">console.log</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3261</span> </span><span class="WHIT">			</span><span class="NAME">console.log.apply</span><span class="PUNC">(</span><span class="NAME">console</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">arguments</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3262</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3263</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3264</span> </span><span class="WHIT">	
+<span class='line'>3265</span> 	</span><span class="NAME">load</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">source</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">callback</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3266</span> </span><span class="WHIT">		</span><span class="NAME">makeRequest</span><span class="PUNC">(</span><span class="NAME">source</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">script</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3267</span> </span><span class="WHIT">			</span><span class="NAME">lisp.eval</span><span class="PUNC">(</span><span class="NAME">script</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3268</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">callback</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3269</span> </span><span class="WHIT">				</span><span class="NAME">callback</span><span class="PUNC">(</span><span class="NAME">source</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3270</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3271</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3272</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3273</span> </span><span class="WHIT">	
+<span class='line'>3274</span> 	</span><span class="NAME">dotag</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">tag</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3275</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">tag.src</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3276</span> </span><span class="WHIT">			</span><span class="NAME">lisp.load</span><span class="PUNC">(</span><span class="NAME">tag.src</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">script</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3277</span> </span><span class="WHIT">				</span><span class="NAME">lisp.eval</span><span class="PUNC">(</span><span class="NAME">tag.textContent</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3278</span> </span><span class="WHIT">				</span><span class="NAME">tag.parentElement.removeChild</span><span class="PUNC">(</span><span class="NAME">tag</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3279</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3280</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3281</span> </span><span class="WHIT">			</span><span class="NAME">lisp.eval</span><span class="PUNC">(</span><span class="NAME">tag.textContent</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3282</span> </span><span class="WHIT">			</span><span class="NAME">tag.parentElement.removeChild</span><span class="PUNC">(</span><span class="NAME">tag</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3283</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3284</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>3285</span> </span><span class="WHIT">	
+<span class='line'>3286</span> 	</span><span class="NAME">run</span><span class="PUNC">:</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3287</span> </span><span class="WHIT">		</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">tags</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">document.getElementsByTagName</span><span class="PUNC">(</span><span class="STRN">"script"</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3288</span> </span><span class="WHIT">		</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="WHIT"> </span><span class="PUNC">&lt;</span><span class="WHIT"> </span><span class="NAME">tags.length</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="NAME">i</span><span class="PUNC">++</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3289</span> </span><span class="WHIT">			</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">tag</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tags</span><span class="PUNC">[</span><span class="NAME">i</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3290</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">tag.type</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"text/lisp"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3291</span> </span><span class="WHIT">				</span><span class="NAME">lisp.dotag</span><span class="PUNC">(</span><span class="NAME">tag</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3292</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3293</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3294</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3295</span> </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3296</span> 
+<span class='line'>3297</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">(</span><span class="KEYW">this</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3298</span> 
+<span class='line'>3299</span> </span><span class="COMM">// Set this library up to work with node.js</span><span class="WHIT">
+<span class='line'>3300</span> </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">window</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"undefined"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT">
+<span class='line'>3301</span> </span><span class="WHIT">	</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">global</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"object"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">global</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="COMM">// Make sure it isn't null</span><span class="WHIT">
+<span class='line'>3302</span> </span><span class="WHIT">	</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">require</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"function"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT">
+<span class='line'>3303</span> </span><span class="WHIT">	</span><span class="PUNC">(</span><span class="KEYW">typeof</span><span class="PUNC">(</span><span class="NAME">exports</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">==</span><span class="WHIT"> </span><span class="STRN">"object"</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">&&</span><span class="WHIT"> </span><span class="NAME">exports</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3304</span> </span><span class="WHIT">	</span><span class="COMM">// We are probably running in node.js now.</span><span class="WHIT">
+<span class='line'>3305</span> </span><span class="WHIT">	</span><span class="COMM">// FIXME: Find a better way to tell we're running in node.js</span><span class="WHIT">
+<span class='line'>3306</span> </span><span class="WHIT">	</span><span class="KEYW">for</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">key</span><span class="WHIT"> </span><span class="KEYW">in</span><span class="WHIT"> </span><span class="NAME">lisp</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3307</span> </span><span class="WHIT">		</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">lisp.hasOwnProperty</span><span class="PUNC">(</span><span class="NAME">key</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>3308</span> </span><span class="WHIT">			</span><span class="NAME">exports</span><span class="PUNC">[</span><span class="NAME">key</span><span class="PUNC">]</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">lisp</span><span class="PUNC">[</span><span class="NAME">key</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3309</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3310</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3311</span> </span><span class="WHIT">	
+<span class='line'>3312</span> 	</span><span class="NAME">lisp.log</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">require</span><span class="PUNC">(</span><span class="STRN">"sys"</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">puts</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>3313</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>3314</span> 
+<span class='line'>3315</span> </span></pre></body></html>

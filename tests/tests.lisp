@@ -1023,8 +1023,28 @@ string" "a\nstring")))
 									  "I like apples; apples are good."))))
 
 (JSTest.TestCase (object
-	:name "macro (map)"
+	:name "function (apply)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error (getfunc apply) nil))
+	:testOneArgument (lambda ()
+		(this.assertRaises Error (getfunc apply) nil +))
+	:testTwoArguments (lambda ()
+		(this.assertNotRaises Error (getfunc apply) nil + '(1 2)))
+	:testMoreThanTwoArguments (lambda ()
+		(this.assertRaises Error (getfunc apply) nil + '(1 2) '(3 4)))
+	:testNonFunctionFirstArgument (lambda ()
+		(this.assertRaises Error (getfunc apply) nil "hi" '(1 2)))
+	:testNonListSecondArgument (lambda ()
+		(this.assertRaises Error (getfunc apply) nil + 1))
+	:testBasic (lambda ()
+		(this.assertEqual (apply + '(1 2 3)) 6))
+))
+
+(JSTest.TestCase (object
+	:name "function (map)"
 	;; TODO: Test error conditions
 	:testBasic (lambda ()
 		(this.assertEqual (map (lambda (x) (1+ x)) '(1 2 3))
 						  '(2 3 4) nil (getfunc equal)))))
+
+;; TODO: Test props

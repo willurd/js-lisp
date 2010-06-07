@@ -838,7 +838,7 @@ defun("1+", function (number) {
  * @function
  * @member lisp.functions
  * 
- * @return The result of subtracting 1 from the given number.
+ * @returns The result of subtracting 1 from the given number.
  * 
  * @param {number} number
  *     The number to subtract 1 from.
@@ -869,9 +869,9 @@ defun("1-", function (number) {
  * @function
  * @member lisp.functions
  * 
- * @return The result of applying the given arguments to sprintf
- *         (in the vendor section) if print evaluates to true,
- *         otherwise nil.
+ * @returns The result of applying the given arguments to sprintf
+ *          (in the vendor section) if print evaluates to true,
+ *          otherwise nil.
  * 
  * @param {boolean} print
  *     Whether to print the result, or return it.
@@ -900,6 +900,50 @@ defun("format", function (print, format /*, &rest */) {
 
 /**
  * <pre>
+ * Calls apply on the given function and passes in the given
+ * list as arguments.
+ * </pre>
+ * 
+ * @name apply
+ * @lisp
+ * @function
+ * @member lisp.functions
+ * 
+ * @returns The result of applying the given list as the arguments to
+ *          the given function.
+ * 
+ * @param {function} func
+ *     The function to apply the list of arguments to.
+ * @param {Array} list
+ *     The list to give as arguments to the given function.
+ * 
+ * @example Add a list of numbers together
+ *     >> (apply + '(1 2 3))
+ *     => 6
+ * 
+ * @example Print a list of values
+ *     >> (apply print '("arg1", "arg2", '("a" "list")))
+ *     arg1 , arg2 , quote,a,list
+ *     => nil
+ */
+defun("apply", function (func, list) {
+	if (arguments.length !== 2) {
+		throw new Error("(apply) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
+	if (typeof(func) != "function") {
+		throw new Error("(apply) requires a function as its " +
+			"first argument (got " + String(func) + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(apply) requires a list as its second " +
+			"argument (got " + String(list) + ")");
+	}
+	return func.apply(null, list);
+});
+
+/**
+ * <pre>
  * Run each of the items in the given list through the given
  * function and returns a new list with the given return values.
  * 
@@ -912,12 +956,12 @@ defun("format", function (print, format /*, &rest */) {
  * @function
  * @member lisp.functions
  * 
- * @return The result of mapping the given list to the given function.
+ * @returns The result of mapping the given list to the given function.
  * 
  * @param {function} func
- *     The function to apply to each object in the given list.
+ *     The function which gets passed each value in the given list.
  * @param {Array} list
- *     The list of items to pass to the given function.
+ *     The list of values to pass to the given function.
  */
 defun("map", function (func, list) {
 	if (arguments.length !== 2) {
@@ -953,8 +997,8 @@ defun("map", function (func, list) {
  * @function
  * @member lisp.functions
  * 
- * @return A new object containing only the values on the given
- *         object specified by the list of keys.
+ * @returns A new object containing only the values on the given
+ *          object specified by the list of keys.
  * 
  * @param {object} object
  *     The object containing the values to return (specified by the
