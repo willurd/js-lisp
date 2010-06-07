@@ -784,8 +784,8 @@ defun("-", function (/* &rest */) {
  * @rest rest
  */
 defun("%", function () {
-	if (arguments.length !== 2) {
-		throw new Error("(%) requires 2 arguments (got " +
+	if (arguments.length < 2) {
+		throw new Error("(%) requires at least 2 arguments (got " +
 			arguments.length + ")");
 	}
 	return argsToArray(arguments).reduce(function (a, b) {
