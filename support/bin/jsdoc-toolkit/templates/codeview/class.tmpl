@@ -7,7 +7,87 @@
 		<title>JsDoc Reference - {+data.alias+}</title>
 		<link href="../css/default.css" type="text/css" rel="stylesheet" media="all" />
 	</head>
-
+	
+	{!
+		function getName (member) {
+			var sig = makeSignature(member.params);
+			var name = member.name.replace(/\^\d+$/, '');
+			
+			if (isLisp(member)) {
+				sig = sig.replace(/(^\s*\(\s*|\s*\)\s*$)/g, '');
+				sig = sig.replace(/,/g, '');
+				sig = sig.replace(/^\s+$/, '');
+				if (sig.length > 0) {
+					sig = ' ' + sig;
+				}
+				
+				var optional = member.comment.getTag('optional');
+				var rest = member.comment.getTag('rest');
+				rest = rest.length > 0 ? rest[0] : null;
+				
+				var args = optional.concat(rest ? rest : []);
+				var last = args.join(' ');
+				sig = sig.replace(new RegExp(last + "$"), '');
+				
+				if (optional.length > 0) {
+					sig += ' &amp;optional ' + optional.join(' ');
+				}
+				
+				if (rest) {
+					sig += ' &amp;rest ' + rest;
+				}
+				
+				return '(' + name + sig + ')';
+			} else {
+				return name + sig;
+			}
+		}
+		
+		function getSlug (member) {
+			var slug = getName(member);
+			slug = slug.replace(/\s+/g, '-');
+			return slug;
+		}
+		
+		function getPrettyName (member) {
+			var name = getName(member);
+			if (isLisp(member)) {
+				name = name.replace(/^\((\S+)/, "(<b>$1</b>");
+				name = name.replace(/(\&amp\;optional|\&amp\;rest)/g, "<i>$1</i>");
+			} else {
+				name = name.replace(/^(\S+)\(/, "<b>$1</b>(");
+			}
+			return name;
+		}
+		
+		function isLisp (member) {
+			return member.comment.getTag("lisp").length > 0;
+		}
+		
+		function isOptional (member, name) {
+			var tags = member.comment.getTag("optional");
+			for (var i = 0; i < tags.length; i++) {
+				if (tags[i].toString() == name) {
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		function isRest (member, name) {
+			var tags = member.comment.getTag("rest");
+			for (var i = 0; i < tags.length; i++) {
+				if (tags[i].toString() == name) {
+					return true;
+				}
+			}
+			return false;
+		}
+	!}
+	
+	{! var inOptional = false; !}
+	{! var inRest = false; !}
+	
 	<body>
 		{+include("static/header.html")+}
 
@@ -189,8 +269,7 @@
 												if (member.isStatic) output += "&lt;static&gt; ";
 											!}&nbsp;</td>
 											<td class="nameDescription"><!--{+member.name.replace(/\^\d+$/, '')+}-->
-												<div class="fixedFont"><b><a href="#.{+member.name.replace(/\^\d+$/, '')+}">{+member.name.replace(/\^\d+$/, '')+}</a></b>{+makeSignature(member.params)+}
-												</div>
+												<div class="fixedFont"><a href="#{+getSlug(member)+}">{+getPrettyName(member)+}</a></div>
 												<div class="description">{+resolveLinks(summarize(member.desc))+}</div>
 											</td>
 										</tr>
@@ -467,7 +546,7 @@
 
 	<!--
 	#### METHOD DETAILS
-	-->		
+	-->
 				<if test="defined(ownMethods) && ownMethods.length">
 					<div class="details props">
 						<div class="innerProps">
@@ -476,7 +555,7 @@
 							</div>
 							
 							<for each="member" in="ownMethods">
-								<a name="{+Link.symbolNameToLinkName(member)+}"></a>
+								<a name="{+getSlug(member)+}"></a>
 								
 								<div class="fixedFont heading">
 									<span class='lighter'>
@@ -489,7 +568,7 @@
 									
 									<if test="member.type"><span class="light">{{+new Link().toSymbol(member.type)+}}</span></if>
 									
-									<b>{+member.name.replace(/\^\d+$/, '')+}</b>{+makeSignature(member.params)+}
+									{+getPrettyName(member)+}
 								</div>
 								
 								<div class="description">
@@ -506,10 +585,22 @@
 								<if test="member.params.length">
 									<dl class="detailList params">
 										<dt class="heading">Parameters:</dt>
+										{! inOptional = false; !}
+										{! inRest = false; !}
 										<for each="item" in="member.params">
+											{!
+												if (!inOptional && isOptional(member, item.name)) {
+													inOptional = true;
+													output += '<span class="keywordOptional">&amp;optional</span>';
+												} else if (!inRest && isRest(member, item.name)) {
+													inRest = true;
+													output += '<span class="keywordRest">&amp;rest</span>';
+												}
+											!}
 											<dt>
 												{+((item.type)?"<span class=\"light fixedFont\">{"+(new Link().toSymbol(item.type))+"}</span> " : "")+}<b>{+item.name+}</b>
-												<if test="item.isOptional"><i>Optional<if test="item.defaultValue">, Default: {+item.defaultValue+}</if></i></if>
+												<if test="!isLisp(member) && item.isOptional"><i>Optional<if test="item.defaultValue">, Default: {+item.defaultValue+}</if></i></if>
+												<if test="isLisp(member) && item.isOptional && item.defaultValue"><span class="defaultValue">, Default: {+item.defaultValue+}</span></if>
 											</dt>
 											<dd>{+resolveLinks(item.desc)+}</dd>
 										</for>
@@ -571,7 +662,10 @@
 									</for>
 								</if>
 								
-								<if test="!$member_last"><div class="hr"></div></if>
+								<if test="!$member_last">
+									<div class="memberDivider"></div>
+									<div class="hr"></div>
+								</if>
 							</for>
 						</div>
 					</div>

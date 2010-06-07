@@ -17,8 +17,9 @@ var macros = {}; // This is just for documentation. It doesn't get used.
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name quote
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @returns The given argument, unevaluated.
@@ -41,8 +42,9 @@ defmacro("quote", function (expression) {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name lambda
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @returns The created function.
@@ -71,8 +73,7 @@ defmacro("lambda", function (arglist /*, ... */) {
 				var argname = arglist[i];
 				if (argname == "&rest") {
 					if (i == arglist.length - 1) {
-						throw new Error("No rest argument after &rest identifier in " +
-							"(defun) arglist");
+						throw new Error("No argument name after &rest identifier");
 					}
 					if (arglist.length > i + 2) {
 						throw new Error("Unexpected arguments (" +
@@ -102,8 +103,9 @@ defmacro("lambda", function (arglist /*, ... */) {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name defun
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("defun", function (name, arglist /*, ... */) {
@@ -141,8 +143,9 @@ defmacro("defun", function (name, arglist /*, ... */) {
  * 
  * @tested
  * 
- * @function
  * @name try
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @returns The return value of the last evaluated body expression
@@ -258,8 +261,9 @@ defmacro("try", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name getfunc
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("getfunc", function (symbol) {
@@ -285,8 +289,9 @@ defmacro("getfunc", function (symbol) {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name funcall
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("funcall", function (object, dotpath) {
@@ -318,13 +323,15 @@ defmacro("funcall", function (object, dotpath) {
 
 /**
  * <pre>
+ * FIXME: This method sucks (actually, env.let sucks)
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name let
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("let", function () {
@@ -355,8 +362,9 @@ defmacro("let", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name setq
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("setq", function () {
@@ -379,8 +387,9 @@ defmacro("setq", function () {
  * 
  * @tested
  * 
- * @function
  * @name progn
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @returns The return value of the last expression, or nil if there
@@ -401,8 +410,9 @@ defmacro("progn", function (/* .. */) {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name cond
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @returns The value of the last evaluated expression, or nil.
@@ -439,8 +449,9 @@ defmacro("cond", function () {
  * 
  * @tested
  * 
- * @function
  * @name if
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @returns The return value of either the second or last expression, or
@@ -475,8 +486,9 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
  * 
  * @tested
  * 
- * @function
  * @name when
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @returns The return value of the last expression.
@@ -502,8 +514,9 @@ defmacro("when", function () {
  * 
  * @tested
  * 
- * @function
  * @name not
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("not", function (value) {	
@@ -522,8 +535,9 @@ defmacro("not", function (value) {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name or
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("or", function () {
@@ -542,8 +556,9 @@ defmacro("or", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name and
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("and", function () {
@@ -562,8 +577,9 @@ defmacro("and", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name equal
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("equal", function () {
@@ -583,8 +599,9 @@ defmacro("equal", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name not-equal
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("not-equal", function () {
@@ -604,8 +621,9 @@ defmacro("not-equal", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name ==
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("==", function () {
@@ -625,8 +643,9 @@ defmacro("==", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name ===
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("===", function () {
@@ -646,8 +665,9 @@ defmacro("===", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name !=
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("!=", function () {
@@ -667,8 +687,9 @@ defmacro("!=", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name !==
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("!==", function () {
@@ -687,8 +708,9 @@ defmacro("!==", function () {
  * TODO: Document me
  * </pre>
  * 
- * @function
  * @name <
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @example Comparing two arguments
@@ -715,8 +737,9 @@ defmacro("<", function () {
  * TODO: Document me
  * </pre>
  * 
- * @function
  * @name >
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @example Comparing two arguments
@@ -743,8 +766,9 @@ defmacro(">", function () {
  * TODO: Document me
  * </pre>
  * 
- * @function
  * @name <=
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @example Comparing two arguments
@@ -771,8 +795,9 @@ defmacro("<=", function () {
  * TODO: Document me
  * </pre>
  * 
- * @function
  * @name >=
+ * @lisp
+ * @function
  * @member lisp.macros
  * 
  * @example Comparing two arguments
@@ -801,8 +826,9 @@ defmacro(">=", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-true
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-true", function () {
@@ -822,8 +848,9 @@ defmacro("is-true", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-false
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-false", function () {
@@ -843,8 +870,9 @@ defmacro("is-false", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-null
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-null", function () {
@@ -862,8 +890,9 @@ defmacro("is-null", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-undefined
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-undefined", function () {
@@ -883,8 +912,9 @@ defmacro("is-undefined", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-string
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-string", function () {
@@ -904,8 +934,9 @@ defmacro("is-string", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-number
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-number", function () {
@@ -925,8 +956,9 @@ defmacro("is-number", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-boolean
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-boolean", function () {
@@ -946,8 +978,9 @@ defmacro("is-boolean", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-function
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-function", function () {
@@ -967,8 +1000,9 @@ defmacro("is-function", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-object
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-object", function () {
@@ -988,9 +1022,10 @@ defmacro("is-object", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-array
  * @alias is-list
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-array", function () {
@@ -1011,8 +1046,9 @@ defmacro("is-array", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name is-list
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("is-list", function () {
@@ -1032,8 +1068,9 @@ defmacro("is-list", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name dolist
+ * @lisp
+ * @function
  * @member lisp.macros
  */
 defmacro("dolist", function (arglist /*, ... */) {

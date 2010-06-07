@@ -413,6 +413,29 @@ pre.code {
 	min-height: 0;
 }
 
+.memberDivider {
+	background: #e5e5e5;
+	height: 3px;
+	margin: 30px auto -10px;
+	width: 300px;
+	}
+
+.keywordOptional,
+.keywordRest {
+	background: #d5d5d5;
+	display: inline-block;
+	font-size: 0.9em;
+	font-style: italic;
+	font-weight: bold;
+	margin: 2px 0px;
+	padding: 2px 5px 2px 4px;
+	}
+
+.defaultValue {
+	font-size: 0.9em;
+	font-style: italic;
+	}
+
 /*
  * END JSDOC
  */

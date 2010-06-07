@@ -7,32 +7,45 @@
 var functions = {}; // This is just for documentation. It doesn't get used.
 
 /**
- * <li>TODO: Test me
- * <li>TODO: Document me
- * <li>TODO: Add examples
+ * <pre>
+ * Applies the given arguments to the JavaScript eval function.
  * 
- * @function
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
  * @name jseval
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @param {[mixed]} rest
+ *     The arguments to be applied to the JavaScript eval function.
+ * @rest rest
  */
-defun("jseval", function () {
+defun("jseval", function (/* &rest */) {
 	return eval.apply(null, arguments);
 });
 
 /**
- * <p>Returns an instance of the given class, initialized with
+ * <pre>
+ * Returns an instance of the given class, initialized with
  * the rest of the given arguments.
  * 
- * <li>TODO: Test me
+ * TODO: Test me
+ * </pre>
  * 
- * @function
  * @name new
+ * @lisp
+ * @function
  * @member lisp.functions
  * 
  * @param {function} cls
  *     The class to create a new instance of.
  * @param {[mixed]} rest
  *     The arguments to be passed to the class constructor.
+ * @rest rest
  * 
  * @returns The new class instance.
  * 
@@ -44,9 +57,13 @@ defun("jseval", function () {
  *     >> (to-string (new Error "My error message"))
  *     => "Error: My error message"
  */
-defun("new", function (cls /*, ... */) {
+defun("new", function (cls /*, &rest */) {
 	if (arguments.length === 0) {
 		throw new Error("(new) requires at least 1 argument");
+	}
+	if (typeof(cls) != "function") {
+		throw new Error("(new) requires a function as its first argument " +
+			"(got " + String(cls) + ")");
 	}
 	var args = argsToArray(arguments).slice(1);
 	var argnames = args.map(function (item, i, thisObject) { return "args[" + i + "]"; });
@@ -54,37 +71,58 @@ defun("new", function (cls /*, ... */) {
 });
 
 /**
- * <li>TODO: Test me
- * <li>TODO: Document me
- * <li>TODO: Add examples
+ * <pre>
+ * Returns the value of "value instanceof cls".
  * 
- * @function
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
  * @name instanceof
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The value of "value instanceof cls".
+ * 
+ * @param {mixed} value
+ *     The left side of the instanceof operator.
+ * @param {function} cls
+ *     The right side of the instanceof operator.
  */
-defun("instanceof", function (object, cls) {
+defun("instanceof", function (value, cls) {
 	if (arguments.length !== 2) {
 		throw new Error("(instanceof) requires 2 arguments (got " +
 			arguments.length + ")");
 	}
-	return object instanceof cls;
+	if (typeof(cls) != "function") {
+		throw new Error("(instanceof) requires a function as its second " +
+			"argument (got " + String(cls) + ")");
+	}
+	return (value instanceof cls);
 });
 
 /**
- * <p>Throws the given object, or "new Error()" if no object is provided.
+ * <pre>
+ * Throws the given object, or "new Error()" if no object is provided.
+ * </pre>
  * 
  * @tested
  * 
- * @function
  * @name throw
+ * @lisp
+ * @function
  * @member lisp.functions
  * 
- * @param {mixed} object The object to throw. Defaults to new Error().
+ * @param {mixed} [value=new Error()]
+ *     The value to throw.
+ * @optional value
  * 
- * @returns Nothing. After throw'ing the stack is unwided to the
- *          nearest 'catch' block.
+ * @returns Nothing. After throw'ing the stack is unwound to the
+ *          nearest 'catch' block (or to the top).
  * 
- * @example Basic Error
+ * @example Default Error
  *     >> (throw) ; Throws "new Error()"
  * 
  * @example Custom Error
@@ -96,26 +134,33 @@ defun("instanceof", function (object, cls) {
  *     >> (throw (object :type "MyError"))
  *     >> (throw (array 1 2 3))
  */
-defun("throw", function (object) {
+defun("throw", function (value) {
 	if (arguments.length > 1) {
 		throw new Error("(throw) accepts 1 optional argument (got " +
 			arguments.length + ")");
 	}
-	object = object || new Error(); // Throw "new Error()" if nothing is provided
-	throw object;
+	value = value || new Error(); // Throw "new Error()" if nothing is provided
+	throw value;
 });
 
 /**
- * <p>Creates an array from the given arguments.
+ * <pre>
+ * Creates an array from the given arguments.
  * 
- * <li>TODO: Test me
+ * TODO: Test me
+ * </pre>
  * 
- * @function
  * @name array
  * @alias list
+ * @lisp
+ * @function
  * @member lisp.functions
  * 
  * @returns The new array.
+ * 
+ * @param {[mixed]} rest
+ *     The objects to join into an array.
+ * @rest rest
  * 
  * @example An empty array
  *     >> (array)
@@ -129,38 +174,52 @@ defun("throw", function (object) {
  *     >> (array (array 1 2) (array 3 4))
  *     => [[1, 2], [3, 4]]
  */
-defun("array", function () {
+defun("array", function (/* &rest */) {
 	return argsToArray(arguments);
 });
 
 /**
- * <p>Returns the given arguments as an array (this is an alias
+ * <pre>
+ * Returns the given arguments as an array (this is an alias
  * for (array)).
  * 
- * <li>TODO: Test me
+ * TODO: Test me
+ * </pre>
  * 
- * @function
  * @name list
+ * @lisp
+ * @function
  * @member lisp.functions
  * 
  * @returns The new array.
+ * 
+ * @param {[mixed]} rest
+ *     The objects to join into an array.
+ * @rest rest
  */
-defun("list", function (/* ... */) {
+defun("list", function (/* &rest */) {
 	return argsToArray(arguments);
 });
 
 /**
- * <p>Creates a JavaScript object using the given arguments as a
+ * <pre>
+ * Creates a JavaScript object, using the given arguments as a
  * property list to initialize the object. There must be an even
  * number of arguments -- one value for every key.
+ * </pre>
  * 
  * @tested
  * 
- * @function
  * @name object
+ * @lisp
+ * @function
  * @member lisp.functions
  * 
  * @returns The new object.
+ * 
+ * @param {[mixed]} rest
+ *     The property list from which to make the object.
+ * @rest rest
  * 
  * @example An empty object
  *     >> (object)
@@ -182,7 +241,7 @@ defun("list", function (/* ... */) {
  *         parents: [{name: "John"},
  *                   {name: "Jane"}]}
  */
-defun("object", function () {
+defun("object", function (/* &rest */) {
 	var args = argsToArray(arguments);
 	var object = {};
 	
@@ -198,15 +257,25 @@ defun("object", function () {
 });
 
 /**
- * <p>Returns a value from an object given a key (will work with
+ * <pre>
+ * Returns a value from an object given a key (will work with
  * array indices as well).
  * 
- * <li>TODO: Test me
- * <li>TODO: Add examples
+ * TODO: Test me
+ * TODO: Add examples
+ * </pre>
  * 
- * @function
  * @name getkey
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The value of "object[key]".
+ * 
+ * @param {mixed} key
+ *     The key to access on the given object.
+ * @param {object} object
+ *     The object on which to access the given key.
  */
 defun("getkey", function (key, object) {
 	if (arguments.length !== 2) {
@@ -217,40 +286,60 @@ defun("getkey", function (key, object) {
 });
 
 /**
- * <p>Sets a value on the given object using the given key.
+ * <pre>
+ * Sets a value on the given object using the given key.
  * 
- * <li>TODO: Test me
- * <li>TODO: Add examples
+ * TODO: Test me
+ * TODO: Add examples
+ * </pre>
  * 
- * @function
  * @name setkey
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The given value.
+ * 
+ * @param {mixed} key
+ *     The key to set on the given object.
+ * @param {object} object
+ *     The object on which to set the given key.
+ * @param {mixed} value
+ *     The value to set to the given key on the given object.
  */
 defun("setkey", function (key, object, value) {
 	if (arguments.length !== 3) {
 		throw new Error("(setkey) requires 3 arguments (got " +
 			arguments.length + ")");
 	}
-	return object[key] = value;
+	object[key] = value;
+	return value;
 });
 
 /**
- * <p>Prints the given arguments to the console.
+ * <pre>
+ * Prints the given arguments to the console.
+ * </pre>
  * 
  * @tested
  * 
- * @function
  * @name print
+ * @lisp
+ * @function
  * @member lisp.functions
  * 
  * @returns nil.
+ * 
+ * @param {[mixed]} rest
+ *     The objects to print.
+ * @rest rest
  * 
  * @example Basic (print) expression
  *     >> (print "Hello" "Lisp")
  *     Hello Lisp
  *     => nil
  */
-defun("print", function () {
+defun("print", function (/* &rest */) {
 	// Do not remove this. This is not a debug statement.
 	lisp.log.apply(null, arguments);
 	return null;
@@ -263,11 +352,16 @@ defun("print", function () {
  * 
  * @tested
  * 
- * @function
  * @name concat
+ * @lisp
+ * @function
  * @member lisp.functions
  * 
  * @returns The string result of the joined arguments.
+ * 
+ * @param {[mixed]} rest
+ *     The objects to join together into the returning string.
+ * @rest rest
  * 
  * @example Concatenate a single object (if you really want to)
  *     >> (concat "Hello")
@@ -278,7 +372,7 @@ defun("print", function () {
  *          (concat "Hello: " name))
  *     => "Hello: Lisp"
  */
-defun("concat", function () {
+defun("concat", function (/* &rest */) {
 	return argsToArray(arguments).join("");
 });
 
@@ -290,11 +384,19 @@ defun("concat", function () {
  * 
  * @tested
  * 
- * @function
  * @name join
+ * @lisp
+ * @function
  * @member lisp.functions
  * 
  * @returns The string result of the joined arguments.
+ * 
+ * @param {mixed} sep
+ *     The value that separates the objects in the returning string.
+ * @param {[mixed]} rest
+ *     The objects to join together into the returning string,
+ *     separated by 'sep'.
+ * @rest rest
  * 
  * @example Join items from a single list
  *     >> (join ", " (list "one" "two"))
@@ -306,12 +408,11 @@ defun("concat", function () {
  *          (join ", " l1 l2))
  *     => "one, two, three"
  */
-defun("join", function () {
+defun("join", function (sep /*, &rest */) {
 	if (arguments.length === 0) {
 		throw new Error("(join) requires at least 1 argument");
 	}
 	var args = argsToArray(arguments);
-	var sep  = args[0];
 	var rest = args.slice(1);
 	for (var i = 0; i < rest.length; i++) {
 		var arg = rest[i];
@@ -326,17 +427,20 @@ defun("join", function () {
 
 /**
  * <pre>
- * Returns the type of the given value (the result of
- * "typeof(value)").
+ * Returns the type of the given value (the result of "typeof(value)").
  * </pre>
  * 
  * <li>TODO: Add examples
  * 
  * @tested
  * 
- * @function
  * @name typeof
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @param {mixed} value
+ *     The value whose type is returned.
  */
 defun("typeof", function (value) {
 	if (arguments.length !== 1) {
@@ -355,9 +459,13 @@ defun("typeof", function (value) {
  * 
  * @tested
  * 
- * @function
  * @name to-string
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @param {mixed} value
+ *     The value to turn into a string.
  */
 defun("to-string", function (value) {
 	if (arguments.length !== 1) {
@@ -376,9 +484,13 @@ defun("to-string", function (value) {
  * 
  * @tested
  * 
- * @function
  * @name to-number
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @param {mixed} value
+ *     The value to turn into a number.
  */
 defun("to-number", function (value) {
 	if (arguments.length !== 1) {
@@ -397,9 +509,13 @@ defun("to-number", function (value) {
  * 
  * @tested
  * 
- * @function
  * @name to-boolean
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @param {mixed} value
+ *     The value to turn into a boolean.
  */
 defun("to-boolean", function (value) {
 	if (arguments.length !== 1) {
@@ -417,12 +533,22 @@ defun("to-boolean", function (value) {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name to-json
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @param {mixed} value
+ *     The value whose json representation is returned.
+ * @param {boolean} pretty
+ *     Whether to pretty-print the resulting json string.
+ * @param {boolean} levels
+ *     The amount of levels deep to go before stopping.
+ * @optional pretty
+ * @optional levels
  */
-defun("to-json", function () {
-	return toJSON.apply(null, arguments);
+defun("to-json", function (value, pretty, levels) {
+	return toJSON(value, pretty, levels);
 });
 
 /**
@@ -434,19 +560,26 @@ defun("to-json", function () {
  * 
  * @tested
  * 
- * @function
  * @name to-upper
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The result of "string.toUpperCase()".
+ * 
+ * @param {string} string
+ *     The string to convert to uppercase.
  */
-defun("to-upper", function (value) {
+defun("to-upper", function (string) {
 	if (arguments.length !== 1) {
 		throw new Error("(to-upper) requires 1 argument (got " +
 			arguments.length + ")");
 	}
-	if (typeof(value) != "string") {
-		throw new Error("(to-upper) requires a string argument");
+	if (typeof(string) != "string") {
+		throw new Error("(to-upper) requires a string argument (got " +
+			String(string) + ")");
 	}
-	return value.toUpperCase();
+	return string.toUpperCase();
 });
 
 /**
@@ -458,19 +591,26 @@ defun("to-upper", function (value) {
  * 
  * @tested
  * 
- * @function
  * @name to-lower
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The result of "string.toLowerCase()".
+ * 
+ * @param {string} string
+ *     The string to convert to lowercase.
  */
-defun("to-lower", function (value) {
+defun("to-lower", function (string) {
 	if (arguments.length !== 1) {
 		throw new Error("(to-lower) requires 1 argument (got " +
 			arguments.length + ")");
 	}
-	if (typeof(value) != "string") {
-		throw new Error("(to-lower) requires a string argument");
+	if (typeof(string) != "string") {
+		throw new Error("(to-lower) requires a string argument (got " +
+			String(string) + ")");
 	}
-	return value.toLowerCase();
+	return string.toLowerCase();
 });
 
 /**
@@ -482,11 +622,19 @@ defun("to-lower", function (value) {
  * 
  * @tested
  * 
- * @function
  * @name /
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The result of reducing all of the given arguments
+ *          on the division operator.
+ * 
+ * @param {[number]} rest
+ *     The numbers to divide into each other.
+ * @rest rest
  */
-defun("/", function () {
+defun("/", function (/* &rest */) {
 	if (arguments.length === 0) {
 		throw new Error("(/) requires at least 1 argument");
 	}
@@ -510,11 +658,19 @@ defun("/", function () {
  * 
  * @tested
  * 
- * @function
  * @name *
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The result of reducing all of the given arguments
+ *          on the multiplication operator.
+ * 
+ * @param {[number]} rest
+ *     The numbers to multiply by each other.
+ * @rest rest
  */
-defun("*", function () {
+defun("*", function (/* &rest */) {
 	var args = argsToArray(arguments);
 	if (args.length === 0) {
 		args = [1];
@@ -533,11 +689,19 @@ defun("*", function () {
  * 
  * @tested
  * 
- * @function
  * @name +
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The result of reducing all of the given arguments
+ *          on the addition operator.
+ * 
+ * @param {[number]} rest
+ *     The numbers to add to each other.
+ * @rest rest
  */
-defun("+", function () {
+defun("+", function (/* &rest */) {
 	var args = argsToArray(arguments);
 	if (args.length === 0) {
 		args = [0];
@@ -556,11 +720,19 @@ defun("+", function () {
  * 
  * @tested
  * 
- * @function
  * @name -
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The result of reducing all of the given arguments
+ *          on the subtraction operator.
+ * 
+ * @param {[number]} rest
+ *     The numbers to subtract by each other.
+ * @rest rest
  */
-defun("-", function () {
+defun("-", function (/* &rest */) {
 	if (arguments.length === 0) {
 		throw new Error("(-) requires at least 1 argument");
 	}
@@ -582,9 +754,17 @@ defun("-", function () {
  * 
  * @tested
  * 
- * @function
  * @name %
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The result of reducing all of the given arguments
+ *          on the modulo operator.
+ * 
+ * @param {[number]} rest
+ *     The numbers on which to use the modulo operator.
+ * @rest rest
  */
 defun("%", function () {
 	if (arguments.length !== 2) {
@@ -605,20 +785,26 @@ defun("%", function () {
  * 
  * @tested
  * 
- * @function
  * @name 1+
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @returns The result of adding 1 to the given number.
+ * 
+ * @param {number} number
+ *     The number to add 1 to.
  */
-defun("1+", function (value) {
+defun("1+", function (number) {
 	if (arguments.length !== 1) {
 		throw new Error("(1+) requires 1 argument (got " +
 			arguments.length + ")");
 	}
-	if (typeof(value) != "number") {
+	if (typeof(number) != "number") {
 		throw new Error("(1+) requires a number argument (got " +
-			value + ")");
+			number + ")");
 	}
-	return Number(value) + 1;
+	return number + 1;
 });
 
 /**
@@ -630,37 +816,55 @@ defun("1+", function (value) {
  * 
  * @tested
  * 
- * @function
  * @name 1-
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @return The result of subtracting 1 from the given number.
+ * 
+ * @param {number} number
+ *     The number to subtract 1 from.
  */
-defun("1-", function (value) {
+defun("1-", function (number) {
 	if (arguments.length !== 1) {
 		throw new Error("(1-) requires 1 argument (got " +
 			arguments.length + ")");
 	}
-	if (typeof(value) != "number") {
+	if (typeof(number) != "number") {
 		throw new Error("(1-) requires a number argument (got " +
-			value + ")");
+			number + ")");
 	}
-	return Number(value) - 1;
+	return number - 1;
 });
 
 /**
  * <pre>
- * Calls {@link sprintf} (found in the vendor section) with the
- * supplied arguments.
+ * Calls sprintf (found in the vendor section) with the supplied arguments.
  * 
  * TODO: Add examples
  * </pre>
  * 
  * @tested
  * 
- * @function
  * @name format
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @return The result of applying the given arguments to sprintf
+ *         (in the vendor section) if print evaluates to true,
+ *         otherwise nil.
+ * 
+ * @param {boolean} print
+ *     Whether to print the result, or return it.
+ * @param {string} format
+ *     The string format to which to apply the given arguments.
+ * @param {[mixed]} rest
+ *     The arguments to apply to the given format
+ * @rest rest
  */
-defun("format", function (print, format) {
+defun("format", function (print, format /*, &rest */) {
 	if (arguments.length < 2) {
 		throw new Error("(format) expects at least 2 arguments (got " +
 			arguments.length + ")");
@@ -686,9 +890,17 @@ defun("format", function (print, format) {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name map
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @return The result of mapping the given list to the given function.
+ * 
+ * @param {function} func
+ *     The function to apply to each object in the given list.
+ * @param {Array} list
+ *     The list of items to pass to the given function.
  */
 defun("map", function (func, list) {
 	if (arguments.length !== 2) {
@@ -719,9 +931,20 @@ defun("map", function (func, list) {
  * TODO: Add examples
  * </pre>
  * 
- * @function
  * @name props
+ * @lisp
+ * @function
  * @member lisp.functions
+ * 
+ * @return A new object containing only the values on the given
+ *         object specified by the list of keys.
+ * 
+ * @param {object} object
+ *     The object containing the values to return (specified by the
+ *     given list of keys).
+ * @param {Array} list
+ *     The list of keys specifying which values to return in the
+ *     resulting object.
  */
 defun("props", function (object, list) {
 	if (arguments.length !== 2) {
