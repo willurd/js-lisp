@@ -58,7 +58,7 @@
         // Constants
         // Some are enums, data types, others just for optimisation
         self.keyCodes = { left:37,right:39,up:38,down:40,back:8,del:46,
-                            end:35,start:36,ret:13 };
+                            end:35,start:36,ret:13, v: 86 };
         self.cursor = '<span class="jquery-console-cursor">&nbsp;</span>';
         // Opera only works with this character, not <wbr> or &shy;,
         // but IE6 displays this character, which is bad, so just use
@@ -78,7 +78,6 @@
 		self.ps3 = config.ps3 || "=> "; // Return values
         self.column = 0;
         self.promptText = '';
-        self.restoreText = '';
         // Prompt history stack
         self.history = [];
         self.historyCursor = 0;
@@ -218,13 +217,15 @@
         // Is a keycode a contorl character? 
         // E.g. up, down, left, right, backspc, return, etc.
         function isControlCharacter (keyCode) {
-            // TODO: Make more precise/fast.
-            return (
-                (keyCode >= self.keyCodes.left && keyCode <= self.keyCodes.down)
-                    || keyCode == self.keyCodes.back || keyCode == self.keyCodes.del
-                    || keyCode == self.keyCodes.end || keyCode == self.keyCodes.start
-                    || keyCode == self.keyCodes.ret
-            );
+			if (keyCode >= self.keyCodes.left && keyCode <= self.keyCodes.down) {
+				return true;
+			}
+			for (var key in self.keyCodes) {
+				if (self.keyCodes[key] == keyCode) {
+					return true;
+				}
+			}
+			return false;
         };
 		
 		self.consoleControl = function (e) {
@@ -240,62 +241,62 @@
 		};
 		
         self.defaultConsoleControl = function (e) {
-            switch (e.keyCode) {
-            case self.keyCodes.left:{
+            switch (e.keyCode)
+			{
+			case self.keyCodes.v: // This could be a paste
+				if (e.metaKey) { // This is a paste
+					// This is so gross
+					setTimeout(function () {
+						self.typer.insertString(self.typer[0].value);
+						self.typer[0].value = '';
+					}, 10);
+					return false;
+				}
+				return true;
+            case self.keyCodes.left:
 				self.cancelKey(e.keyCode);
                 moveColumn(-1);
                 updatePromptDisplay(); 
                 return false;
-                break;
-            }
-            case self.keyCodes.right:{
+            case self.keyCodes.right:
 				self.cancelKey(e.keyCode);
                 moveColumn(1); 
                 updatePromptDisplay();
                 return false;
-                break; 
-            }
-            case self.keyCodes.back:{
+            case self.keyCodes.back:
 				self.cancelKey(e.keyCode);
                 if (moveColumn(-1)){
                     deleteCharAtPos();
                     updatePromptDisplay();
                 }
                 return false;
-                break;
-            }
-            case self.keyCodes.del:{
+            case self.keyCodes.del:
 				self.cancelKey(e.keyCode);
                 if (deleteCharAtPos())
                     updatePromptDisplay();
                 return false;
-                break;
-            }
-            case self.keyCodes.end:{
+            case self.keyCodes.end:
 				self.cancelKey(e.keyCode);
 				self.moveToEnd();
                 return false;
-                break;
-            }
-            case self.keyCodes.start:{
+            case self.keyCodes.start:
 				self.cancelKey(e.keyCode);
 				self.moveToStart();
                 return false;
-                break;
-            }
-            case self.keyCodes.ret:{
+            case self.keyCodes.ret:
 				self.cancelKey(e.keyCode);
-                commandTrigger(); return false;
-            }
-            case self.keyCodes.up:{
+                commandTrigger();
+				return false;
+            case self.keyCodes.up:
 				self.cancelKey(e.keyCode);
-                rotateHistory(-1); return false;
-            }
-            case self.keyCodes.down:{
+                rotateHistory(-1);
+				return false;
+            case self.keyCodes.down:
 				self.cancelKey(e.keyCode);
-                rotateHistory(1); return false;
-            }
-            default: //alert("Unknown control character: " + keyCode);
+                rotateHistory(1);
+				return false;
+            default:
+				break;
             }
         };
 		
@@ -381,16 +382,14 @@
 		function addToHistory (text){
 			self.history.push(text);
 			self.historyCursor = self.history.length;
-			self.restoreText = '';
 		}
 
         // Delete the character at the current position
-        function deleteCharAtPos(){
+        function deleteCharAtPos () {
             if (self.promptText != ''){
                 self.promptText =
                     self.promptText.substring(0,self.column) +
                     self.promptText.substring(self.column+1);
-                self.restoreText = self.promptText;
                 return true;
             } else return false;
         };
@@ -483,14 +482,22 @@
 
         ////////////////////////////////////////////////////////////////////////
         // Handle normal character insertion
-        self.typer.consoleInsert = function(keyCode){
+		
+		self.typer.insertString = function (string) {
+            var before = self.promptText.substring(0, self.column);
+            var after = self.promptText.substring(self.column);
+            self.promptText = before + string + after;
+            moveColumn(string.length);
+            updatePromptDisplay();
+		};
+		
+        self.typer.consoleInsert = function (keyCode) {
             // TODO: remove redundant indirection
             var char = String.fromCharCode(keyCode);
-            var before = self.promptText.substring(0,self.column);
+            var before = self.promptText.substring(0, self.column);
             var after = self.promptText.substring(self.column);
             self.promptText = before + char + after;
             moveColumn(1);
-            self.restoreText = self.promptText;
             updatePromptDisplay();
         };
         
@@ -552,7 +559,7 @@
             return (
                 text.replace(/&/g,'&amp;')
                     .replace(/</g,'&lt;')
-                    .replace(/</g,'&lt;')
+                    .replace(/>/g,'&gt;')
                     .replace(/ /g,'&nbsp;')
             );
         };

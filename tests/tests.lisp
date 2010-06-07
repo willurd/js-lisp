@@ -28,35 +28,6 @@ string" "a\nstring"))
 		(this.assertEqual "a	string" "a\tstring"))))
 
 (JSTest.TestCase (object
-	:name "Scope"
-	:testLetScoping (lambda ()
-		(this.assertUndefined somevar)
-		(let ((somevar t))
-			(this.assertNotUndefined somevar))
-		(this.assertUndefined somevar))
-	:testLetMultipleLevels (lambda ()
-		(this.assertUndefined somevar)
-		(let ((somevar "first value"))
-			(this.assertEqual somevar "first value")
-			(let ((somevar "second value"))
-				(this.assertEqual somevar "second value"))
-			(this.assertEqual somevar "first value"))
-		(this.assertUndefined somevar))
-	:testClosures (lambda ()
-	    (let ((x 3)
-	          (test (lambda () (setq x (1+ x)))))
-	        (this.assertEqual x 3)
-	        (test)
-	        (test)
-	        (this.assertEqual x 5))
-	    (let ((x 3)
-	          (test (lambda (x) (setq x (1+ x)))))
-	        (this.assertEqual x 3)
-	        (test x)
-	        (test x)
-	        (this.assertEqual x 3)))))
-
-(JSTest.TestCase (object
 	:name "Functions As Function Calls"
 	:testFunctionCallAsFirstArg (lambda ()
 		(let ((o (object :func (lambda (x) (1+ x)))))
@@ -201,7 +172,29 @@ string" "a\nstring"))
 
 ;; TODO: Test (getfunc)
 ;; TODO: Test (funcall)
-;; TODO: Test (let)
+
+(JSTest.TestCase (object
+	:name "macro (let)"
+	:testScoping (lambda ()
+		(this.assertUndefined somevar)
+		(let ((somevar nil))
+			(this.assertNotUndefined somevar))
+		(this.assertUndefined somevar))
+	:testMultipleLevels (lambda ()
+		(this.assertUndefined somevar)
+		(let ((somevar "first value"))
+			(this.assertEqual somevar "first value")
+			(let ((somevar "second value"))
+				(this.assertEqual somevar "second value"))
+			(this.assertEqual somevar "first value"))
+		(this.assertUndefined somevar))
+	:testClosures (lambda ()
+		(let ((test))
+	    	(let ((x 3))
+				(setq test (lambda () (setq x (1+ x)))))
+	        (this.assertEqual (test) 4)	
+	        (this.assertEqual (test) 5)	
+	        (this.assertEqual (test) 6)))))
 
 ;; TODO: There are probably more things to test here
 (JSTest.TestCase (object
