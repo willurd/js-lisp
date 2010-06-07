@@ -1,5 +1,6 @@
 # TODO
 
+* #1 Organize This File
 * Make the REPL evaluate expressions each on their own line if it receives more than one
 * Add a transcript to the REPL (just use controller.history)
 * Ideas
@@ -66,3 +67,11 @@
 		* Closures copy scopes (which takes the current values, instead of the old values)
 * Handle empty list: if an sexp has no arguments, it's an empty list
 * Think about Cons' and how they'll fit in (or if they will...)
+* Test (Class.extend (object ...))
+* Test defining a class from scratch (using the prototype property)
+* Think about defing a class macro (or maybe reusing CL's defclass, or atleast borrowing from it)
+* Make the repl solid and tell the creator
+* Write the generic do macro
+* Think about beginning to tackle (loop)
+* Think about a (formatcl) function that uses CL's format language
+* Think about writing a mini app/example/widget/whatever is 100% lisp (or maybe just using jquery?)
