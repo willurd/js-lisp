@@ -31,6 +31,7 @@
  */
 var lisp = (function (global) {
 	var jseval = window.eval;
+
 /*jsl:ignore*/ // Suppress jsl warnings
 
 (function () {
@@ -116,6 +117,7 @@ var lisp = (function (global) {
 })();
 
 /*jsl:end*/
+
 /*jsl:ignore*/ // Suppress jsl warnings
 
 /**
@@ -281,6 +283,7 @@ function sprintf (format /*, ... */) {
 }
 
 /*jsl:end*/
+
 function toJSON (object, pretty, levels, level) {
 	levels = levels || 2; // Default levels
 	level = level || 0;
@@ -380,6 +383,7 @@ function toJSON (object, pretty, levels, level) {
 		return object.toString();
 	}
 }
+
 /**
  * The method used for (equal) equality in js-lisp.
  * 
@@ -458,6 +462,7 @@ function times (string, num) {
 	}
 	return ret;
 }
+
 var StreamException = Class.extend({
 	init: function (message) {
 		this.message = message;
@@ -548,6 +553,7 @@ var StringStream = Class.extend({
 		}
 	}
 });
+
 function _S (name) {
 	return new Symbol(name);
 }
@@ -633,6 +639,7 @@ function comparator (args, testFunc) {
 	}
 	return true;
 }
+
 var Env = Class.extend({
 	init: function (parent, symbols) {
 		this.parent = parent || null;
@@ -725,6 +732,7 @@ var Env = Class.extend({
 		this.symbols[symbol] = value;
 	}
 });
+
 var Symbol = Class.extend({
 	init: function (value) {
 		this.value = value;
@@ -734,6 +742,7 @@ var Symbol = Class.extend({
 		return this.value;
 	}
 });
+
 var Keyword = Class.extend({
 	init: function (value) {
 		this.value = value;
@@ -743,11 +752,13 @@ var Keyword = Class.extend({
 		return this.value;
 	}
 });
+
 var Macro = Class.extend({
 	init: function (callable) {
 		this.callable = callable;
 	}
 });
+
 function validateInput (input) {
 	if (typeof(input) != "string" &&
 		!(input instanceof StringStream)) {
@@ -758,207 +769,270 @@ function validateInput (input) {
 	}
 	return new StringStream(input);
 }
-var parse = {
-	NUMBER_FORMATS: [
-		(/^(([+-]{1})?[0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/),
-		(/^(0x(?:[0-9a-fA-F]+))(?:\s+|\)|$)/)
-	],
-	
-	ParserException: function (message) {
-		this.toString = function () {
-			return "ParserException: " + message;
-		};
+
+/**
+ * <p>An object containing all of the js-lisp parsers (string, numbers,
+ * quoted items, lists, symbols, keywords, comments, etc);</p>
+ * 
+ * @namespace
+ * @name parse
+ */
+var parse = {};
+
+/**
+ * <p>A list of possible number formats.</p>
+ * 
+ * @constant
+ */
+parse.NUMBER_FORMATS = [
+	(/^(([+-]{1})?[0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/),
+	(/^(0x(?:[0-9a-fA-F]+))(?:\s+|\)|$)/)
+];
+
+parse.ParserException = Class.extend("ParserException", 
+	/** @lends parse.ParserException */ {
+	/**
+	 * <p>The exception type thrown when any parse error occurs.</p>
+	 * 
+	 * @constructs
+	 * @extends Class
+	 */
+	init: function (message) {
+		this.message = message;
 	},
 	
-	script: function (stream) {
-		stream = validateInput(stream);
-		var expressions = [];
-		
-		try {
-			while (!stream.eof()) {
-				stream.swallowWhitespace();
-				var exp = parse.any(stream);
-				if (exp !== undefined)
-					expressions.push(exp);
-				stream.swallowWhitespace();
-			}
-		} catch (e) {
-			// There aren't any sexps left, or the rest is invalid
-			// Should something else be done besides throwing an error?
-			throw e;
-		}
-		
-		return expressions;
-	},
+	/**
+	 * <p>Returns a string representation of the exception.</p>
+	 * 
+	 * @function
+	 */
+	toString: function () {
+		return "ParserException: " + message;
+	}
+});
+
+/**
+ * <p>Parses a lisp script, which can be any number of root-level expression,
+ * into an array of ASTs representing those expressions.</p>
+ * 
+ * @param {string, StringStream} stream
+ *     A string or StringStream instance that holds the script contents.
+ * 
+ * @returns An array of the parsed expressions.
+ */
+parse.script = function (stream) {
+	stream = validateInput(stream);
+	var expressions = [];
 	
-	any: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		
-		switch (stream.peek())
-		{
-		case '(':
-			return parse.sexp(stream);
-		case "'":
-			stream.next();
-			return [_S("quote"), parse.any(stream)];
-		case '"':
-			return parse.string(stream);
-		case ':':
-			return parse.keyword(stream);
-		case ';':
-			return parse.comment(stream);
-		// case '{':
-		// 	return parse.object(stream);
-		default:
-			var rest = stream.rest();
-			for (var i = 0; i < lisp.parse.NUMBER_FORMATS.length; i++) {
-				var format = lisp.parse.NUMBER_FORMATS[i];
-				var match = rest.match(format);
-				if (match) {
-					return parse.number(stream, match[1]);
-				}
-			}
-			return parse.symbol(stream);
-		}
-	},
-	
-	sexp: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		if (stream.peek() != '(') {
-			throw new parse.ParserException("Invalid sexp at position " +
-				stream.position + " (starting with: '" + stream.peek() + "')");
-		}
-		stream.next();
-		stream.swallowWhitespace();
-		var parts = [];
-		while (stream.peek() != ')' && !stream.eof()) {
+	try {
+		while (!stream.eof()) {
+			stream.swallowWhitespace();
 			var exp = parse.any(stream);
 			if (exp !== undefined)
-				parts.push(exp);
+				expressions.push(exp);
 			stream.swallowWhitespace();
 		}
+	} catch (e) {
+		// There aren't any sexps left, or the rest is invalid
+		// Should something else be done besides throwing an error?
+		throw e;
+	}
+	
+	return expressions;
+};
+
+/**
+ * @returns The parsed object.
+ */
+parse.any = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	
+	switch (stream.peek())
+	{
+	case '(':
+		return parse.sexp(stream);
+	case "'":
 		stream.next();
-		return parts;
-	},
-	
-	// Do we want object literals?
-	// object: function (stream) {
-	// 	throw new Error("Not impelemented");
-	// 	stream = validateInput(stream);
-	// 	stream.swallowWhitespace();
-	// 	if (stream.peek() != '{') {
-	// 		throw new parse.ParserException("Invalid object at position " +
-	// 			stream.position + " (starting with: '" + stream.peek() + "')");
-	// 	}
-	// 	stream.next()
-	// 	stream.swallowWhitespace();
-	// 	while (stream.peek() != '}') {
-	// 		stream.swallowWhitespace();
-	// 		var key /* grab the key */;
-	// 	}
-	// },
-	
-	symbol: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		var badChars = WHITESPACE + '()';
-		if (badChars.indexOf(stream.peek()) != -1) {
-			throw new parse.ParserException("Invalid symbol at position " +
-				stream.position + " (starting with: '" + stream.peek() + "')");
-		}
-		var symbol = "";
-		while (badChars.indexOf(stream.peek()) == -1 && !stream.eof()) {
-			symbol += stream.next();
-		}
-		return _S(symbol);
-	},
-	
-	keyword: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		if (stream.peek() != ':') {
-			throw new parse.ParserException("Invalid keyword at position " +
-				stream.position + " (starting with: '" + stream.peek() + "')");
-		}
-		stream.next();
-		return new Keyword(parse.symbol(stream).value);
-	},
-	
-	string: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		if (stream.peek() != '"') {
-			throw new parse.ParserException("Invalid string at position " +
-				stream.position + " (starting with: '" + stream.peek() + "')");
-		}
-		var string = "";
-		stream.next();
-		while (stream.peek() != '"' && !stream.eof()) {
-			var c = stream.next();
-			switch (c)
-			{
-			case "\\":
-				string += parse.stringEscape(stream);
-				break;
-			default:
-				string += c;
-				break;
+		return [_S("quote"), parse.any(stream)];
+	case '"':
+		return parse.string(stream);
+	case ':':
+		return parse.keyword(stream);
+	case ';':
+		return parse.comment(stream);
+	// case '{':
+	// 	return parse.object(stream);
+	default:
+		var rest = stream.rest();
+		for (var i = 0; i < lisp.parse.NUMBER_FORMATS.length; i++) {
+			var format = lisp.parse.NUMBER_FORMATS[i];
+			var match = rest.match(format);
+			if (match) {
+				return parse.number(stream, match[1]);
 			}
 		}
-		stream.next();
-		return string;
-	},
-	
-	stringEscape: function (stream) {
-		stream = validateInput(stream);
-		var c = stream.next();
-		return eval('"' + '\\' + c + '"');
-	},
-	
-	number: function (stream, match) {
-		if (!match) {
-			stream = validateInput(stream);
-			stream.swallowWhitespace();
-			var rest = stream.rest();
-			for (var i = 0; i < lisp.parse.NUMBER_FORMATS.length; i++) {
-				var format = lisp.parse.NUMBER_FORMATS[i];
-				match = rest.match(format);
-				if (match) {
-					match = match[1];
-					break;
-				}
-			}
-		}
-		
-		if (!match) {
-			throw new parse.ParserException("Invalid number at position " + stream.position +
-				" (starting with: '" + stream.peek() + "')");
-		}
-		
-		stream.position += match.length;
-		return eval(match);
-	},
-	
-	comment: function (stream) {
-		stream = validateInput(stream);
-		stream.swallowWhitespace();
-		if (stream.peek() != ';') {
-			throw new parse.ParserException("Invalid comment at position " +
-				stream.position + " (starting with: '" + stream.peek() + "')");
-		}
-		var c = '';
-		while ('\n\r'.indexOf(stream.peek()) == -1 &&
-			   !stream.eof() &&
-		 	   stream.slice(stream.position, stream.position+2) != '\n\r') {
-			c += stream.next();
-		}
-		if (!stream.eof()) {
-			stream.next();
-		}
+		return parse.symbol(stream);
 	}
 };
+
+/**
+ * @returns The parsed sexp.
+ */
+parse.sexp = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	if (stream.peek() != '(') {
+		throw new parse.ParserException("Invalid sexp at position " +
+			stream.position + " (starting with: '" + stream.peek() + "')");
+	}
+	stream.next();
+	stream.swallowWhitespace();
+	var parts = [];
+	while (stream.peek() != ')' && !stream.eof()) {
+		var exp = parse.any(stream);
+		if (exp !== undefined)
+			parts.push(exp);
+		stream.swallowWhitespace();
+	}
+	stream.next();
+	return parts;
+};
+
+// Do we want object literals?
+// object: function (stream) {
+// 	throw new Error("Not impelemented");
+// 	stream = validateInput(stream);
+// 	stream.swallowWhitespace();
+// 	if (stream.peek() != '{') {
+// 		throw new parse.ParserException("Invalid object at position " +
+// 			stream.position + " (starting with: '" + stream.peek() + "')");
+// 	}
+// 	stream.next()
+// 	stream.swallowWhitespace();
+// 	while (stream.peek() != '}') {
+// 		stream.swallowWhitespace();
+// 		var key /* grab the key */;
+// 	}
+// },
+
+/**
+ * @returns The parsed symbol.
+ */
+parse.symbol = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	var badChars = WHITESPACE + '()';
+	if (badChars.indexOf(stream.peek()) != -1) {
+		throw new parse.ParserException("Invalid symbol at position " +
+			stream.position + " (starting with: '" + stream.peek() + "')");
+	}
+	var symbol = "";
+	while (badChars.indexOf(stream.peek()) == -1 && !stream.eof()) {
+		symbol += stream.next();
+	}
+	return _S(symbol);
+};
+
+/**
+ * @returns The parsed keyword.
+ */
+parse.keyword = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	if (stream.peek() != ':') {
+		throw new parse.ParserException("Invalid keyword at position " +
+			stream.position + " (starting with: '" + stream.peek() + "')");
+	}
+	stream.next();
+	return new Keyword(parse.symbol(stream).value);
+};
+
+/**
+ * @returns The parsed string.
+ */
+parse.string = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	if (stream.peek() != '"') {
+		throw new parse.ParserException("Invalid string at position " +
+			stream.position + " (starting with: '" + stream.peek() + "')");
+	}
+	var string = "";
+	stream.next();
+	while (stream.peek() != '"' && !stream.eof()) {
+		var c = stream.next();
+		switch (c)
+		{
+		case "\\":
+			string += parse.stringEscape(stream);
+			break;
+		default:
+			string += c;
+			break;
+		}
+	}
+	stream.next();
+	return string;
+};
+
+/**
+ * @returns The parsed escaped character.
+ */
+parse.stringEscape = function (stream) {
+	stream = validateInput(stream);
+	var c = stream.next();
+	return eval('"' + '\\' + c + '"');
+};
+
+/**
+ * @returns The parsed number.
+ */
+parse.number = function (stream, match) {
+	if (!match) {
+		stream = validateInput(stream);
+		stream.swallowWhitespace();
+		var rest = stream.rest();
+		for (var i = 0; i < lisp.parse.NUMBER_FORMATS.length; i++) {
+			var format = lisp.parse.NUMBER_FORMATS[i];
+			match = rest.match(format);
+			if (match) {
+				match = match[1];
+				break;
+			}
+		}
+	}
+	
+	if (!match) {
+		throw new parse.ParserException("Invalid number at position " + stream.position +
+			" (starting with: '" + stream.peek() + "')");
+	}
+	
+	stream.position += match.length;
+	return eval(match);
+};
+
+/**
+ * @returns Nothing
+ */
+parse.comment = function (stream) {
+	stream = validateInput(stream);
+	stream.swallowWhitespace();
+	if (stream.peek() != ';') {
+		throw new parse.ParserException("Invalid comment at position " +
+			stream.position + " (starting with: '" + stream.peek() + "')");
+	}
+	var c = '';
+	while ('\n\r'.indexOf(stream.peek()) == -1 &&
+		   !stream.eof() &&
+	 	   stream.slice(stream.position, stream.position+2) != '\n\r') {
+		c += stream.next();
+	}
+	if (!stream.eof()) {
+		stream.next();
+	}
+};
+
 var WHITESPACE = " \t\n\r";
 
 var ROOT_ENV = new Env(new Env(null, global), {
@@ -989,8 +1063,11 @@ var ROOT_ENV = new Env(new Env(null, global), {
 	
 	"*features*": [_K("notmuch")]
 });
+
 /**
+ * <pre>
  * Macros that are defined for the lisp environment.
+ * </pre>
  * 
  * @name lisp.macros
  * @namespace
@@ -998,10 +1075,13 @@ var ROOT_ENV = new Env(new Env(null, global), {
 var macros = {}; // This is just for documentation. It doesn't get used.
 
 /**
- * Takes a single lisp expression (s-expression) and returns it unevaluated.
+ * <pre>
+ * Takes a single lisp expression (s-expression) and returns it
+ * unevaluated.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name quote
@@ -1018,12 +1098,14 @@ defmacro("quote", function (expression) {
 });
 
 /**
- * Creates an anonymous function with the first (required) expression
- * as its arglist and which executes the rest of the expressions
- * when called.
+ * <pre>
+ * Creates an anonymous function with the first (required)
+ * expression as its arglist and which executes the rest of the
+ * expressions when called.
  * 
  * TODO: Test me more
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name lambda
@@ -1079,10 +1161,12 @@ defmacro("lambda", function (arglist /*, ... */) {
 });
 
 /**
+ * <pre>
  * Defines a function. This is shorthand for (setq name (lambda ...)).
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name defun
@@ -1107,7 +1191,9 @@ defmacro("defun", function (name, arglist /*, ... */) {
 });
 
 /**
- * Provides JavaScript's try/catch feature to the lisp environment.
+ * <pre>
+ * Provides JavaScript's try/catch/finally feature to the lisp
+ * environment.
  * 
  * Note: (catch) and (finally) must be the last expressions in the
  * (try) expression, and (catch) must come before (finally). The only
@@ -1117,6 +1203,7 @@ defmacro("defun", function (name, arglist /*, ... */) {
  *     - (try ... (catch ...))
  *     - (try ... (finally ...))
  *     - (try ... (catch ...) (finally ...))
+ * </pre>
  * 
  * @tested
  * 
@@ -1230,10 +1317,12 @@ defmacro("try", function () {
 });
 
 /**
+ * <pre>
  * Returns the function that the given symbol points to.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name getfunc
@@ -1254,11 +1343,13 @@ defmacro("getfunc", function (symbol) {
 });
 
 /**
+ * <pre>
  * Takes an object and a dotpath and calls the dotpath as a function
  * on the given object (with the given arguments).
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name funcall
@@ -1292,9 +1383,11 @@ defmacro("funcall", function (object, dotpath) {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name let
@@ -1322,9 +1415,11 @@ defmacro("let", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me more
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name setq
@@ -1339,12 +1434,14 @@ defmacro("setq", function () {
 });
 
 /**
+ * <pre>
  * Simply executes all of the given expressions in order. This
  * is mainly for being able to execute multiple expressions inside
  * of places in other macros/functions where only one expression
  * can go.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -1364,9 +1461,11 @@ defmacro("progn", function (/* .. */) {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name cond
@@ -1395,12 +1494,14 @@ defmacro("cond", function () {
 // TODO: Create (case) or (switch) macro
 
 /**
+ * <pre>
  * If the first expression evaluates to true in a boolean context,
  * this macro evaluates and returns the result of the second
  * expression, otherwise it evaluates all of the remaining expression
  * and returns the return value of the last one.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -1431,10 +1532,12 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
 });
 
 /**
+ * <pre>
  * Executes the rest of the arguments if the first argument
  * is true.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -1457,9 +1560,11 @@ defmacro("when", function () {
 });
 
 /**
+ * <pre>
  * Performs a logical negation on the given value.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -1477,9 +1582,11 @@ defmacro("not", function (value) {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name or
@@ -1495,9 +1602,11 @@ defmacro("or", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name and
@@ -1513,9 +1622,11 @@ defmacro("and", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name equal
@@ -1532,9 +1643,11 @@ defmacro("equal", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name not-equal
@@ -1551,9 +1664,11 @@ defmacro("not-equal", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name ==
@@ -1570,9 +1685,11 @@ defmacro("==", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name ===
@@ -1589,9 +1706,11 @@ defmacro("===", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name !=
@@ -1608,9 +1727,11 @@ defmacro("!=", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name !==
@@ -1627,8 +1748,10 @@ defmacro("!==", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
+ * </pre>
  * 
  * @function
  * @name <
@@ -1653,8 +1776,10 @@ defmacro("<", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
+ * </pre>
  * 
  * @function
  * @name >
@@ -1679,8 +1804,10 @@ defmacro(">", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
+ * </pre>
  * 
  * @function
  * @name <=
@@ -1705,8 +1832,10 @@ defmacro("<=", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
+ * </pre>
  * 
  * @function
  * @name >=
@@ -1731,10 +1860,12 @@ defmacro(">=", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values === true.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-true
@@ -1750,10 +1881,12 @@ defmacro("is-true", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values === false.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-false
@@ -1769,10 +1902,12 @@ defmacro("is-false", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values === null.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-null
@@ -1788,8 +1923,10 @@ defmacro("is-null", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-undefined
@@ -1805,10 +1942,12 @@ defmacro("is-undefined", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are strings.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-string
@@ -1824,10 +1963,12 @@ defmacro("is-string", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are numbers.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-number
@@ -1843,10 +1984,12 @@ defmacro("is-number", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are booleans.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-boolean
@@ -1862,10 +2005,12 @@ defmacro("is-boolean", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are functions.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-function
@@ -1881,10 +2026,12 @@ defmacro("is-function", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are objects.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-object
@@ -1900,10 +2047,12 @@ defmacro("is-object", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are arrays.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-array
@@ -1920,11 +2069,13 @@ defmacro("is-array", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are arrays (this is an alias
  * for (is-array)).
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-list
@@ -1940,10 +2091,12 @@ defmacro("is-list", function () {
 });
 
 /**
+ * <pre>
  * An expression for basic iteration over a list.
  * 
  * TODO: Test me more
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name dolist
@@ -1990,8 +2143,9 @@ defmacro("dolist", function (arglist /*, ... */) {
 });
 
 // TODO: Write macro (dotimes)
+
 /**
- * Functions that are defined for the lisp environment.
+ * <p>Functions that are defined for the lisp environment.
  * 
  * @name lisp.functions
  * @namespace
@@ -1999,9 +2153,9 @@ defmacro("dolist", function (arglist /*, ... */) {
 var functions = {}; // This is just for documentation. It doesn't get used.
 
 /**
- * TODO: Test me
- * TODO: Document me
- * TODO: Add examples
+ * <li>TODO: Test me
+ * <li>TODO: Document me
+ * <li>TODO: Add examples
  * 
  * @function
  * @name jseval
@@ -2012,16 +2166,16 @@ defun("jseval", function () {
 });
 
 /**
- * Returns an instance of the given class, initialized with
+ * <p>Returns an instance of the given class, initialized with
  * the rest of the given arguments.
  * 
- * TODO: Test me
+ * <li>TODO: Test me
  * 
  * @function
  * @name new
  * @member lisp.functions
  * 
- * @param {Class} Class
+ * @param {function} cls
  *     The class to create a new instance of.
  * @param {[mixed]} rest
  *     The arguments to be passed to the class constructor.
@@ -2036,34 +2190,34 @@ defun("jseval", function () {
  *     >> (to-string (new Error "My error message"))
  *     => "Error: My error message"
  */
-defun("new", function (Class /*, ... */) {
+defun("new", function (cls /*, ... */) {
 	if (arguments.length === 0) {
 		throw new Error("(new) requires at least 1 argument");
 	}
 	var args = argsToArray(arguments).slice(1);
 	var argnames = args.map(function (item, i, thisObject) { return "args[" + i + "]"; });
-	return eval("new Class(" + argnames.join(",") + ")");
+	return eval("new cls(" + argnames.join(",") + ")");
 });
 
 /**
- * TODO: Test me
- * TODO: Document me
- * TODO: Add examples
+ * <li>TODO: Test me
+ * <li>TODO: Document me
+ * <li>TODO: Add examples
  * 
  * @function
  * @name instanceof
  * @member lisp.functions
  */
-defun("instanceof", function (object, Class) {
+defun("instanceof", function (object, cls) {
 	if (arguments.length !== 2) {
 		throw new Error("(instanceof) requires 2 arguments (got " +
 			arguments.length + ")");
 	}
-	return object instanceof Class;
+	return object instanceof cls;
 });
 
 /**
- * Throws the given object, or "new Error()" if no object is provided.
+ * <p>Throws the given object, or "new Error()" if no object is provided.
  * 
  * @tested
  * 
@@ -2098,9 +2252,9 @@ defun("throw", function (object) {
 });
 
 /**
- * Creates an array from the given arguments.
+ * <p>Creates an array from the given arguments.
  * 
- * TODO: Test me
+ * <li>TODO: Test me
  * 
  * @function
  * @name array
@@ -2126,10 +2280,10 @@ defun("array", function () {
 });
 
 /**
- * Returns the given arguments as an array (this is an alias
+ * <p>Returns the given arguments as an array (this is an alias
  * for (array)).
  * 
- * TODO: Test me
+ * <li>TODO: Test me
  * 
  * @function
  * @name list
@@ -2142,7 +2296,7 @@ defun("list", function (/* ... */) {
 });
 
 /**
- * Creates a JavaScript object using the given arguments as a
+ * <p>Creates a JavaScript object using the given arguments as a
  * property list to initialize the object. There must be an even
  * number of arguments -- one value for every key.
  * 
@@ -2190,11 +2344,11 @@ defun("object", function () {
 });
 
 /**
- * Returns a value from an object given a key (will work with
+ * <p>Returns a value from an object given a key (will work with
  * array indices as well).
  * 
- * TODO: Test me
- * TODO: Add examples
+ * <li>TODO: Test me
+ * <li>TODO: Add examples
  * 
  * @function
  * @name getkey
@@ -2209,10 +2363,10 @@ defun("getkey", function (key, object) {
 });
 
 /**
- * Sets a value on the given object using the given key.
+ * <p>Sets a value on the given object using the given key.
  * 
- * TODO: Test me
- * TODO: Add examples
+ * <li>TODO: Test me
+ * <li>TODO: Add examples
  * 
  * @function
  * @name setkey
@@ -2227,7 +2381,7 @@ defun("setkey", function (key, object, value) {
 });
 
 /**
- * Prints the given arguments to the console.
+ * <p>Prints the given arguments to the console.
  * 
  * @tested
  * 
@@ -2249,7 +2403,9 @@ defun("print", function () {
 });
 
 /**
+ * <pre>
  * Joins the given arguments together into one string.
+ * </pre>
  * 
  * @tested
  * 
@@ -2273,8 +2429,10 @@ defun("concat", function () {
 });
 
 /**
+ * <pre>
  * Joins the given arguments together into one string, using
  * the first argument as the separator.
+ * </pre>
  * 
  * @tested
  * 
@@ -2313,10 +2471,12 @@ defun("join", function () {
 });
 
 /**
+ * <pre>
  * Returns the type of the given value (the result of
  * "typeof(value)").
+ * </pre>
  * 
- * TODO: Add examples
+ * <li>TODO: Add examples
  * 
  * @tested
  * 
@@ -2333,9 +2493,11 @@ defun("typeof", function (value) {
 });
 
 /**
+ * <pre>
  * Converts the given value to a string.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2352,9 +2514,11 @@ defun("to-string", function (value) {
 });
 
 /**
+ * <pre>
  * Converts the given value to a number.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2371,9 +2535,11 @@ defun("to-number", function (value) {
 });
 
 /**
+ * <pre>
  * Converts the given value to a number.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2390,10 +2556,12 @@ defun("to-boolean", function (value) {
 });
 
 /**
+ * <pre>
  * Converts the given value to a json representation of that value.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name to-json
@@ -2404,9 +2572,11 @@ defun("to-json", function () {
 });
 
 /**
+ * <pre>
  * Converts the given string to uppercase.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2426,9 +2596,11 @@ defun("to-upper", function (value) {
 });
 
 /**
+ * <pre>
  * Converts the given string to uppercase.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2448,9 +2620,11 @@ defun("to-lower", function (value) {
 });
 
 /**
+ * <pre>
  * Reduces the given arguments on the / operator.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2474,9 +2648,11 @@ defun("/", function () {
 });
 
 /**
+ * <pre>
  * Reduces the given arguments on the * operator.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2495,9 +2671,11 @@ defun("*", function () {
 });
 
 /**
+ * <pre>
  * Reduces the given arguments on the + operator.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2516,9 +2694,11 @@ defun("+", function () {
 });
 
 /**
+ * <pre>
  * Reduces the given arguments on the - operator.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2540,9 +2720,11 @@ defun("-", function () {
 });
 
 /**
+ * <pre>
  * Reduces the given arguments on the % operator.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2561,9 +2743,11 @@ defun("%", function () {
 });
 
 /**
+ * <pre>
  * Adds 1 to the given value.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2584,9 +2768,11 @@ defun("1+", function (value) {
 });
 
 /**
+ * <pre>
  * Subtracts 1 from the given value.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2607,10 +2793,12 @@ defun("1-", function (value) {
 });
 
 /**
+ * <pre>
  * Calls {@link sprintf} (found in the vendor section) with the
  * supplied arguments.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -2636,11 +2824,13 @@ defun("format", function (print, format) {
 });
 
 /**
+ * <pre>
  * Run each of the items in the given list through the given
  * function and returns a new list with the given return values.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name map
@@ -2667,11 +2857,13 @@ defun("map", function (func, list) {
 });
 
 /**
+ * <pre>
  * Returns an object containing the values of each property
  * in the given list on the given object.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name props
@@ -2693,6 +2885,7 @@ defun("props", function (object, list) {
 	}
 	return newObject;
 });
+
 return {
 	VERSION: "0.0.1",
 	
@@ -2767,6 +2960,7 @@ return {
 		}
 	}
 };
+
 })(this);
 
 // Set this library up to work with node.js
@@ -2784,3 +2978,4 @@ if ((typeof(window) == "undefined") &&
 	
 	lisp.log = require("sys").puts;
 }
+

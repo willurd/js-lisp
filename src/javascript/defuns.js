@@ -1,5 +1,5 @@
 /**
- * Functions that are defined for the lisp environment.
+ * <p>Functions that are defined for the lisp environment.
  * 
  * @name lisp.functions
  * @namespace
@@ -7,9 +7,9 @@
 var functions = {}; // This is just for documentation. It doesn't get used.
 
 /**
- * TODO: Test me
- * TODO: Document me
- * TODO: Add examples
+ * <li>TODO: Test me
+ * <li>TODO: Document me
+ * <li>TODO: Add examples
  * 
  * @function
  * @name jseval
@@ -20,16 +20,16 @@ defun("jseval", function () {
 });
 
 /**
- * Returns an instance of the given class, initialized with
+ * <p>Returns an instance of the given class, initialized with
  * the rest of the given arguments.
  * 
- * TODO: Test me
+ * <li>TODO: Test me
  * 
  * @function
  * @name new
  * @member lisp.functions
  * 
- * @param {Class} Class
+ * @param {function} cls
  *     The class to create a new instance of.
  * @param {[mixed]} rest
  *     The arguments to be passed to the class constructor.
@@ -44,34 +44,34 @@ defun("jseval", function () {
  *     >> (to-string (new Error "My error message"))
  *     => "Error: My error message"
  */
-defun("new", function (Class /*, ... */) {
+defun("new", function (cls /*, ... */) {
 	if (arguments.length === 0) {
 		throw new Error("(new) requires at least 1 argument");
 	}
 	var args = argsToArray(arguments).slice(1);
 	var argnames = args.map(function (item, i, thisObject) { return "args[" + i + "]"; });
-	return eval("new Class(" + argnames.join(",") + ")");
+	return eval("new cls(" + argnames.join(",") + ")");
 });
 
 /**
- * TODO: Test me
- * TODO: Document me
- * TODO: Add examples
+ * <li>TODO: Test me
+ * <li>TODO: Document me
+ * <li>TODO: Add examples
  * 
  * @function
  * @name instanceof
  * @member lisp.functions
  */
-defun("instanceof", function (object, Class) {
+defun("instanceof", function (object, cls) {
 	if (arguments.length !== 2) {
 		throw new Error("(instanceof) requires 2 arguments (got " +
 			arguments.length + ")");
 	}
-	return object instanceof Class;
+	return object instanceof cls;
 });
 
 /**
- * Throws the given object, or "new Error()" if no object is provided.
+ * <p>Throws the given object, or "new Error()" if no object is provided.
  * 
  * @tested
  * 
@@ -106,9 +106,9 @@ defun("throw", function (object) {
 });
 
 /**
- * Creates an array from the given arguments.
+ * <p>Creates an array from the given arguments.
  * 
- * TODO: Test me
+ * <li>TODO: Test me
  * 
  * @function
  * @name array
@@ -134,10 +134,10 @@ defun("array", function () {
 });
 
 /**
- * Returns the given arguments as an array (this is an alias
+ * <p>Returns the given arguments as an array (this is an alias
  * for (array)).
  * 
- * TODO: Test me
+ * <li>TODO: Test me
  * 
  * @function
  * @name list
@@ -150,7 +150,7 @@ defun("list", function (/* ... */) {
 });
 
 /**
- * Creates a JavaScript object using the given arguments as a
+ * <p>Creates a JavaScript object using the given arguments as a
  * property list to initialize the object. There must be an even
  * number of arguments -- one value for every key.
  * 
@@ -198,11 +198,11 @@ defun("object", function () {
 });
 
 /**
- * Returns a value from an object given a key (will work with
+ * <p>Returns a value from an object given a key (will work with
  * array indices as well).
  * 
- * TODO: Test me
- * TODO: Add examples
+ * <li>TODO: Test me
+ * <li>TODO: Add examples
  * 
  * @function
  * @name getkey
@@ -217,10 +217,10 @@ defun("getkey", function (key, object) {
 });
 
 /**
- * Sets a value on the given object using the given key.
+ * <p>Sets a value on the given object using the given key.
  * 
- * TODO: Test me
- * TODO: Add examples
+ * <li>TODO: Test me
+ * <li>TODO: Add examples
  * 
  * @function
  * @name setkey
@@ -235,7 +235,7 @@ defun("setkey", function (key, object, value) {
 });
 
 /**
- * Prints the given arguments to the console.
+ * <p>Prints the given arguments to the console.
  * 
  * @tested
  * 
@@ -257,7 +257,9 @@ defun("print", function () {
 });
 
 /**
+ * <pre>
  * Joins the given arguments together into one string.
+ * </pre>
  * 
  * @tested
  * 
@@ -281,8 +283,10 @@ defun("concat", function () {
 });
 
 /**
+ * <pre>
  * Joins the given arguments together into one string, using
  * the first argument as the separator.
+ * </pre>
  * 
  * @tested
  * 
@@ -321,10 +325,12 @@ defun("join", function () {
 });
 
 /**
+ * <pre>
  * Returns the type of the given value (the result of
  * "typeof(value)").
+ * </pre>
  * 
- * TODO: Add examples
+ * <li>TODO: Add examples
  * 
  * @tested
  * 
@@ -341,9 +347,11 @@ defun("typeof", function (value) {
 });
 
 /**
+ * <pre>
  * Converts the given value to a string.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -360,9 +368,11 @@ defun("to-string", function (value) {
 });
 
 /**
+ * <pre>
  * Converts the given value to a number.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -379,9 +389,11 @@ defun("to-number", function (value) {
 });
 
 /**
+ * <pre>
  * Converts the given value to a number.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -398,10 +410,12 @@ defun("to-boolean", function (value) {
 });
 
 /**
+ * <pre>
  * Converts the given value to a json representation of that value.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name to-json
@@ -412,9 +426,11 @@ defun("to-json", function () {
 });
 
 /**
+ * <pre>
  * Converts the given string to uppercase.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -434,9 +450,11 @@ defun("to-upper", function (value) {
 });
 
 /**
+ * <pre>
  * Converts the given string to uppercase.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -456,9 +474,11 @@ defun("to-lower", function (value) {
 });
 
 /**
+ * <pre>
  * Reduces the given arguments on the / operator.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -482,9 +502,11 @@ defun("/", function () {
 });
 
 /**
+ * <pre>
  * Reduces the given arguments on the * operator.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -503,9 +525,11 @@ defun("*", function () {
 });
 
 /**
+ * <pre>
  * Reduces the given arguments on the + operator.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -524,9 +548,11 @@ defun("+", function () {
 });
 
 /**
+ * <pre>
  * Reduces the given arguments on the - operator.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -548,9 +574,11 @@ defun("-", function () {
 });
 
 /**
+ * <pre>
  * Reduces the given arguments on the % operator.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -569,9 +597,11 @@ defun("%", function () {
 });
 
 /**
+ * <pre>
  * Adds 1 to the given value.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -592,9 +622,11 @@ defun("1+", function (value) {
 });
 
 /**
+ * <pre>
  * Subtracts 1 from the given value.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -615,10 +647,12 @@ defun("1-", function (value) {
 });
 
 /**
+ * <pre>
  * Calls {@link sprintf} (found in the vendor section) with the
  * supplied arguments.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -644,11 +678,13 @@ defun("format", function (print, format) {
 });
 
 /**
+ * <pre>
  * Run each of the items in the given list through the given
  * function and returns a new list with the given return values.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name map
@@ -675,11 +711,13 @@ defun("map", function (func, list) {
 });
 
 /**
+ * <pre>
  * Returns an object containing the values of each property
  * in the given list on the given object.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name props

@@ -683,9 +683,9 @@ string" "a\nstring")))
             (this.assertNotUndefined (getkey :key o))
             (this.assertEqual (getkey :key o) "value")))
     :testKeyTypes (lambda ()
-        (let ((Class Object)
-              (obj   (object))
-              (func  (lambda ()))
+        (let ((cls  Object)
+              (obj  (object))
+              (func (lambda ()))
               (o (object
                     :keyword   1
                     "string"   2
@@ -693,7 +693,7 @@ string" "a\nstring")))
                     false      4
                     nil        5
                     undefined  6
-                    Class      7
+                    cls        7
                     obj        8
                     func       9)))
             (this.assertEqual (getkey :keyword  o) 1)        
@@ -702,7 +702,7 @@ string" "a\nstring")))
             (this.assertEqual (getkey false     o) 4)
             (this.assertEqual (getkey nil       o) 5)
             (this.assertEqual (getkey undefined o) 6)
-            (this.assertEqual (getkey Class     o) 7)
+            (this.assertEqual (getkey cls       o) 7)
             (this.assertEqual (getkey obj       o) 8)
             (this.assertEqual (getkey func      o) 9)))
     :testNew (lambda ()

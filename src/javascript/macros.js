@@ -1,5 +1,7 @@
 /**
+ * <pre>
  * Macros that are defined for the lisp environment.
+ * </pre>
  * 
  * @name lisp.macros
  * @namespace
@@ -7,10 +9,13 @@
 var macros = {}; // This is just for documentation. It doesn't get used.
 
 /**
- * Takes a single lisp expression (s-expression) and returns it unevaluated.
+ * <pre>
+ * Takes a single lisp expression (s-expression) and returns it
+ * unevaluated.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name quote
@@ -27,12 +32,14 @@ defmacro("quote", function (expression) {
 });
 
 /**
- * Creates an anonymous function with the first (required) expression
- * as its arglist and which executes the rest of the expressions
- * when called.
+ * <pre>
+ * Creates an anonymous function with the first (required)
+ * expression as its arglist and which executes the rest of the
+ * expressions when called.
  * 
  * TODO: Test me more
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name lambda
@@ -88,10 +95,12 @@ defmacro("lambda", function (arglist /*, ... */) {
 });
 
 /**
+ * <pre>
  * Defines a function. This is shorthand for (setq name (lambda ...)).
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name defun
@@ -116,7 +125,9 @@ defmacro("defun", function (name, arglist /*, ... */) {
 });
 
 /**
- * Provides JavaScript's try/catch feature to the lisp environment.
+ * <pre>
+ * Provides JavaScript's try/catch/finally feature to the lisp
+ * environment.
  * 
  * Note: (catch) and (finally) must be the last expressions in the
  * (try) expression, and (catch) must come before (finally). The only
@@ -126,6 +137,7 @@ defmacro("defun", function (name, arglist /*, ... */) {
  *     - (try ... (catch ...))
  *     - (try ... (finally ...))
  *     - (try ... (catch ...) (finally ...))
+ * </pre>
  * 
  * @tested
  * 
@@ -239,10 +251,12 @@ defmacro("try", function () {
 });
 
 /**
+ * <pre>
  * Returns the function that the given symbol points to.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name getfunc
@@ -263,11 +277,13 @@ defmacro("getfunc", function (symbol) {
 });
 
 /**
+ * <pre>
  * Takes an object and a dotpath and calls the dotpath as a function
  * on the given object (with the given arguments).
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name funcall
@@ -301,9 +317,11 @@ defmacro("funcall", function (object, dotpath) {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name let
@@ -331,9 +349,11 @@ defmacro("let", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me more
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name setq
@@ -348,12 +368,14 @@ defmacro("setq", function () {
 });
 
 /**
+ * <pre>
  * Simply executes all of the given expressions in order. This
  * is mainly for being able to execute multiple expressions inside
  * of places in other macros/functions where only one expression
  * can go.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -373,9 +395,11 @@ defmacro("progn", function (/* .. */) {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name cond
@@ -404,12 +428,14 @@ defmacro("cond", function () {
 // TODO: Create (case) or (switch) macro
 
 /**
+ * <pre>
  * If the first expression evaluates to true in a boolean context,
  * this macro evaluates and returns the result of the second
  * expression, otherwise it evaluates all of the remaining expression
  * and returns the return value of the last one.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -440,10 +466,12 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
 });
 
 /**
+ * <pre>
  * Executes the rest of the arguments if the first argument
  * is true.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -466,9 +494,11 @@ defmacro("when", function () {
 });
 
 /**
+ * <pre>
  * Performs a logical negation on the given value.
  * 
  * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -486,9 +516,11 @@ defmacro("not", function (value) {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name or
@@ -504,9 +536,11 @@ defmacro("or", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name and
@@ -522,9 +556,11 @@ defmacro("and", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name equal
@@ -541,9 +577,11 @@ defmacro("equal", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name not-equal
@@ -560,9 +598,11 @@ defmacro("not-equal", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name ==
@@ -579,9 +619,11 @@ defmacro("==", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name ===
@@ -598,9 +640,11 @@ defmacro("===", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name !=
@@ -617,9 +661,11 @@ defmacro("!=", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name !==
@@ -636,8 +682,10 @@ defmacro("!==", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
+ * </pre>
  * 
  * @function
  * @name <
@@ -662,8 +710,10 @@ defmacro("<", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
+ * </pre>
  * 
  * @function
  * @name >
@@ -688,8 +738,10 @@ defmacro(">", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
+ * </pre>
  * 
  * @function
  * @name <=
@@ -714,8 +766,10 @@ defmacro("<=", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
+ * </pre>
  * 
  * @function
  * @name >=
@@ -740,10 +794,12 @@ defmacro(">=", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values === true.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-true
@@ -759,10 +815,12 @@ defmacro("is-true", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values === false.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-false
@@ -778,10 +836,12 @@ defmacro("is-false", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values === null.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-null
@@ -797,8 +857,10 @@ defmacro("is-null", function () {
 });
 
 /**
+ * <pre>
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-undefined
@@ -814,10 +876,12 @@ defmacro("is-undefined", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are strings.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-string
@@ -833,10 +897,12 @@ defmacro("is-string", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are numbers.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-number
@@ -852,10 +918,12 @@ defmacro("is-number", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are booleans.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-boolean
@@ -871,10 +939,12 @@ defmacro("is-boolean", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are functions.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-function
@@ -890,10 +960,12 @@ defmacro("is-function", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are objects.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-object
@@ -909,10 +981,12 @@ defmacro("is-object", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are arrays.
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-array
@@ -929,11 +1003,13 @@ defmacro("is-array", function () {
 });
 
 /**
+ * <pre>
  * Returns true if the given values are arrays (this is an alias
  * for (is-array)).
  * 
  * TODO: Test me
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name is-list
@@ -949,10 +1025,12 @@ defmacro("is-list", function () {
 });
 
 /**
+ * <pre>
  * An expression for basic iteration over a list.
  * 
  * TODO: Test me more
  * TODO: Add examples
+ * </pre>
  * 
  * @function
  * @name dolist

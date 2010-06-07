@@ -33,7 +33,7 @@ task :build do
       File.open(outfilename, 'w') do |outfile|
         list.each do |filename|
           puts "  - writing #{filename} to #{outfilename}"
-          outfile << File.read(filename)
+          outfile << File.read(filename) + "\n"
         end
       end
     end
@@ -104,7 +104,7 @@ task :line, :filename, :num do |t, args|
     found = false
     files.each do |filename|
       content = File.read(filename)
-      file_line_count = content.lines.count
+      file_line_count = content.lines.count + 1 # For the extra newline placed after each file in :build
       current_line += file_line_count
       if current_line >= line
         actual_line = file_line_count - (current_line - line)
