@@ -1,12 +1,27 @@
 # js-lisp: A 100% JavaScript lisp interpreter for browser scripting
 
-Disclaimer: DO NOT attempt to use this project for any production code whatsoever. This project is still VERY young; if there were such a thing as negative version numbers, it would have one. For now, this is a toy project. It is my hope that js-lisp will one day grow up to become a solid library devs around the world can use to sefely get their Lisp fix while they get their JavaScript fix, but until that time, DO NOT use this in production code (and if you do, I'm not responsible for the craziness that will most certainly ensue thereafter).
+Disclaimer: DO NOT attempt to use this project for any production code whatsoever. This project is still VERY young; if there were such a thing as negative version numbers, it would have one. For now, js-lisp is a toy. It is my hope that js-lisp will one day grow up to become a solid library that developers around the world can use to safely get their Lisp fix while they get their JavaScript fix, but until that time, DO NOT use this in production code (and if you do, I'm not responsible for the craziness that will most certainly ensue thereafter).
+
+## About
+
+js-lisp is a lisp interpreter written in 100% JavaScript, and thus usable in any (supported) browser or JavaScript runtime without the need for plugins or add-ons of any kind.
+
+js-lisp is fully interoperable with existing JavaScript code (meaning you don't need to modify your existing JavaScript code in order to use js-lisp alongside it). You can call any JavaScript function just as you would a function defined specifically for the lisp environment. As an example:
+
+	// Inside JavaScript
+	window.object = {
+		myFunction: function () { ... }
+	};
+	
+	;; Inside lisp
+	(object.myFunction ...)
+	(window.object.myFunction ...)
 
 ## Usage
 
 *Step 1: Include js-lisp*
 
-Include the js-lisp code (lisp.js inside /build).
+Include the js-lisp code (lisp.js inside /build/).
 
     <script src="/path/to/lisp.js"></script>
 
@@ -16,6 +31,14 @@ Include the js-lisp code (lisp.js inside /build).
 	  lisp.load("/path/to/code.lisp");
 	  lisp.load("/path/to/more-code.lisp");
 	</script>
+
+## Documentation
+
+The functions, macros, and variables created for the lisp environment are all documented in /docs/jslisp/. They are also up on the live demo: [http://williambowers.net/projects/js-lisp/docs/jsdoc/][docs].
+
+New documentation can be created by running `rake doc`.
+
+[docs]: http://williambowers.net/projects/js-lisp/docs/jsdoc/
 
 ## Playing around at the REPL
 
@@ -77,7 +100,7 @@ If you're feeling adventurous enough to modify js-lisp, there's one specific rak
 
     rake watch
 
-js-lisp, the project, is actually a bunch of JavaScript files that are all combined into one when the project is built. `rake watch` will run a program that automatically builds the project when there are modifications anywhere under the /src directory. This will make development go much faster for you.
+js-lisp, the project, is actually a bunch of JavaScript files that are all combined into one when the project is built. `rake watch` will run a program that automatically builds the project when there are modifications anywhere under the /src/ directory. This will make development go much faster for you.
 
 If you feel like building the project manually, its
 
