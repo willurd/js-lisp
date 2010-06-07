@@ -554,7 +554,6 @@
                     .replace(/</g,'&lt;')
                     .replace(/</g,'&lt;')
                     .replace(/ /g,'&nbsp;')
-                    .replace(/([^<>&]{10})/g,'$1<wbr>&shy;' + wbr)
             );
         };
 		

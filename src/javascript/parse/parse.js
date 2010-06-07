@@ -18,9 +18,12 @@ parse.NUMBER_FORMATS = [
 ];
 
 parse.ParserException = Class.extend("ParserException", 
-	/** @lends parse.ParserException */ {
+	/** @lends parse.ParserException */
+{
 	/**
-	 * <p>The exception type thrown when any parse error occurs.</p>
+	 * <pre>
+	 * The exception type thrown when any parse error occurs.
+	 * </pre>
 	 * 
 	 * @constructs
 	 * @extends Class
@@ -30,12 +33,14 @@ parse.ParserException = Class.extend("ParserException",
 	},
 	
 	/**
-	 * <p>Returns a string representation of the exception.</p>
+	 * <pre>
+	 * Returns a string representation of the exception.
+	 * </pre>
 	 * 
 	 * @function
 	 */
 	toString: function () {
-		return "ParserException: " + message;
+		return "ParserException: " + this.message;
 	}
 });
 

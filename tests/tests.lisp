@@ -624,6 +624,21 @@ string" "a\nstring")))
 (JSTest.Divider "functions")
 
 (JSTest.TestCase (object
+	:name "function (jseval)"
+	:testNoArguments (lambda ()
+		(this.assertNotRaises Error (getfunc jseval) nil)
+		(this.assertUndefined (jseval)))
+	:testEvalJSON (lambda ()
+		(let ((obj (jseval "({'key1': 1, 'key2': 2})")))
+			(this.assertType obj "object")
+			(this.assertEqual obj.key1 1)
+			(this.assertEqual obj.key2 2)))
+	:testEvalNewFunction (lambda ()
+		(let ((func (jseval "new Function('x', 'return x + 1')")))
+			(this.assertType func "function")
+			(this.assertEqual (func 2) 3)))))
+
+(JSTest.TestCase (object
     :name "function (new)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error (getfunc new) nil))
@@ -641,6 +656,20 @@ string" "a\nstring")))
 			  (instance  (new SomeClass "hello" "goodbye")))
 		  (this.assertEqual instance.arg1 "hello")
 		  (this.assertEqual instance.arg2 "goodbye")))))
+
+(JSTest.TestCase (object
+	:name "function (instanceof)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error (getfunc instanceof) nil))
+	:testOneArgument (lambda ()
+		(this.assertRaises Error (getfunc instanceof) nil "value"))
+	:testTwoArguments (lambda ()
+		(this.assertNotRaises Error (getfunc instanceof) nil "value" Function))
+	:testBadClassArgument (lambda ()
+		(this.assertRaises Error (getfunc instanceof) nil "value" "not a class"))
+	:testBasic (lambda ()
+		(this.assertTrue (instanceof (new Error) Error))
+		(this.assertFalse (instanceof "not an error" Error)))))
 
 (JSTest.TestCase (object
     :name "function (throw)"
@@ -669,7 +698,27 @@ string" "a\nstring")))
 			(catch (e)
 			  (self.assertTrue (=== e 12))))))))
 
-;; TODO: Test (list)
+(JSTest.TestCase (object
+	:name "function (array)"
+	:testNoArguments (lambda ()
+		(this.assertNotRaises Error (getfunc array) nil))
+	:testEmptyArray (lambda ()
+		(this.assertEqual (array) (jseval "[]")))
+	:testOneValue (lambda ()
+		(this.assertEqual (array 'hello) '(hello) nil (getfunc equal)))
+	:testManyValues (lambda ()
+		(this.assertEqual (array 1 2 3) '(1 2 3) nil (getfunc equal)))))
+
+(JSTest.TestCase (object
+	:name "function (list)"
+	:testNoArguments (lambda ()
+		(this.assertNotRaises Error (getfunc list) nil))
+	:testEmptyArray (lambda ()
+		(this.assertEqual (list) (jseval "[]")))
+	:testOneValue (lambda ()
+		(this.assertEqual (list 'hello) '(hello) nil (getfunc equal)))
+	:testManyValues (lambda ()
+		(this.assertEqual (list 1 2 3) '(1 2 3) nil (getfunc equal)))))
 
 (JSTest.TestCase (object
     :name "function (object)"
@@ -714,7 +763,6 @@ string" "a\nstring")))
             (this.assertNotUndefined d)
             (this.assertEqual (d.getTime) 1234567890000)))))
 
-;; TODO: Test (array)
 ;; TODO: Test (getkey)
 ;; TODO: Test (setkey)
 

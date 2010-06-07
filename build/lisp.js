@@ -790,9 +790,12 @@ parse.NUMBER_FORMATS = [
 ];
 
 parse.ParserException = Class.extend("ParserException", 
-	/** @lends parse.ParserException */ {
+	/** @lends parse.ParserException */
+{
 	/**
-	 * <p>The exception type thrown when any parse error occurs.</p>
+	 * <pre>
+	 * The exception type thrown when any parse error occurs.
+	 * </pre>
 	 * 
 	 * @constructs
 	 * @extends Class
@@ -802,12 +805,14 @@ parse.ParserException = Class.extend("ParserException",
 	},
 	
 	/**
-	 * <p>Returns a string representation of the exception.</p>
+	 * <pre>
+	 * Returns a string representation of the exception.
+	 * </pre>
 	 * 
 	 * @function
 	 */
 	toString: function () {
-		return "ParserException: " + message;
+		return "ParserException: " + this.message;
 	}
 });
 
@@ -2192,11 +2197,9 @@ var functions = {}; // This is just for documentation. It doesn't get used.
 /**
  * <pre>
  * Applies the given arguments to the JavaScript eval function.
- * 
- * TODO: Test me
- * TODO: Document me
- * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name jseval
  * @lisp
@@ -2206,6 +2209,21 @@ var functions = {}; // This is just for documentation. It doesn't get used.
  * @param {[mixed]} rest
  *     The arguments to be applied to the JavaScript eval function.
  * @rest rest
+ * 
+ * @example eval some JSON
+ *     >> (setq some-json "{'key1': 1, 'key2': 2}")
+ *     => "{'key1': 1, 'key2': 2}"
+ *     >> (jseval (concat "(" some-json ")"))
+ *     => {
+ *       "key1": 1,
+ *       "key2": 2
+ *     }
+ * 
+ * @example eval anything
+ *     >> (setq my-1+ (jseval "new Function('x', 'return x + 1')"))
+ *     => function anonymous(x) { ... }
+ *     >> (my-1+ 2)
+ *     => 3
  */
 defun("jseval", function (/* &rest */) {
 	return eval.apply(null, arguments);
@@ -2215,9 +2233,9 @@ defun("jseval", function (/* &rest */) {
  * <pre>
  * Returns an instance of the given class, initialized with
  * the rest of the given arguments.
- * 
- * TODO: Test me
  * </pre>
+ * 
+ * @tested
  * 
  * @name new
  * @lisp
@@ -2256,11 +2274,9 @@ defun("new", function (cls /*, &rest */) {
 /**
  * <pre>
  * Returns the value of "value instanceof cls".
- * 
- * TODO: Test me
- * TODO: Document me
- * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name instanceof
  * @lisp
@@ -2273,6 +2289,12 @@ defun("new", function (cls /*, &rest */) {
  *     The left side of the instanceof operator.
  * @param {function} cls
  *     The right side of the instanceof operator.
+ * 
+ * @example Basic example
+ *     >> (instanceof (new Error) Error)
+ *     => t
+ *     >> (instanceof "not an error" Error)
+ *     => f
  */
 defun("instanceof", function (value, cls) {
 	if (arguments.length !== 2) {
@@ -2329,9 +2351,9 @@ defun("throw", function (value) {
 /**
  * <pre>
  * Creates an array from the given arguments.
- * 
- * TODO: Test me
  * </pre>
+ * 
+ * @tested
  * 
  * @name array
  * @alias list
@@ -2365,9 +2387,9 @@ defun("array", function (/* &rest */) {
  * <pre>
  * Returns the given arguments as an array (this is an alias
  * for (array)).
- * 
- * TODO: Test me
  * </pre>
+ * 
+ * @tested
  * 
  * @name list
  * @lisp
