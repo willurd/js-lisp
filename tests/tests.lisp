@@ -8,7 +8,16 @@
 	:testOctals (lambda ()
 		(this.assertEqual 0100 64))
 	:testHex (lambda ()
-		(this.assertEqual 0x40 64))))
+		(this.assertEqual 0x40 64))
+	:testNegative (lambda ()
+		(this.assertTrue (< -.2 0))
+		(this.assertEqual -0.2 -.2))
+	:testPositive (lambda ()
+		(this.assertTrue (> .2 0))
+		(this.assertEqual 0.2 .2))
+	:testScientificNotation (lambda ()
+		(this.assertEqual 20e2 2000)
+		(this.assertEqual 20e-2 0.2))))
 
 (JSTest.TestCase (object
 	:name "Strings"
@@ -967,7 +976,7 @@ string" "a\nstring")))
 	:testTwoArguments (lambda ()
         (this.assertNotRaises Error (getfunc %) nil 1 2))
 	:testManyArguments (lambda ()
-        (this.assertRaises Error (getfunc %) nil 1 2 3))
+        (this.assertNotRaises Error (getfunc %) nil 1 2 3))
 	:testBasic (lambda ()
 	    (this.assertEqual (% 3 2) 1))))
 

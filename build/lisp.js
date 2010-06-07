@@ -771,8 +771,10 @@ function validateInput (input) {
 }
 
 /**
- * <p>An object containing all of the js-lisp parsers (string, numbers,
- * quoted items, lists, symbols, keywords, comments, etc);</p>
+ * <pre>
+ * An object containing all of the js-lisp parsers (string, numbers,
+ * quoted items, lists, symbols, keywords, comments, etc).
+ * </pre>
  * 
  * @namespace
  * @name parse
@@ -780,13 +782,16 @@ function validateInput (input) {
 var parse = {};
 
 /**
- * <p>A list of possible number formats.</p>
+ * <pre>
+ * A list of possible number formats.
+ * </pre>
  * 
  * @constant
  */
 parse.NUMBER_FORMATS = [
-	(/^(([+-]{1})?[0-9]+(?:\.(?:[0-9]+))?(?:e([0-9]+))?)(?:\s+|\)|$)/),
-	(/^(0x(?:[0-9a-fA-F]+))(?:\s+|\)|$)/)
+	(/^([+-]?[0-9]+(\.[0-9]+)?(e[+-]?[0-9]+)?)([\s\(\)\"]|$)/),
+	(/^([+-]?\.[0-9]+(e[+-]?[0-9]+)?)([\s\(\)\"]|$)/),
+	(/^(0x([0-9a-fA-F]+))(\s+|\)|$)/)
 ];
 
 parse.ParserException = Class.extend("ParserException", 
@@ -817,8 +822,10 @@ parse.ParserException = Class.extend("ParserException",
 });
 
 /**
- * <p>Parses a lisp script, which can be any number of root-level expression,
- * into an array of ASTs representing those expressions.</p>
+ * <pre>
+ * Parses a lisp script, which can be any number of root-level expression,
+ * into an array of ASTs representing those expressions.
+ * </pre>
  * 
  * @param {string, StringStream} stream
  *     A string or StringStream instance that holds the script contents.
