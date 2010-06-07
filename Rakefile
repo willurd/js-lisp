@@ -51,6 +51,7 @@ end
 
 task :doc do
   sh "
+    rm -rf #{DOCS_CODE_ROOT}
     mkdir -p #{DOCS_CODE_ROOT}
     java -jar #{JSDOC_ROOT}/jsrun.jar #{JSDOC_ROOT}/app/run.js -a -d=#{DOCS_CODE_ROOT} \
       -t=#{JSDOC_ROOT}/templates/codeview #{BUILD_DIRECTORY}/#{LISP_JS}.js
