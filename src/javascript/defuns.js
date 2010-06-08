@@ -1023,3 +1023,184 @@ defun("props", function (object, list) {
 	}
 	return newObject;
 });
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name items
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("items", function (object) {
+	if (arguments.length !== 1) {
+		throw new Error("(items) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(object instanceof Object)) {
+		throw new Error("(items) requires an object as its argument " +
+			"(got " + String(object) + ")");
+	}
+	
+	var items = [];
+	for (var key in object) {
+		items.push([key, object[key]]);
+	}
+	return items;
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name first
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("first", function (list) {
+	if (arguments.length !== 1) {
+		throw new Error("(first) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(first) requires an Array as its argument " +
+			"(got " + String(object) + ")");
+	}
+	if (list.length === 0) {
+		return null;
+	}
+	return list[0];
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name second
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("second", function (list) {
+	if (arguments.length !== 1) {
+		throw new Error("(second) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(second) requires an Array as its argument " +
+			"(got " + String(object) + ")");
+	}
+	if (list.length < 2) {
+		return null;
+	}
+	return list[1];
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name third
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("third", function (list) {
+	if (arguments.length !== 1) {
+		throw new Error("(third) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(third) requires an Array as its argument " +
+			"(got " + String(object) + ")");
+	}
+	if (list.length < 3) {
+		return null;
+	}
+	return list[2];
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name push
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("push", function (list, value) {
+	if (arguments.length !== 2) {
+		throw new Error("(push) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(push) requires an Array as its first " +
+			"argument (got " + String(list) + ")");
+	}
+	list.push(value)
+	return list;
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name sort!
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("sort!", function (list) {
+	if (arguments.length !== 1) {
+		throw new Error("(sort!) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(sort!) requires an Array as its first " +
+			"argument (got " + String(list) + ")");
+	}
+	return list.sort();
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * FIXME: This should really be defined in lisp (/src/lisp/core.lisp).
+ *        (defun) already exists, so there's no holdup.
+ * </pre>
+ * 
+ * @name sort
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("sort", function (list) {
+	console.info(1, arguments, list);
+	list = (list instanceof Array) ? list.concat() : list;
+	console.info(2, list);
+	return resolve([_S("sort!"), [_S("quote"), list]]); // Gross
+});

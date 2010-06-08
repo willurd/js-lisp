@@ -2163,23 +2163,26 @@ defmacro("dolist", function (arglist /*, ... */) {
 		throw new Error("(dolist) got invalid argument list. Requires at least " +
 			"2 arguments and no more than 3 (got " + arglist.length + ")");
 	}
-	if (!(arglist[0] instanceof Symbol)) {
+	
+	var itemName = arglist[0];
+	var list     = resolve(arglist[1]);
+	
+	if (!(itemName instanceof Symbol)) {
 		throw new Error("(dolist) got invalid argument list. First argument " +
-			"must be a symbol (got " + String(arglist[0]) + ")");
+			"must be a symbol (got " + String(itemName) + ")");
 	}
-	var symbol = arglist[0];
-	var list = resolve(arglist[1]);
-	var expressions = argsToArray(arguments).slice(1);
-	var ret;
 	if (!(list instanceof Array)) {
-		throw new Error("(dolist) got invalid list argument: " + String(list));
+		throw new Error("(dolist) got invalid argument list. Second argument " +
+			"must be a list (got " + String(list) + ")");
 	}
 	
 	lisp.env = new Env(lisp.env);
+	var body = argsToArray(arguments).slice(1);
+	var ret;
 	for (var i = 0; i < list.length; i++) {
-		lisp.env.let(symbol, list[i]);
-		for (var j = 0; j < expressions.length; j++) {
-			ret = resolve(expressions[j]);
+		lisp.env.let(itemName, list[i]);
+		for (var j = 0; j < body.length; j++) {
+			ret = resolve(body[j]);
 		}
 	}
 	lisp.env = lisp.env.parent;
@@ -2192,6 +2195,116 @@ defmacro("dolist", function (arglist /*, ... */) {
 });
 
 // TODO: Write macro (dotimes)
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name foreach
+ * @lisp
+ * @function
+ * @macro
+ * @member lisp.macros
+ * 
+ * @example Basic usage
+ *     >> (let ((set (object :one 1 :two 2 :three 3)))
+ *          (foreach (item set)
+ *            (print (first item))))
+ *     one
+ *     two
+ *     three
+ *     => nil
+ */
+defmacro("foreach", function (arglist /*, &rest */) {
+	if (arguments.length === 0) {
+		throw new Error("(foreach) requires at least 1 argument");
+	}
+	if (!(arglist instanceof Array)) {
+		throw new Error("(foreach) requires a list as its first " +
+			" argument (got " + String(arglist) + ")");
+	}
+	if (arglist.length !== 2) {
+		throw new Error("(foreach) got invalid argument list. Requires " +
+			"2 arguments (got " + arglist.length + ")");
+	}
+	
+	var itemName = arglist[0];
+	var object   = resolve(arglist[1]);
+	
+	if (!(itemName instanceof Symbol)) {
+		throw new Error("(foreach) got invalid argument list. First argument " +
+			"must be a symbol (got " + String(itemName) + ")");
+	}
+	if (!(object instanceof Object)) {
+		throw new Error("(foreach) got invalid argument list. Second argument " +
+			"must be an object (got " + String(object) + ")");
+	}
+	
+	var body = argsToArray(arguments).slice(1);
+	
+	lisp.env = new Env(lisp.env);
+	var ret = null;
+	var value;
+	for (var key in object) {
+		value = object[key];
+		lisp.env.let(itemName, [key, value]);
+		for (var i = 0; i < body.length; i++) {
+			ret = resolve(body[i]);
+		}
+	}
+	lisp.env = lisp.env.parent;
+	
+	return ret;
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * FIXME: This should really be defined in lisp (/src/lisp/core.lisp),
+ *        after (defmacro) is created.
+ * </pre>
+ * 
+ * @name collect
+ * @lisp
+ * @function
+ * @macro
+ * @member lisp.macros
+ * 
+ * @translation
+ *     (let ((itemName (first arglist)))
+ *       `(let ((set '()))
+ *          (foreach ,arglist
+ *            (when (progn ,rest)
+ *              (push set ,itemName)))
+ *          set))
+ * 
+ * @example Basic usage
+ *     >> (let ((obj (object :name "js-lisp" :age 0)))
+ *          (collect (item obj)
+ *            (is-number (second item))))
+ *     => (("age" 0)) ; Returns every (key,value) pair where the last 
+ *                    ; expression of the body evaluates to true.
+ */
+defmacro("collect", function (arglist /*, &rest */) {
+	var itemName = ((arglist instanceof Array) &&
+					(arglist.length > 0)) ? arglist[0] : null;
+	var body = argsToArray(arguments).slice(1);
+	
+	// This is really nasty, and already not fun to debug. (defmacro)
+	// needs to get made asap.
+	return resolve(
+		[_S("let"), [[_S("set"), []]],
+			[_S("foreach"), arglist,
+				[_S("when"), [_S("progn")].concat(body),
+					[_S("set.push"), itemName]]],
+			_S("set")]);
+});
 
 /**
  * <p>Functions that are defined for the lisp environment.
@@ -3217,6 +3330,187 @@ defun("props", function (object, list) {
 		newObject[key] = object[key];
 	}
 	return newObject;
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name items
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("items", function (object) {
+	if (arguments.length !== 1) {
+		throw new Error("(items) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(object instanceof Object)) {
+		throw new Error("(items) requires an object as its argument " +
+			"(got " + String(object) + ")");
+	}
+	
+	var items = [];
+	for (var key in object) {
+		items.push([key, object[key]]);
+	}
+	return items;
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name first
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("first", function (list) {
+	if (arguments.length !== 1) {
+		throw new Error("(first) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(first) requires an Array as its argument " +
+			"(got " + String(object) + ")");
+	}
+	if (list.length === 0) {
+		return null;
+	}
+	return list[0];
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name second
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("second", function (list) {
+	if (arguments.length !== 1) {
+		throw new Error("(second) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(second) requires an Array as its argument " +
+			"(got " + String(object) + ")");
+	}
+	if (list.length < 2) {
+		return null;
+	}
+	return list[1];
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name third
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("third", function (list) {
+	if (arguments.length !== 1) {
+		throw new Error("(third) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(third) requires an Array as its argument " +
+			"(got " + String(object) + ")");
+	}
+	if (list.length < 3) {
+		return null;
+	}
+	return list[2];
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name push
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("push", function (list, value) {
+	if (arguments.length !== 2) {
+		throw new Error("(push) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(push) requires an Array as its first " +
+			"argument (got " + String(list) + ")");
+	}
+	list.push(value)
+	return list;
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name sort!
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("sort!", function (list) {
+	if (arguments.length !== 1) {
+		throw new Error("(sort!) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(sort!) requires an Array as its first " +
+			"argument (got " + String(list) + ")");
+	}
+	return list.sort();
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * FIXME: This should really be defined in lisp (/src/lisp/core.lisp).
+ *        (defun) already exists, so there's no holdup.
+ * </pre>
+ * 
+ * @name sort
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("sort", function (list) {
+	console.info(1, arguments, list);
+	list = (list instanceof Array) ? list.concat() : list;
+	console.info(2, list);
+	return resolve([_S("sort!"), [_S("quote"), list]]); // Gross
 });
 
 return {
