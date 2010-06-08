@@ -318,8 +318,14 @@ table.summaryTable td.nameDescription {
 }
 
 table.summaryTable td.nameDescription div.fixedFont {
-	font-weight: bold;
+	
 }
+
+.memberName {
+	font-size: 1.1em;
+	font-weight: bold;
+	margin: 0px 1px;
+	}
 
 table.summaryTable div.description {
 	color: #333;

@@ -3,7 +3,7 @@ require "yaml"
 LISP_JS = "lisp"
 LISP_JS_MIN = "lisp.min"
 
-DOCS_CODE_ROOT = "docs/jsdoc"
+DOCS_ROOT = "docs"
 
 BUILD_CONFIG = "build.yaml"
 BUILD_DIRECTORY = "build"
@@ -51,9 +51,9 @@ end
 
 task :doc do
   sh "
-    rm -rf #{DOCS_CODE_ROOT}
-    mkdir -p #{DOCS_CODE_ROOT}
-    java -jar #{JSDOC_ROOT}/jsrun.jar #{JSDOC_ROOT}/app/run.js -a -d=#{DOCS_CODE_ROOT} \
+    rm -rf #{DOCS_ROOT}/css #{DOCS_ROOT}/symbols #{DOCS_ROOT}/*.html
+    mkdir -p #{DOCS_ROOT}
+    java -jar #{JSDOC_ROOT}/jsrun.jar #{JSDOC_ROOT}/app/run.js -a -d=#{DOCS_ROOT} \
       -t=#{JSDOC_ROOT}/templates/codeview #{BUILD_DIRECTORY}/#{LISP_JS}.js
   "
 end

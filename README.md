@@ -34,11 +34,11 @@ Include the js-lisp code (lisp.js inside /build/).
 
 ## Documentation
 
-The functions, macros, and variables created for the lisp environment are all documented in /docs/jslisp/. They are also up on the live demo: [http://williambowers.net/projects/js-lisp/docs/jsdoc/][docs].
+The functions, macros, and variables created for the lisp environment are all documented in /docs/. They are also up on the live demo: [http://williambowers.net/projects/js-lisp/docs/][docs].
 
 New documentation can be created by running `rake doc`.
 
-[docs]: http://williambowers.net/projects/js-lisp/docs/jsdoc/
+[docs]: http://williambowers.net/projects/js-lisp/docs/
 
 ## Playing around at the REPL
 

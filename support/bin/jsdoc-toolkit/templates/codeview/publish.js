@@ -204,3 +204,78 @@ function resolveLinks(str, from) {
 	
 	return str;
 }
+
+function getName (member) {
+	var sig = makeSignature(member.params);
+	var name = member.name.replace(/\^\d+$/, '');
+	
+	if (isLisp(member)) {
+		sig = sig.replace(/(^\s*\(\s*|\s*\)\s*$)/g, '');
+		sig = sig.replace(/,/g, '');
+		sig = sig.replace(/^\s+$/, '');
+		if (sig.length > 0) {
+			sig = ' ' + sig;
+		}
+		
+		var optional = member.comment.getTag('optional');
+		var rest = member.comment.getTag('rest');
+		rest = rest.length > 0 ? rest[0] : null;
+		
+		var args = optional.concat(rest ? rest : []);
+		var last = args.join(' ');
+		sig = sig.replace(new RegExp(last + "$"), '');
+		
+		if (optional.length > 0) {
+			sig += ' &amp;optional ' + optional.join(' ');
+		}
+		
+		if (rest) {
+			sig += ' &amp;rest ' + rest;
+		}
+		
+		return '(' + name + sig + ')';
+	} else {
+		return name + sig;
+	}
+}
+
+function getSlug (member) {
+	var slug = getName(member);
+	slug = slug.replace(/\s+/g, '-');
+	return slug;
+}
+
+function getPrettyName (member) {
+	var name = getName(member);
+	if (isLisp(member)) {
+		name = name.replace(/^\((\S+)/, '(<span class="memberName">$1</span>');
+		name = name.replace(/(\&amp\;optional|\&amp\;rest)/g, "<i>$1</i>");
+	} else {
+		name = name.replace(/^(\S+)\(/, '<span class="memberName">$1</span>(');
+	}
+	return name;
+}
+
+function isLisp (member) {
+	return member.comment.getTag("lisp").length > 0;
+}
+
+function isOptional (member, name) {
+	var tags = member.comment.getTag("optional");
+	for (var i = 0; i < tags.length; i++) {
+		if (tags[i].toString() == name) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function isRest (member, name) {
+	var tags = member.comment.getTag("rest");
+	for (var i = 0; i < tags.length; i++) {
+		if (tags[i].toString() == name) {
+			return true;
+		}
+	}
+	return false;
+}
