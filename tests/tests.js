@@ -1,3 +1,15 @@
+// Set this library up to work with node.js
+if ((typeof(window) == "undefined") &&
+	(typeof(global) == "object") && global && // Make sure it isn't null
+	(typeof(require) == "function") &&
+	(typeof(exports) == "object") && exports) {
+	// We are probably running in node.js now.
+	// FIXME: Find a better way to tell we're running in node.js
+	var JSTest = require("../support/vendor/JSTest/src/jstest"),
+		lisp   = require("../build/lisp"),
+		window = global;
+}
+
 JSTest.TestCase({
 	name: 'Parser',
 	

@@ -30,7 +30,7 @@
  * @namespace
  */
 var lisp = (function (global) {
-	var jseval = window.eval;
+	var jseval = eval;
 
 /*jsl:ignore*/ // Suppress jsl warnings
 
