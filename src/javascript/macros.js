@@ -39,7 +39,7 @@ defmacro("quote", function (expression) {
  * TODO: Add examples
  * </pre>
  * 
- * @name defmacro
+ * @name resolve
  * @lisp
  * @function
  * @member lisp.macros

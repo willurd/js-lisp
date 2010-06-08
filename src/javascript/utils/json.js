@@ -65,8 +65,8 @@ function toJSON (object, pretty, levels, level) {
 				for (var key in object) {
 					count++;
 					if (object.hasOwnProperty(key)) {
-						if (object[key] == window) {
-							value = "[window]";
+						if (object[key] == global) {
+							value = "[global]";
 						} else {
 							value = toJSON(object[key], pretty, levels, level+1);
 						}

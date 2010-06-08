@@ -1,6 +1,7 @@
 return {
 	VERSION: "0.0.1",
 	
+	Class: Class,
 	Env: Env,
 	Macro: Macro,
 	Symbol: Symbol,

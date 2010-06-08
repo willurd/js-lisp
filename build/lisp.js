@@ -351,8 +351,8 @@ function toJSON (object, pretty, levels, level) {
 				for (var key in object) {
 					count++;
 					if (object.hasOwnProperty(key)) {
-						if (object[key] == window) {
-							value = "[window]";
+						if (object[key] == global) {
+							value = "[global]";
 						} else {
 							value = toJSON(object[key], pretty, levels, level+1);
 						}
@@ -773,6 +773,7 @@ var Keyword = Class.extend({
 var _inMacro = false; // So we can have expressions that only work inside macros
 var Macro = Class.extend({
 	init: function (callable) {
+		/** @ignore */
 		this.callable = function () {
 			_inMacro = true;
 			var ret = callable.apply(null, arguments);
@@ -1144,7 +1145,7 @@ defmacro("quote", function (expression) {
  * TODO: Add examples
  * </pre>
  * 
- * @name defmacro
+ * @name resolve
  * @lisp
  * @function
  * @member lisp.macros
@@ -3588,6 +3589,7 @@ defun("sort", function (list) {
 return {
 	VERSION: "0.0.1",
 	
+	Class: Class,
 	Env: Env,
 	Macro: Macro,
 	Symbol: Symbol,

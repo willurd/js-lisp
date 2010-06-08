@@ -56,10 +56,27 @@ Here are a few shots of the REPL, and js-lisp, in action:
 
 ![](http://github.com/willurd/js-lisp/raw/master/docs/readme/repl4.png)
 
+### Command line REPL
+
+There's also a command line version of the REPL written in node.js at /examples/noderepl/. You can run it like this (you must be inside the /examples/noderepl/ directory):
+
+	$ node run.js
+
+or this:
+
+	$ ./noderepl
+
+And I suggest using [rlwrap][rlwrap] (for readline support):
+
+	$ rlwrap node run.js
+	# or
+	$ rlwrap noderepl
+
 Have fun!
 
 [0]: http://williambowers.net/projects/js-lisp/examples/repl/
 [1]: http://github.com/chrisdone/jquery-console
+[rlwrap]: http://utopia.knoware.nl/~hlub/uck/rlwrap/
 
 ## What lisp are you using?
 
