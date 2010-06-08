@@ -1,4 +1,4 @@
-})(this);
+})((typeof(window) != "undefined") ? window : global); // For compatibility with node.js
 
 // Set this library up to work with node.js
 if ((typeof(window) == "undefined") &&

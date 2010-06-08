@@ -92,9 +92,13 @@ parse.any = function (stream) {
 	{
 	case '(':
 		return parse.sexp(stream);
-	case "'":
+	case "'": // Accept either style for quotes (normal single quote,	
+	case "`": // or backtick)
 		stream.next();
 		return [_S("quote"), parse.any(stream)];
+	case ",":
+		stream.next();
+		return [_S("resolve"), parse.any(stream)];
 	case '"':
 		return parse.string(stream);
 	case ':':

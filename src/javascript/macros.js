@@ -29,7 +29,54 @@ defmacro("quote", function (expression) {
 		throw new Error("(quote) requires 1 argument (got " +
 			arguments.length + ")");
 	}
-	return expression;
+	return checkResolve(expression);
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name defmacro
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("resolve", function (expression) {
+	if (arguments.length !== 1) {
+		throw new Error("(resolve) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return resolve(expression);
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name defmacro
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("defmacro", function (name, arglist /*, &rest */) {
+	throw new Error("(defmacro) Not Implemented");
+	// ;; Example macro (with pretty much everything):
+	// (defmacro collect ((itemName list) &body body)
+	// 	`(let ((set '()))
+	//     (foreach (,itemName ',list)
+	//       (when (progn ,@body)
+	//         (push set ,itemName)))))
+	// TODO: Build the @ (explosion?) parser and logic (use _inMacro for this)
+	if (arguments.length < 2) {
+		throw new Error("(defmacro) requires at least 2 arguments (got " +
+			arguments.length + ")");
+	}
 });
 
 /**

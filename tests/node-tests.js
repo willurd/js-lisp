@@ -13,4 +13,6 @@ require(JS_TESTS);
 lisp.env.set("JSTest", JSTest);
 lisp.eval(fs.readFileSync(LISP_TESTS));
 
-JSTest.run(false, JSTest.handlers.NodeJSHandler);
+with (JSTest) {
+	run(false, handlers.NodeJSHandler);
+}

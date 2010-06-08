@@ -26,6 +26,23 @@ function resolve (value) {
 	}
 }
 
+/**
+ * Recursively resolves all (resolve) expressions an
+ * unevaluated expression.
+ */
+function checkResolve (expression) {
+	if ((expression instanceof Array)) {
+		if ((expression.length > 0) &&
+			(equal(expression[0], _S("resolve")))) {
+			return resolve(expression);
+		}
+		for (var i = 0; i < expression.length; i++) {
+			expression[i] = checkResolve(expression[i]);
+		}
+	}
+	return expression;
+}
+
 function doSExp (sexp) {
 	if (!sexp) {
 		throw new Error("doSExp got empty expression");

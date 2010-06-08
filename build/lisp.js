@@ -582,6 +582,23 @@ function resolve (value) {
 	}
 }
 
+/**
+ * Recursively resolves all (resolve) expressions an
+ * unevaluated expression.
+ */
+function checkResolve (expression) {
+	if ((expression instanceof Array)) {
+		if ((expression.length > 0) &&
+			(equal(expression[0], _S("resolve")))) {
+			return resolve(expression);
+		}
+		for (var i = 0; i < expression.length; i++) {
+			expression[i] = checkResolve(expression[i]);
+		}
+	}
+	return expression;
+}
+
 function doSExp (sexp) {
 	if (!sexp) {
 		throw new Error("doSExp got empty expression");
@@ -753,9 +770,15 @@ var Keyword = Class.extend({
 	}
 });
 
+var _inMacro = false; // So we can have expressions that only work inside macros
 var Macro = Class.extend({
 	init: function (callable) {
-		this.callable = callable;
+		this.callable = function () {
+			_inMacro = true;
+			var ret = callable.apply(null, arguments);
+			_inMacro = false;
+			return ret;
+		};
 	}
 });
 
@@ -864,9 +887,13 @@ parse.any = function (stream) {
 	{
 	case '(':
 		return parse.sexp(stream);
-	case "'":
+	case "'": // Accept either style for quotes (normal single quote,	
+	case "`": // or backtick)
 		stream.next();
 		return [_S("quote"), parse.any(stream)];
+	case ",":
+		stream.next();
+		return [_S("resolve"), parse.any(stream)];
 	case '"':
 		return parse.string(stream);
 	case ':':
@@ -1107,7 +1134,54 @@ defmacro("quote", function (expression) {
 		throw new Error("(quote) requires 1 argument (got " +
 			arguments.length + ")");
 	}
-	return expression;
+	return checkResolve(expression);
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name defmacro
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("resolve", function (expression) {
+	if (arguments.length !== 1) {
+		throw new Error("(resolve) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return resolve(expression);
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name defmacro
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("defmacro", function (name, arglist /*, &rest */) {
+	throw new Error("(defmacro) Not Implemented");
+	// ;; Example macro (with pretty much everything):
+	// (defmacro collect ((itemName list) &body body)
+	// 	`(let ((set '()))
+	//     (foreach (,itemName ',list)
+	//       (when (progn ,@body)
+	//         (push set ,itemName)))))
+	// TODO: Build the @ (explosion?) parser and logic (use _inMacro for this)
+	if (arguments.length < 2) {
+		throw new Error("(defmacro) requires at least 2 arguments (got " +
+			arguments.length + ")");
+	}
 });
 
 /**
@@ -3463,7 +3537,7 @@ defun("push", function (list, value) {
 		throw new Error("(push) requires an Array as its first " +
 			"argument (got " + String(list) + ")");
 	}
-	list.push(value)
+	list.push(value);
 	return list;
 });
 
@@ -3507,9 +3581,7 @@ defun("sort!", function (list) {
  * @member lisp.functions
  */
 defun("sort", function (list) {
-	console.info(1, arguments, list);
 	list = (list instanceof Array) ? list.concat() : list;
-	console.info(2, list);
 	return resolve([_S("sort!"), [_S("quote"), list]]); // Gross
 });
 
@@ -3588,7 +3660,7 @@ return {
 	}
 };
 
-})(this);
+})((typeof(window) != "undefined") ? window : global); // For compatibility with node.js
 
 // Set this library up to work with node.js
 if ((typeof(window) == "undefined") &&

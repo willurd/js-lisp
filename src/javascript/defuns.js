@@ -1155,7 +1155,7 @@ defun("push", function (list, value) {
 		throw new Error("(push) requires an Array as its first " +
 			"argument (got " + String(list) + ")");
 	}
-	list.push(value)
+	list.push(value);
 	return list;
 });
 
@@ -1199,8 +1199,6 @@ defun("sort!", function (list) {
  * @member lisp.functions
  */
 defun("sort", function (list) {
-	console.info(1, arguments, list);
 	list = (list instanceof Array) ? list.concat() : list;
-	console.info(2, list);
 	return resolve([_S("sort!"), [_S("quote"), list]]); // Gross
 });
