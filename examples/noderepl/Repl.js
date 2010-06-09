@@ -6,7 +6,7 @@ exports.Repl = lisp.Class.extend({
 		props = props || {};
 		this.ps1 = props.ps1 || ">> ";
 		this.ps2 = props.ps2 || ".. ";
-		this.ps3 = props.ps3 || "=> ";
+		this.ps3 = props.ps3 || "\n";
 		this.multilineCommand = false;
 		this.data = '';
 	},
@@ -17,9 +17,32 @@ exports.Repl = lisp.Class.extend({
 			return;
 		}
 		try {
-			var ret = lisp.eval(this.data);
-			var output = lisp.env.get("repl-represent")(ret); // repl-represent is defined in utils.lisp
-			sys.puts(this.ps3 + output);
+			var expressions = lisp.parse.script(this.data);
+			var expression;
+			var ret;
+			var output;
+			if (expressions.length > 1) {
+				sys.puts("** evaluating " + expressions.length + " expressions **");
+			}
+			for (var i in expressions) {
+				expression = expressions[i];
+				str = lisp.env.get("repl-represent")(expression);
+				if (expressions.length > 1) {
+					this.newCommand();
+					sys.puts(str);
+				}
+				try {
+					ret = lisp.eval(str);
+					output = lisp.env.get("repl-represent")(ret); // repl-represent is defined in utils.lisp
+					sys.puts(this.ps3 + output);
+				} catch (e) {
+					if (e instanceof lisp.exception.StreamEOFException) {
+						throw e;
+					} else {
+						sys.puts(e);
+					}
+				}
+			}
 			this.multilineCommand = false;
 			this.data = '';
 			this.newCommand();
