@@ -33,7 +33,7 @@ function sprintf (format /*, ... */) {
     // +      input by: Brett Zamir (http://brett-zamir.me)
     // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
 
-    var regex = /%%|%(\d+\$)?([-+\'#0 ]*)(\*\d+\$|\*|\d+)?(\.(\*\d+\$|\*|\d+))?([scboxXuidfegEG])/g;
+    var regex = /%%|%(\d+\$)?([-+\'#0 ]*)(\*\d+\$|\*|\d+)?(\.(\*\d+\$|\*|\d+))?([lscboxXuidfegEG])/g;
     var a = arguments, i = 0, format = a[i++];
 	
     var pad = function (str, len, chr, leftJustify) {
@@ -128,8 +128,9 @@ function sprintf (format /*, ... */) {
 		
         // grab value using valueIndex if required?
         value = valueIndex ? a[valueIndex.slice(0, -1)] : a[i++];
-
+		
         switch (type) {
+			case 'l': return toLisp(value);
             case 's': return formatString(String(value), leftJustify, minWidth, precision, zeroPad, customPadChar);
             case 'c': return formatString(String.fromCharCode(+value), leftJustify, minWidth, precision, zeroPad);
             case 'b': return formatBaseX(value, 2, prefixBaseX, leftJustify, minWidth, precision, zeroPad);

@@ -1,5 +1,8 @@
+require.paths.unshift(__dirname);
+
 var sys   = require("sys"),
 	fs    = require("fs"),
+	path  = require("path"),
 	stdin = process.openStdin(),
 	lisp  = require("../../build/lisp"),
 	Repl  = require("./Repl").Repl;
@@ -15,7 +18,7 @@ repl.newCommand();
 // Setup the lisp environment
 lisp.env.set("lisp", lisp);
 lisp.env.set("this", repl);
-lisp.eval(fs.readFileSync("utils.lisp"));
+lisp.eval(fs.readFileSync(path.join(__dirname, "utils.lisp")));
 
 // Setup the stdin listeners
 stdin.addListener('data', function (data) {

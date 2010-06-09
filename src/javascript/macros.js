@@ -59,24 +59,127 @@ defmacro("resolve", function (expression) {
  * TODO: Add examples
  * </pre>
  * 
+ * @name resolve
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("explode", function (expression) {
+	if (arguments.length !== 1) {
+		throw new Error("(explode) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return [_S("explode"), expression];
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * 
+ * FIXME: While this "solution" works for the limited amount of tests
+ *        i've throw at it, it is FAR from elegant...in fact I might
+ *        go so far as to say it makes me nauseous. That being said,
+ *        I'm happy there is at least a preliminary working version.
+ * </pre>
+ * 
  * @name defmacro
  * @lisp
  * @function
  * @member lisp.macros
  */
 defmacro("defmacro", function (name, arglist /*, &rest */) {
-	throw new Error("(defmacro) Not Implemented");
-	// ;; Example macro (with pretty much everything):
-	// (defmacro collect ((itemName list) &body body)
-	// 	`(let ((set '()))
-	//     (foreach (,itemName ',list)
-	//       (when (progn ,@body)
-	//         (push set ,itemName)))))
-	// TODO: Build the @ (explosion?) parser and logic (use _inMacro for this)
 	if (arguments.length < 2) {
 		throw new Error("(defmacro) requires at least 2 arguments (got " +
 			arguments.length + ")");
 	}
+	if (!(name instanceof Symbol)) {
+		throw new Error("(defmacro) requires a symbol as its first " +
+			"argument (got " + String(name) + ")");
+	}
+	if (!(arglist instanceof Array)) {
+		throw new Error("(defmacro) requires an Array as its second " +
+			"argument (got " + String(arglist) + ")");
+	}
+	
+	var restName;
+	
+	for (i = 0; i < arglist.length; i++) {
+		var argname = arglist[i];
+		if (argname == "&rest" || argname == "&body") {
+			if (i == arglist.length - 1) {
+				throw new Error("No argument name after " + toLisp(argname) + " identifier");
+			}
+			if (arglist.length > i + 2) {
+				throw new Error("Unexpected arguments " +
+					toLisp(arglist.slice(i+1)) + " after &rest argument");
+			}
+			restName = arglist[i+1];
+			arglist = arglist.slice(0, arglist.length-2);
+		}
+	}
+	
+	function setargs (arglist, args, top) {
+		if (top === undefined) {
+			top = true;
+		}
+		if (!(args instanceof Array)) {
+			throw new Error("Error while parsing arguments to macro " + toLisp(name) + ".\n" +
+				"\tInvalid arguments to:\n" +
+				"\t  " + toLisp(arglist) + "\n" +
+				"\tExpected a list but got '" + toLisp(args) + "'");
+		}
+		if (arglist.length != args.length && (!top || !restName)) {
+			throw new Error("Error while parsing arguments to macro " + toLisp(name) + ".\n" +
+				"\tInvalid number of elements in:\n" +
+				"\t  " + toLisp(args) + "\n" +
+				"\tto satisfy the argument list:\n" +
+				"\t  " + toLisp(arglist) + "\n" +
+				"\tExpected " + arglist.length + " but got " + args.length);
+		}
+		var i;
+		var arg;
+		for (i = 0; i < arglist.length; i++) {
+			arg = arglist[i];
+			if (arg instanceof Array) {
+				setargs(arg, args[i], false);
+			} else {
+				lisp.env.let(arg, args[i]);
+			}
+		}
+		if (top && restName) {
+			lisp.env.let(restName, args.slice(i));
+		}
+	}
+	
+	var env  = new Env(lisp.env);
+	var args = argsToArray(arguments);
+	
+	return (function (env, args) {
+		var macro = new Macro(function () {
+			if (args.length < 3) {
+				return null; // This macro does nothing
+			}
+			args = deepCopyArray(args);
+			var tempEnv = lisp.env;
+			lisp.env = new Env(env, {});
+			setargs(arglist, argsToArray(arguments));
+			var body = deepCopyArray(args.slice(2));
+			var ret;
+			var i;
+			for (var i = 0; i < body.length; i++) {
+				ret = checkResolve(body[i]); // Resolve anything in the expression tree that needs resolving
+				ret = checkExplode(ret); // Check for @ symbols in the expression
+				ret = resolve(ret);
+			}
+			ret = resolve(ret); // FIXME: This extra resolve is a hack
+			lisp.env = tempEnv;
+			return ret;
+		});
+		lisp.env.set(name, macro);
+		return macro;
+	})(env, args);
 });
 
 /**
@@ -97,13 +200,13 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
  * @returns The created function.
  */
 defmacro("lambda", function (arglist /*, ... */) {
-	var env  = new Env(lisp.env);
-	var args = argsToArray(arguments);
-	
 	if (arguments.length > 0 && !(arglist instanceof Array)) {
 		throw new Error("(lambda) requires a list as its first expression " +
 			"(got " + String(arglist) + ")");
 	}
+	
+	var env  = new Env(lisp.env);
+	var args = argsToArray(arguments);
 	
 	return (function (env, args) {
 		var body = args.slice(1);
@@ -114,7 +217,7 @@ defmacro("lambda", function (arglist /*, ... */) {
 			var largs = argsToArray(arguments);
 			var tempEnv = lisp.env;
 			var i;
-			lisp.env = env;
+			lisp.env = new Env(env);
 			lisp.env.let("this", this);
 			for (i = 0; i < arglist.length; i++) {
 				var argname = arglist[i];
@@ -148,6 +251,8 @@ defmacro("lambda", function (arglist /*, ... */) {
  * 
  * TODO: Test me
  * TODO: Add examples
+ * 
+ * FIXME: Define this is lisp.
  * </pre>
  * 
  * @name defun
@@ -1109,6 +1214,72 @@ defmacro("is-list", function () {
 
 /**
  * <pre>
+ * Returns true if the given values are Symbols.
+ * 
+ * TODO: Test me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name is-symbol
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("is-symbol", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-symbol) requires at least 1 argument");
+	}
+	return predicate(arguments, function (value) {
+		return value instanceof Symbol;
+	});
+});
+
+/**
+ * <pre>
+ * Returns true if the given values are Keywords.
+ * 
+ * TODO: Test me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name is-keyword
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("is-keyword", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-keyword) requires at least 1 argument");
+	}
+	return predicate(arguments, function (value) {
+		return value instanceof Keyword;
+	});
+});
+
+/**
+ * <pre>
+ * Returns true if the given values are Macros.
+ * 
+ * TODO: Test me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name is-macro
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("is-macro", function () {
+	if (arguments.length === 0) {
+		throw new Error("(is-macro) requires at least 1 argument");
+	}
+	return predicate(arguments, function (value) {
+		return value instanceof Macro;
+	});
+});
+
+/**
+ * <pre>
  * An expression for basic iteration over a list.
  * 
  * TODO: Test me more
@@ -1233,10 +1404,7 @@ defmacro("foreach", function (arglist /*, &rest */) {
  * <pre>
  * TODO: Test me
  * TODO: Document me
- * TODO: Add examples
- * 
- * FIXME: This should really be defined in lisp (/src/lisp/core.lisp),
- *        after (defmacro) is created.
+ * TODO: Add more examples
  * </pre>
  * 
  * @name collect
@@ -1245,14 +1413,6 @@ defmacro("foreach", function (arglist /*, &rest */) {
  * @macro
  * @member lisp.macros
  * 
- * @translation
- *     (let ((itemName (first arglist)))
- *       `(let ((set '()))
- *          (foreach ,arglist
- *            (when (progn ,rest)
- *              (push set ,itemName)))
- *          set))
- * 
  * @example Basic usage
  *     >> (let ((obj (object :name "js-lisp" :age 0)))
  *          (collect (item obj)
@@ -1260,17 +1420,4 @@ defmacro("foreach", function (arglist /*, &rest */) {
  *     => (("age" 0)) ; Returns every (key,value) pair where the last 
  *                    ; expression of the body evaluates to true.
  */
-defmacro("collect", function (arglist /*, &rest */) {
-	var itemName = ((arglist instanceof Array) &&
-					(arglist.length > 0)) ? arglist[0] : null;
-	var body = argsToArray(arguments).slice(1);
-	
-	// This is really nasty, and already not fun to debug. (defmacro)
-	// needs to get made asap.
-	return resolve(
-		[_S("let"), [[_S("set"), []]],
-			[_S("foreach"), arglist,
-				[_S("when"), [_S("progn")].concat(body),
-					[_S("set.push"), itemName]]],
-			_S("set")]);
-});
+var _macro_collect; // Defined in /src/lisp/core.lisp

@@ -570,6 +570,22 @@ defun("to-json", function (value, pretty, levels) {
 
 /**
  * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name lisp-string
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("lisp-string", function (value) {
+	return toLisp(value);
+});
+
+/**
+ * <pre>
  * Converts the given string to uppercase.
  * 
  * TODO: Add examples

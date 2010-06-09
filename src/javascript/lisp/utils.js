@@ -31,7 +31,7 @@ function resolve (value) {
  * unevaluated expression.
  */
 function checkResolve (expression) {
-	if ((expression instanceof Array)) {
+	if (expression instanceof Array) {
 		if ((expression.length > 0) &&
 			(equal(expression[0], _S("resolve")))) {
 			return resolve(expression);
@@ -41,6 +41,33 @@ function checkResolve (expression) {
 		}
 	}
 	return expression;
+}
+
+function checkExplode (expression, parent, index) {
+	if (expression instanceof Array) {
+		if ((expression.length > 0) &&
+			(equal(expression[0], _S("explode"))) &&
+			parent) {
+			var list = resolve(expression[1]);
+			if (!(list instanceof Array)) {
+				list = [list]; // Be lenient if someone is trying to "explode" a non-list
+			}
+			if (list.length === 0) {
+				return index;
+			}
+			// Insert the expressions elements into the parent
+			var end = parent.slice(index+1);
+			parent.splice(index, 1); // Remove the (explode) expression
+			parent.splice.apply(parent, [index, list.length].concat(list));
+			parent.splice.apply(parent, [parent.length, end.length].concat(end));
+			return index + list.length;
+		} else {
+			for (var i = 0; i < expression.length; i++) {
+				i = checkExplode(expression[i], expression, i);
+			}
+		}
+	}
+	return parent ? index : expression;
 }
 
 function doSExp (sexp) {

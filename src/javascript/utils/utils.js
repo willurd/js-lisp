@@ -47,6 +47,19 @@ function argsToArray (args) {
 	return a;
 }
 
+function deepCopyArray (array) {
+	var newArray = [];
+	var item;
+	for (var i = 0; i < array.length; i++) {
+		item = array[i];
+		if (item instanceof Array) {
+			item = deepCopyArray(item);
+		}
+		newArray.push(item);
+	}
+	return newArray;
+}
+
 function makeRequest (url, successCallback) {
 	var request;
 	

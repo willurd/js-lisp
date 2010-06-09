@@ -99,6 +99,9 @@ parse.any = function (stream) {
 	case ",":
 		stream.next();
 		return [_S("resolve"), parse.any(stream)];
+	case "@":
+		stream.next();
+		return [_S("explode"), parse.any(stream)];
 	case '"':
 		return parse.string(stream);
 	case ':':

@@ -68,6 +68,22 @@ string" "a\nstring"))
 		(this.assertEqual (quote (hello!)) '(hello!) nil (getfunc equal))
 		(this.assertEqual (quote (quote hello!)) ''hello! nil (getfunc equal)))))
 
+;; TODO: Test (resolve)
+
+(JSTest.TestCase (object
+	:name "macro (defmacro)"
+	:testBasic (lambda ()
+		(let ((collect nil))
+			(defmacro my-collect ((itemName lst) &body body)
+			  `(let ((set (list)))
+		        (foreach (,itemName ,lst)
+		          (when (progn ,@body)
+		            (push set ,itemName)))
+				set))
+			(let ((lt3 (my-collect (item (list 1 2 3))
+						 (< (second item) 3))))
+				(this.assertEqual (map second lt3) '(1 2)))))))
+
 (JSTest.TestCase (object
 	:name "macro (lambda)"
 	:testNoArguments (lambda ()
@@ -619,6 +635,23 @@ string" "a\nstring")))
 			(this.assertEqual x 0)	
 			(this.assertEqual y 5)))))
 
+;; TODO: Test (foreach)
+
+(JSTest.TestCase (object
+	:name "macro (collect)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error (getfunc collect) nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error (getfunc collect) nil '(name '(1 2 3))))
+	:testBadFirstArgument (lambda ()
+		(this.assertRaises Error (getfunc collect) nil '('(name) '(1 2 3))))
+	:testBadSecondArgument (lambda ()
+		(this.assertRaises Error (getfunc collect) nil '(name "bad arg")))
+	:testBasic (lambda ()
+		(let ((lt3 (collect (item (list 1 2 3))
+					 (< (second item) 3))))
+			(this.assertEqual (map second lt3) '(1 2))))))
+
 ;; ================================================================================
 ;; FUNCTIONS
 ;; ================================================================================
@@ -1047,4 +1080,4 @@ string" "a\nstring")))
 		(this.assertEqual (map (lambda (x) (1+ x)) '(1 2 3))
 						  '(2 3 4) nil (getfunc equal)))))
 
-;; TODO: Test props
+;; TODO: Test (props)
