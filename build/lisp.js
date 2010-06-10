@@ -500,6 +500,24 @@ function times (string, num) {
 	return ret;
 }
 
+// From: http://note19.com/2007/05/27/javascript-guid-generator/
+// This is for gensym().
+// I know these aren't real guids, and i'm sure in a million years
+// someone might actually be unlucky enough to witness a conflict
+// with gensym(), but this seems safe enough for the time being.
+function S4() {
+   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+}
+function guid() {
+   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+}
+
+// Used primarly for auto-generated code, so you don't end up pummeling
+// any vars in the current scope.
+function gensym () {
+	return _S(guid().replace(/\-/g,'#')); // Be extra random :)
+}
+
 // Used for (char ...) (for the #\ special operator)
 var _char_table = {
 	"Nul": 0,
@@ -1601,6 +1619,9 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 	
 	var env  = new Env(lisp.env);
 	var args = argsToArray(arguments);
+	
+	// FIXEME: This is a way better way of "unquoting" an expression:
+	//         http://www.gigamonkeys.com/book/macros-defining-your-own.html#generating-the-expansion
 	
 	return (function (env, args) {
 		var macro = new Macro(function () {
@@ -2906,6 +2927,14 @@ var functions = {}; // This is just for documentation. It doesn't get used.
  */
 defun("jseval", function (/* &rest */) {
 	return eval.apply(null, arguments);
+});
+
+defun("gensym", function () {
+	if (arguments.length > 0) {
+		throw new Error("(gensym) takes no arguments (got " +
+			arguments.length + ")");
+	}
+	return gensym();
 });
 
 /**

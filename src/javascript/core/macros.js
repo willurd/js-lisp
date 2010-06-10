@@ -151,6 +151,9 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 	var env  = new Env(lisp.env);
 	var args = argsToArray(arguments);
 	
+	// FIXEME: This is a way better way of "unquoting" an expression:
+	//         http://www.gigamonkeys.com/book/macros-defining-your-own.html#generating-the-expansion
+	
 	return (function (env, args) {
 		var macro = new Macro(function () {
 			if (args.length < 3) {

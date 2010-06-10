@@ -38,7 +38,7 @@
 (defun refresh ()
 	(setq window.location ""))
 
-(defun lisp.log (&rest rest)
+(defun lisp.log (& rest)
 	(try
 		(controller.message (join " " (if rest rest (array))) "jquery-console-stdout")
 	  (:catch (e)

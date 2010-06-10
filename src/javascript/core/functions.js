@@ -41,6 +41,14 @@ defun("jseval", function (/* &rest */) {
 	return eval.apply(null, arguments);
 });
 
+defun("gensym", function () {
+	if (arguments.length > 0) {
+		throw new Error("(gensym) takes no arguments (got " +
+			arguments.length + ")");
+	}
+	return gensym();
+});
+
 /**
  * <pre>
  * Returns an instance of the given class, initialized with
