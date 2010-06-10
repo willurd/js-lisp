@@ -3,8 +3,9 @@ lisp.js:
     - support/vendor/Class.js
     - support/vendor/sprintf.js
     - src/javascript/utils/json.js
-    - src/javascript/utils/to-lisp.js
+    - src/javascript/utils/tolisp.js
     - src/javascript/utils/utils.js
+    - src/javascript/utils/chartable.js
     - src/javascript/utils/stream.js
     - src/javascript/lisp/utils.js
     - src/javascript/lisp/Env.js
@@ -14,10 +15,11 @@ lisp.js:
     - src/javascript/parse/utils.js
     - src/javascript/parse/parse.js
     - src/javascript/config.js
-    - src/javascript/macros.js
-    - src/javascript/defuns.js
+    - src/javascript/core/macros.js
+    - src/javascript/core/functions.js
     - src/javascript/lisp.js
     - src/javascript/wrapper/_footer.js
 
 core.lisp:
-    - src/lisp/core.lisp
+    - src/lisp/macros.lisp
+    - src/lisp/functions.lisp

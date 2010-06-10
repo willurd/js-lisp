@@ -275,6 +275,33 @@ defun("object", function (/* &rest */) {
 
 /**
  * <pre>
+ * Returns the function that the given expression evaluates to.
+ * 
+ * TODO: Test me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name function
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defun("function", function (value) {
+	if (arguments.length !== 1) {
+		throw new Error("(function) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	var object = resolve(value);
+	if (typeof(object) == "function") {
+		return object;
+	} else if (object instanceof Macro) {
+		return object.callable;
+	}
+	throw new Error("'" + toLisp(value) + "' is not callable");
+});
+
+/**
+ * <pre>
  * Returns a value from an object given a key (will work with
  * array indices as well).
  * 
@@ -1019,9 +1046,9 @@ defun("map", function (func, list) {
  * @param {object} object
  *     The object containing the values to return (specified by the
  *     given list of keys).
- * @param {Array} list
- *     The list of keys specifying which values to return in the
- *     resulting object.
+ * @param {mixed} value
+ *     The list of keys (or single key) specifying which values to
+ *     return in the resulting object.
  */
 defun("props", function (object, list) {
 	if (arguments.length !== 2) {
@@ -1029,15 +1056,37 @@ defun("props", function (object, list) {
 			arguments.length + ")");
 	}
 	if (!(list instanceof Array)) {
-		throw new Error("(props) requires a list as its second argument " +
-			"(got " + String(list) + ")");
+		list = [list];
 	}
-	var newObject = {};
-	for (var i = 0; i < list.length; i++) {
-		var key = list[i];
-		newObject[key] = object[key];
+	function makeObject (fromobj, toobj, keyset) {
+		var value;
+		var first;
+		for (var i = 0; i < keyset.length; i++) {
+			try {
+				value = keyset[i];
+				if (value instanceof Array && value.length == 1) {
+					value = value[0];
+				}
+				if (value instanceof Array) {
+					if (value.length === 0) {
+						continue;
+					}
+					first = value[0];
+					toobj[first] = toobj[first] || {};
+					makeObject(fromobj[first], toobj[first], value.slice(1));
+				} else {
+					toobj[value] = fromobj[value];
+				}
+			} catch (e) {
+				if (e instanceof TypeError) {
+					return toobj;
+				}
+				throw e;
+			}
+		}
+		return toobj;
 	}
-	return newObject;
+	return makeObject(object, {}, list.map(function (k) { return String(k).split("."); }));
 });
 
 /**
@@ -1217,4 +1266,24 @@ defun("sort!", function (list) {
 defun("sort", function (list) {
 	list = (list instanceof Array) ? list.concat() : list;
 	return resolve([_S("sort!"), [_S("quote"), list]]); // Gross
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name length
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("length", function (object) {
+	if (arguments.length !== 1) {
+		throw new Error("(length) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	return object.length;
 });

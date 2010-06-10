@@ -96,6 +96,24 @@ parse.any = function (stream) {
 	case "`": // or backtick)
 		stream.next();
 		return [_S("quote"), parse.any(stream)];
+	case "#":
+		stream.next();
+		switch (stream.peek())
+		{
+		case "'": // This is the function special operator
+			stream.next();
+			return [_S("function"), parse.any(stream)];
+		case "\\": // This is the char special operator
+			stream.next();
+			return [_S("char"), parse.symbol(stream)];
+		//case "?":
+		default:
+			// This is an unknown operator.
+			var c = stream.next();
+			throw new parse.ParserException("Undefined special operator #" + c + " at " +
+				"position " + stream.position + " (expression: #" + c +
+				toLisp(parse.any(stream)) + ")");
+		}
 	case ",":
 		stream.next();
 		return [_S("resolve"), parse.any(stream)];
@@ -108,7 +126,7 @@ parse.any = function (stream) {
 		return parse.keyword(stream);
 	case ';':
 		return parse.comment(stream);
-	// case '{':
+	// case '{': // An object literal
 	// 	return parse.object(stream);
 	default:
 		var rest = stream.rest();

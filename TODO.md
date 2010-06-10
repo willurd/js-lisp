@@ -1,7 +1,11 @@
 # TODO
 
+* Add tests for everything (including error conditions) and THEN start deving again. It's way too dangerous to be making big changes (or any changes) right now.
+* Think of ways to break the current (defmacro) implementation because I don't trust it.
+* Rename all instances of &rest and &body to just &.
+* Do &opt (&optional) and &key stuff.
 * #1 Organize This File
-* Make the REPL evaluate expressions each on their own line if it receives more than one
+* Make the browser REPL evaluate expressions each on their own line if it receives more than one
 * Add a transcript to the REPL (just use controller.history)
 * Ideas
     * Look through Practical Common Lisp for ideas on what to implement next
@@ -74,4 +78,4 @@
 * Write the generic do macro
 * Think about beginning to tackle (loop)
 * Think about a (formatcl) function that uses CL's format language
-* Think about writing a mini app/example/widget/whatever is 100% lisp (or maybe just using jquery?)
+* Think about writing a mini app/game/widget/whatever in 100% lisp (or maybe just using jquery?)

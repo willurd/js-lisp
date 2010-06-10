@@ -33,8 +33,8 @@ exports.Repl = lisp.Class.extend({
 				}
 				try {
 					ret = lisp.eval(str);
-					output = lisp.env.get("repl-represent")(ret); // repl-represent is defined in utils.lisp
-					sys.puts(this.ps3 + output);
+					ret = lisp.env.get("repl-represent")(ret); // repl-represent is defined in utils.lisp
+					sys.puts(this.ps3 + ret);
 				} catch (e) {
 					if (e instanceof lisp.exception.StreamEOFException) {
 						throw e;

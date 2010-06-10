@@ -59,7 +59,7 @@ defmacro("resolve", function (expression) {
  * TODO: Add examples
  * </pre>
  * 
- * @name resolve
+ * @name explode
  * @lisp
  * @function
  * @member lisp.macros
@@ -167,7 +167,6 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 			setargs(arglist, argsToArray(arguments));
 			var body = deepCopyArray(args.slice(2));
 			var ret;
-			var i;
 			for (var i = 0; i < body.length; i++) {
 				ret = checkResolve(body[i]); // Resolve anything in the expression tree that needs resolving
 				ret = checkExplode(ret); // Check for @ symbols in the expression
@@ -403,33 +402,6 @@ defmacro("try", function () {
 	}
 	
 	return ret;
-});
-
-/**
- * <pre>
- * Returns the function that the given symbol points to.
- * 
- * TODO: Test me
- * TODO: Add examples
- * </pre>
- * 
- * @name getfunc
- * @lisp
- * @function
- * @member lisp.macros
- */
-defmacro("getfunc", function (symbol) {
-	if (arguments.length !== 1) {
-		throw new Error("(getfunc) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	var object = lisp.env.get(symbol);
-	if (typeof(object) == "function") {
-		return object;
-	} else if (object instanceof Macro) {
-		return object.callable;
-	}
-	throw new Error("'" + symbol + "' is not a function or macro");
 });
 
 /**
@@ -1398,6 +1370,31 @@ defmacro("foreach", function (arglist /*, &rest */) {
 	lisp.env = lisp.env.parent;
 	
 	return ret;
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add more examples
+ * </pre>
+ * 
+ * @name char
+ * @lisp
+ * @function
+ * @macro
+ * @member lisp.macros
+ */
+defmacro("char", function (symbol) {
+	if (arguments.length !== 1) {
+		throw new Error("(char) requires 1 argument (got " +
+			arguments.length + ")");
+	}
+	if (!(symbol instanceof Symbol)) {
+		throw new Error("(char) requires a symbol as its argument " +
+			"(got " + toLisp(symbol) + ")");
+	}
+	return _char_table[String(symbol)];
 });
 
 /**
