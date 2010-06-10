@@ -1,4 +1,4 @@
-(defmacro collect ((itemName lst) &body body)
+(defmacro collect ((itemName lst) & body)
   "Iterates over each (key,value) pair in `lst' (denoted by
 `itemName'), evaluating each expression in `body' for every
 iteration, and collecting the items, whose last `body' expression
@@ -14,4 +14,6 @@ evaluates to true, into a final list that is returned."
         (push set ,itemName)))
 	set))
 
+(defun sort (lst)
+	(sort! (lst.concat)))
 

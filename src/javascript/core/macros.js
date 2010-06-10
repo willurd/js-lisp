@@ -103,23 +103,6 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 			"argument (got " + String(arglist) + ")");
 	}
 	
-	var restName;
-	
-	for (i = 0; i < arglist.length; i++) {
-		var argname = arglist[i];
-		if (argname == "&rest" || argname == "&body") {
-			if (i == arglist.length - 1) {
-				throw new Error("No argument name after " + toLisp(argname) + " identifier");
-			}
-			if (arglist.length > i + 2) {
-				throw new Error("Unexpected arguments " +
-					toLisp(arglist.slice(i+1)) + " after &rest argument");
-			}
-			restName = arglist[i+1];
-			arglist = arglist.slice(0, arglist.length-2);
-		}
-	}
-	
 	function setargs (arglist, args, top) {
 		if (top === undefined) {
 			top = true;
@@ -130,26 +113,38 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 				"\t  " + toLisp(arglist) + "\n" +
 				"\tExpected a list but got '" + toLisp(args) + "'");
 		}
-		if (arglist.length != args.length && (!top || !restName)) {
-			throw new Error("Error while parsing arguments to macro " + toLisp(name) + ".\n" +
-				"\tInvalid number of elements in:\n" +
-				"\t  " + toLisp(args) + "\n" +
-				"\tto satisfy the argument list:\n" +
-				"\t  " + toLisp(arglist) + "\n" +
-				"\tExpected " + arglist.length + " but got " + args.length);
-		}
 		var i;
+		var j = 0;
 		var arg;
 		for (i = 0; i < arglist.length; i++) {
 			arg = arglist[i];
+			j++;
 			if (arg instanceof Array) {
 				setargs(arg, args[i], false);
 			} else {
-				lisp.env.let(arg, args[i]);
+				if (String(arg) == "&") {
+					if (i == arglist.length - 1) {
+						throw new Error("No argument name after rest identifier");
+					}
+					if (arglist.length > i + 2) {
+						throw new Error("Unexpected arguments (" +
+							arglist.slice(i+1).join(" ") + ") after rest argument");
+					}
+					lisp.env.let(arglist[i+1], args.slice(i));
+					j = args.length;
+					i = args.length;
+					break;
+				} else {
+					lisp.env.let(arg, args[i]);
+				}
 			}
 		}
-		if (top && restName) {
-			lisp.env.let(restName, args.slice(i));
+		if (i != j) {
+			throw new Error("Error while parsing arguments to macro " + toLisp(name) + ".\n" +
+				"\tNot enough arguments to:\n" +
+				"\t  " + toLisp(arglist) + "\n" +
+				"\tGot:\n" +
+				"\t  " + toLisp(args));
 		}
 	}
 	
@@ -220,13 +215,13 @@ defmacro("lambda", function (arglist /*, ... */) {
 			lisp.env.let("this", this);
 			for (i = 0; i < arglist.length; i++) {
 				var argname = arglist[i];
-				if (argname == "&rest") {
+				if (argname == "&") {
 					if (i == arglist.length - 1) {
-						throw new Error("No argument name after &rest identifier");
+						throw new Error("No argument name after rest identifier");
 					}
 					if (arglist.length > i + 2) {
 						throw new Error("Unexpected arguments (" +
-							arglist.slice(i+1).join(" ") + ") after &rest argument");
+							arglist.slice(i+1).join(" ") + ") after rest argument");
 					}
 					lisp.env.let(arglist[i+1], largs.slice(i));
 					break;
@@ -1417,4 +1412,4 @@ defmacro("char", function (symbol) {
  *     => (("age" 0)) ; Returns every (key,value) pair where the last 
  *                    ; expression of the body evaluates to true.
  */
-var _macro_collect; // Defined in /src/lisp/core.lisp
+var _macro_collect; // Defined in /src/lisp/macros.lisp

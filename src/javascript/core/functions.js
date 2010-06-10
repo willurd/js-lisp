@@ -1130,6 +1130,37 @@ defun("items", function (object) {
  * @function
  * @member lisp.functions
  */
+defun("nth", function (list, index) {
+	if (arguments.length !== 2) {
+		throw new Error("(nth) requires 2 arguments (got " +
+			arguments.length + ")");
+	}
+	if (!(list instanceof Array)) {
+		throw new Error("(nth) requires an Array as its first argument " +
+			"(got " + toLisp(list) + ")");
+	}
+	if (typeof(index) != "number") {
+		throw new Error("(nth) requires a number as its second argument " +
+			"(got " + toLisp(index) + ")");
+	}
+	if (list.length === 0) {
+		return null;
+	}
+	return list[index];
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name first
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
 defun("first", function (list) {
 	if (arguments.length !== 1) {
 		throw new Error("(first) requires 1 argument (got " +
@@ -1137,7 +1168,7 @@ defun("first", function (list) {
 	}
 	if (!(list instanceof Array)) {
 		throw new Error("(first) requires an Array as its argument " +
-			"(got " + String(object) + ")");
+			"(got " + String(list) + ")");
 	}
 	if (list.length === 0) {
 		return null;
@@ -1164,7 +1195,7 @@ defun("second", function (list) {
 	}
 	if (!(list instanceof Array)) {
 		throw new Error("(second) requires an Array as its argument " +
-			"(got " + String(object) + ")");
+			"(got " + String(list) + ")");
 	}
 	if (list.length < 2) {
 		return null;
@@ -1191,7 +1222,7 @@ defun("third", function (list) {
 	}
 	if (!(list instanceof Array)) {
 		throw new Error("(third) requires an Array as its argument " +
-			"(got " + String(object) + ")");
+			"(got " + String(list) + ")");
 	}
 	if (list.length < 3) {
 		return null;
@@ -1253,9 +1284,6 @@ defun("sort!", function (list) {
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
- * 
- * FIXME: This should really be defined in lisp (/src/lisp/core.lisp).
- *        (defun) already exists, so there's no holdup.
  * </pre>
  * 
  * @name sort
@@ -1263,10 +1291,7 @@ defun("sort!", function (list) {
  * @function
  * @member lisp.functions
  */
-defun("sort", function (list) {
-	list = (list instanceof Array) ? list.concat() : list;
-	return resolve([_S("sort!"), [_S("quote"), list]]); // Gross
-});
+var _function_sort;
 
 /**
  * <pre>

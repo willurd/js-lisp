@@ -1,4 +1,4 @@
-(defmacro collect ((itemName lst) &body body)
+(defmacro collect ((itemName lst) & body)
   "Iterates over each (key,value) pair in `lst' (denoted by
 `itemName'), evaluating each expression in `body' for every
 iteration, and collecting the items, whose last `body' expression
