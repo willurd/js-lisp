@@ -64,15 +64,13 @@ function toJSON (object, pretty, levels, level) {
 				value = null;
 				for (var key in object) {
 					count++;
-					if (object.hasOwnProperty(key)) {
-						if (object[key] == global) {
-							value = "[global]";
-						} else {
-							value = toJSON(object[key], pretty, levels, level+1);
-						}
-						json += prefix + singleprefix + '"' + key + '": ' + value;
-						json += ', ' + newline;
+					if (object[key] == global) {
+						value = "[global]";
+					} else {
+						value = toJSON(object[key], pretty, levels, level+1);
 					}
+					json += prefix + singleprefix + '"' + key + '": ' + value;
+					json += ', ' + newline;
 				}
 				json = json.replace(/[\s\n]*$/g, '');
 				json = json.replace(/,$/, '');
