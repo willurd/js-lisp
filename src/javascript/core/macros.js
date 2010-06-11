@@ -153,6 +153,8 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 			args = deepCopyArray(args);
 			var tempEnv = lisp.env;
 			lisp.env = new Env(env, {});
+			lisp.env.let("this", this);
+			lisp.env.let("arguments", arguments);
 			setargs(arglist, argsToArray(arguments));
 			var body = deepCopyArray(args.slice(2));
 			var ret;
@@ -214,6 +216,7 @@ defmacro("lambda", function (arglist /*, &rest */) {
 			var tempEnv = lisp.env;
 			lisp.env = new Env(env);
 			lisp.env.let("this", this);
+			lisp.env.let("arguments", arguments);
 			
 			var i;
 			for (i = 0; i < arglist.length; i++) {
@@ -223,7 +226,11 @@ defmacro("lambda", function (arglist /*, &rest */) {
 					i = largs.length;
 					break;
 				} else {
-					lisp.env.let(argname, largs[i]);
+					if (i <= largs.length-1) {
+						lisp.env.let(argname, largs[i]);
+					} else {
+						lisp.env.let(argname, undefined);
+					}
 				}
 			}
 			
