@@ -41,11 +41,21 @@ defun("jseval", function (/* &rest */) {
 	return eval.apply(null, arguments);
 });
 
+defun("assert", function (assertion, errorString) {
+	// Input validation
+	assert(arguments.length > 0, "(assert) requires at least 1 argument");
+	
+	// This is the assert the user is making
+	assert(assertion, errorString || "");
+	
+	return null;
+});
+
 defun("gensym", function () {
-	if (arguments.length > 0) {
-		throw new Error("(gensym) takes no arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 0, "(gensym) takes no arguments (got " +
+		arguments.length + ")");
+	
 	return gensym();
 });
 
@@ -79,13 +89,11 @@ defun("gensym", function () {
  *     => "Error: My error message"
  */
 defun("new", function (cls /*, &rest */) {
-	if (arguments.length === 0) {
-		throw new Error("(new) requires at least 1 argument");
-	}
-	if (typeof(cls) != "function") {
-		throw new Error("(new) requires a function as its first argument " +
-			"(got " + String(cls) + ")");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(new) requires at least 1 argument");
+	assert(typeof(cls) === "function", "(new) requires a function as its first argument " +
+		"(got " + toLisp(cls) + ")");
+	
 	var args = argsToArray(arguments).slice(1);
 	var argnames = args.map(function (item, i, thisObject) { return "args[" + i + "]"; });
 	return eval("new cls(" + argnames.join(",") + ")");
@@ -117,14 +125,12 @@ defun("new", function (cls /*, &rest */) {
  *     => f
  */
 defun("instanceof", function (value, cls) {
-	if (arguments.length !== 2) {
-		throw new Error("(instanceof) requires 2 arguments (got " +
-			arguments.length + ")");
-	}
-	if (typeof(cls) != "function") {
-		throw new Error("(instanceof) requires a function as its second " +
-			"argument (got " + String(cls) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 2, "(instanceof) requires 2 arguments (got " +
+		arguments.length + ")");
+	assert(typeof(cls) === "function", "(instanceof) requires a function as its second " +
+		"argument (got " + toLisp(cls) + ")");
+	
 	return (value instanceof cls);
 });
 
@@ -160,10 +166,10 @@ defun("instanceof", function (value, cls) {
  *     >> (throw (array 1 2 3))
  */
 defun("throw", function (value) {
-	if (arguments.length > 1) {
-		throw new Error("(throw) accepts 1 optional argument (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length <= 1, "(throw) accepts 1 optional argument (got " +
+		arguments.length + ")");
+	
 	value = value || new Error(); // Throw "new Error()" if nothing is provided
 	throw value;
 });
@@ -267,12 +273,12 @@ defun("list", function (/* &rest */) {
  *                   {name: "Jane"}]}
  */
 defun("object", function (/* &rest */) {
+	// Input validation
+	assert(arguments.length % 2 === 0, "(object) expects and even number of " +
+		"arguments (got " + arguments.length + ")");
+	
 	var args = argsToArray(arguments);
 	var object = {};
-	
-	if (args.length % 2 !== 0) {
-		throw new Error("Invalid number of arguments to (object): " + args.length);
-	}
 	
 	for (var i = 0; i < args.length; i += 2) {
 		object[args[i]] = args[i+1];
@@ -295,16 +301,18 @@ defun("object", function (/* &rest */) {
  * @member lisp.macros
  */
 defun("function", function (value) {
-	if (arguments.length !== 1) {
-		throw new Error("(function) requires 1 argument (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(function) requires 1 argument (got " +
+		arguments.length + ")");
+	
 	var object = resolve(value);
+	
 	if (typeof(object) == "function") {
 		return object;
 	} else if (object instanceof Macro) {
 		return object.callable;
 	}
+	
 	throw new Error("'" + toLisp(value) + "' is not callable");
 });
 
@@ -330,10 +338,10 @@ defun("function", function (value) {
  *     The object on which to access the given key.
  */
 defun("getkey", function (key, object) {
-	if (arguments.length !== 2) {
-		throw new Error("(getkey) requires 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 2, "(getkey) requires 2 arguments (got " +
+		arguments.length + ")");
+	
 	return object[key];
 });
 
@@ -360,10 +368,10 @@ defun("getkey", function (key, object) {
  *     The value to set to the given key on the given object.
  */
 defun("setkey", function (key, object, value) {
-	if (arguments.length !== 3) {
-		throw new Error("(setkey) requires 3 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 3, "(setkey) requires 3 arguments (got " +
+		arguments.length + ")");
+	
 	object[key] = value;
 	return value;
 });
@@ -461,18 +469,18 @@ defun("concat", function (/* &rest */) {
  *     => "one, two, three"
  */
 defun("join", function (sep /*, &rest */) {
-	if (arguments.length === 0) {
-		throw new Error("(join) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(join) requires at least 1 argument");
+	
 	var args = argsToArray(arguments);
 	var rest = args.slice(1);
+	
 	for (var i = 0; i < rest.length; i++) {
 		var arg = rest[i];
-		if (!(arg instanceof Array)) {
-			throw new Error("(join) got an invalid argument: '" +
-			    String(arg) + "' is not a list");
-		}
+		assert(arg instanceof Array, "(join) got an invalid argument: '" +
+		    toLisp(arg) + "' is not a list");
 	}
+	
 	var list = rest.reduce(function (a, b) { return a.concat(b); });
 	return list.join(sep);
 });
@@ -495,10 +503,10 @@ defun("join", function (sep /*, &rest */) {
  *     The value whose type is returned.
  */
 defun("typeof", function (value) {
-	if (arguments.length !== 1) {
-		throw new Error("(typeof) requires 1 argument (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(typeof) requires 1 argument (got " +
+		arguments.length + ")");
+	
 	return typeof(value);
 });
 
@@ -520,10 +528,10 @@ defun("typeof", function (value) {
  *     The value to turn into a string.
  */
 defun("to-string", function (value) {
-	if (arguments.length !== 1) {
-		throw new Error("(to-string) requires 1 argument (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(to-string) requires 1 argument (got " +
+		arguments.length + ")");
+	
 	return String(value);
 });
 
@@ -545,10 +553,10 @@ defun("to-string", function (value) {
  *     The value to turn into a number.
  */
 defun("to-number", function (value) {
-	if (arguments.length !== 1) {
-		throw new Error("(to-number) requires 1 argument (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(to-number) requires 1 argument (got " +
+		arguments.length + ")");
+	
 	return Number(value);
 });
 
@@ -570,10 +578,10 @@ defun("to-number", function (value) {
  *     The value to turn into a boolean.
  */
 defun("to-boolean", function (value) {
-	if (arguments.length !== 1) {
-		throw new Error("(to-boolean) requires 1 argument (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(to-boolean) requires 1 argument (got " +
+		arguments.length + ")");
+	
 	return Boolean(value);
 });
 
@@ -600,6 +608,9 @@ defun("to-boolean", function (value) {
  * @optional levels
  */
 defun("to-json", function (value, pretty, levels) {
+	// Input validation
+	assert(arguments.length > 0, "(to-json) requires at least 1 argument");
+	
 	return toJSON(value, pretty, levels);
 });
 
@@ -616,6 +627,10 @@ defun("to-json", function (value, pretty, levels) {
  * @member lisp.functions
  */
 defun("lisp-string", function (value) {
+	// Input validation
+	assert(arguments.length, "(lisp-string) requires at least 1 argument " +
+		"(got " + arguments.length + ")");
+	
 	return toLisp(value);
 });
 
@@ -639,14 +654,12 @@ defun("lisp-string", function (value) {
  *     The string to convert to uppercase.
  */
 defun("to-upper", function (string) {
-	if (arguments.length !== 1) {
-		throw new Error("(to-upper) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (typeof(string) != "string") {
-		throw new Error("(to-upper) requires a string argument (got " +
-			String(string) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(to-upper) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(typeof(string) === "string", "(to-upper) requires a string argument (got " +
+		toLisp(string) + ")");
+	
 	return string.toUpperCase();
 });
 
@@ -670,14 +683,12 @@ defun("to-upper", function (string) {
  *     The string to convert to lowercase.
  */
 defun("to-lower", function (string) {
-	if (arguments.length !== 1) {
-		throw new Error("(to-lower) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (typeof(string) != "string") {
-		throw new Error("(to-lower) requires a string argument (got " +
-			String(string) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(to-lower) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(typeof(string) === "string", "(to-lower) requires a string argument (got " +
+		toLisp(string) + ")");
+	
 	return string.toLowerCase();
 });
 
@@ -703,15 +714,17 @@ defun("to-lower", function (string) {
  * @rest rest
  */
 defun("/", function (/* &rest */) {
-	if (arguments.length === 0) {
-		throw new Error("(/) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(/) requires at least 1 argument");
+	
 	var args = argsToArray(arguments);
+	
 	// This is to emulate common lisp, where dividing one number
 	// is the same as dividing 1 by that number.
 	if (args.length === 1) {
 		args = [1].concat(args);
 	}
+	
 	return args.reduce(function (a, b) {
 		return a / b;
 	});
@@ -740,9 +753,11 @@ defun("/", function (/* &rest */) {
  */
 defun("*", function (/* &rest */) {
 	var args = argsToArray(arguments);
+	
 	if (args.length === 0) {
 		args = [1];
 	}
+	
 	return args.reduce(function (a, b) {
 		return a * b;
 	});
@@ -771,9 +786,11 @@ defun("*", function (/* &rest */) {
  */
 defun("+", function (/* &rest */) {
 	var args = argsToArray(arguments);
+	
 	if (args.length === 0) {
 		args = [0];
 	}
+	
 	return args.reduce(function (a, b) {
 		return a + b;
 	});
@@ -801,10 +818,11 @@ defun("+", function (/* &rest */) {
  * @rest rest
  */
 defun("-", function (/* &rest */) {
-	if (arguments.length === 0) {
-		throw new Error("(-) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(-) requires at least 1 argument");
+	
 	var args = argsToArray(arguments);
+	
 	if (args.length === 1) {
 		args = [0].concat(args);
 	}
@@ -835,10 +853,10 @@ defun("-", function (/* &rest */) {
  * @rest rest
  */
 defun("%", function () {
-	if (arguments.length < 2) {
-		throw new Error("(%) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(%) requires at least 2 arguments (got " +
+		arguments.length + ")");
+	
 	return argsToArray(arguments).reduce(function (a, b) {
 		return a % b;
 	});
@@ -864,14 +882,12 @@ defun("%", function () {
  *     The number to add 1 to.
  */
 defun("1+", function (number) {
-	if (arguments.length !== 1) {
-		throw new Error("(1+) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (typeof(number) != "number") {
-		throw new Error("(1+) requires a number argument (got " +
-			number + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(1+) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(typeof(number) === "number", "(1+) requires a number argument (got " +
+		toLisp(number) + ")");
+	
 	return number + 1;
 });
 
@@ -895,14 +911,12 @@ defun("1+", function (number) {
  *     The number to subtract 1 from.
  */
 defun("1-", function (number) {
-	if (arguments.length !== 1) {
-		throw new Error("(1-) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (typeof(number) != "number") {
-		throw new Error("(1-) requires a number argument (got " +
-			number + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(1-) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(typeof(number) === "number", "(1-) requires a number argument (got " +
+		toLisp(number) + ")");
+	
 	return number - 1;
 });
 
@@ -933,14 +947,14 @@ defun("1-", function (number) {
  * @rest rest
  */
 defun("format", function (print, format /*, &rest */) {
-	if (arguments.length < 2) {
-		throw new Error("(format) expects at least 2 arguments (got " +
-			arguments.length + ")");
-	}
-	if (typeof(format) != "string") {
-		throw new Error("(format) expects a string format");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(format) expects at least 2 arguments (got " +
+		arguments.length + ")");
+	assert(typeof(format) === "string", "(format) expects a string format (got " +
+		toLisp(format) + ")");
+	
 	var output = sprintf.apply(null, argsToArray(arguments).slice(1));
+	
 	if (print) {
 		lisp.log(output);
 		return null;
@@ -978,18 +992,14 @@ defun("format", function (print, format /*, &rest */) {
  *     => nil
  */
 defun("apply", function (func, list) {
-	if (arguments.length !== 2) {
-		throw new Error("(apply) requires 2 arguments (got " +
-			arguments.length + ")");
-	}
-	if (typeof(func) != "function") {
-		throw new Error("(apply) requires a function as its " +
-			"first argument (got " + String(func) + ")");
-	}
-	if (!(list instanceof Array)) {
-		throw new Error("(apply) requires a list as its second " +
-			"argument (got " + String(list) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 2, "(apply) requires 2 arguments (got " +
+		arguments.length + ")");
+	assert(typeof(func) === "function", "(apply) requires a function as its " +
+		"first argument (got " + toLisp(func) + ")");
+	assert(list instanceof Array, "(apply) requires a list as its second " +
+		"argument (got " + toLisp(list) + ")");
+	
 	return func.apply(null, list);
 });
 
@@ -1015,22 +1025,20 @@ defun("apply", function (func, list) {
  *     The list of values to pass to the given function.
  */
 defun("map", function (func, list) {
-	if (arguments.length !== 2) {
-		throw new Error("(map) requires 2 arguments (got " +
-			arguments.length + ")");
-	}
-	if (typeof(func) != "function") {
-		throw new Error("(map) requires a function as its first argument (got " +
-			String(func) + ")");
-	}
-	if (!(list instanceof Array)) {
-		throw new Error("(map) requires a list as its second argument (got " +
-			String(list) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 2, "(map) requires 2 arguments (got " +
+		arguments.length + ")");
+	assert(typeof(func) === "function", "(map) requires a function as its first " +
+		"argument (got " + toLisp(func) + ")");
+	assert(list instanceof Array, "(map) requires a list as its second argument (got " +
+		toLisp(list) + ")");
+	
 	var newlist = [];
+	
 	for (var i = 0; i < list.length; i++) {
 		newlist.push(func(list[i]));
 	}
+	
 	return newlist;
 });
 
@@ -1059,13 +1067,16 @@ defun("map", function (func, list) {
  *     return in the resulting object.
  */
 defun("props", function (object, list) {
-	if (arguments.length !== 2) {
-		throw new Error("(props) requires 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 2, "(props) requires 2 arguments (got " +
+		arguments.length + ")");
+	
+	// Allow the user to supply a single key that's not in a list. This
+	// is simply for convenience.
 	if (!(list instanceof Array)) {
 		list = [list];
 	}
+	
 	function makeObject (fromobj, toobj, keyset) {
 		var value;
 		var first;
@@ -1110,14 +1121,11 @@ defun("props", function (object, list) {
  * @member lisp.functions
  */
 defun("items", function (object) {
-	if (arguments.length !== 1) {
-		throw new Error("(items) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (!(object instanceof Object)) {
-		throw new Error("(items) requires an object as its argument " +
-			"(got " + String(object) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(items) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(object instanceof Object, "(items) requires an object as its argument " +
+		"(got " + toLisp(object) + ")");
 	
 	var items = [];
 	for (var key in object) {
@@ -1139,21 +1147,18 @@ defun("items", function (object) {
  * @member lisp.functions
  */
 defun("nth", function (list, index) {
-	if (arguments.length !== 2) {
-		throw new Error("(nth) requires 2 arguments (got " +
-			arguments.length + ")");
-	}
-	if (!(list instanceof Array)) {
-		throw new Error("(nth) requires an Array as its first argument " +
-			"(got " + toLisp(list) + ")");
-	}
-	if (typeof(index) != "number") {
-		throw new Error("(nth) requires a number as its second argument " +
-			"(got " + toLisp(index) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 2, "(nth) requires 2 arguments (got " +
+		arguments.length + ")");
+	assert(list instanceof Array, "(nth) requires an Array as its first argument " +
+		"(got " + toLisp(list) + ")");
+	assert(typeof(index) === "number", "(nth) requires a number as its second argument " +
+		"(got " + toLisp(index) + ")");
+	
 	if (list.length === 0) {
 		return null;
 	}
+	
 	return list[index];
 });
 
@@ -1162,6 +1167,8 @@ defun("nth", function (list, index) {
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * 
+ * FIXME: This should be a macro: `(nth 0 ,list)
  * </pre>
  * 
  * @name first
@@ -1170,17 +1177,16 @@ defun("nth", function (list, index) {
  * @member lisp.functions
  */
 defun("first", function (list) {
-	if (arguments.length !== 1) {
-		throw new Error("(first) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (!(list instanceof Array)) {
-		throw new Error("(first) requires an Array as its argument " +
-			"(got " + String(list) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(first) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(list instanceof Array, "(first) requires an Array as its argument " +
+		"(got " + toLisp(list) + ")");
+	
 	if (list.length === 0) {
 		return null;
 	}
+	
 	return list[0];
 });
 
@@ -1189,6 +1195,8 @@ defun("first", function (list) {
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * 
+ * FIXME: This should be a macro: `(nth 1 ,list)
  * </pre>
  * 
  * @name second
@@ -1197,17 +1205,16 @@ defun("first", function (list) {
  * @member lisp.functions
  */
 defun("second", function (list) {
-	if (arguments.length !== 1) {
-		throw new Error("(second) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (!(list instanceof Array)) {
-		throw new Error("(second) requires an Array as its argument " +
-			"(got " + String(list) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(second) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(list instanceof Array, "(second) requires an Array as its argument " +
+		"(got " + toLisp(list) + ")");
+	
 	if (list.length < 2) {
 		return null;
 	}
+	
 	return list[1];
 });
 
@@ -1216,6 +1223,8 @@ defun("second", function (list) {
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * 
+ * FIXME: This should be a macro: `(nth 2 ,list)
  * </pre>
  * 
  * @name third
@@ -1224,17 +1233,16 @@ defun("second", function (list) {
  * @member lisp.functions
  */
 defun("third", function (list) {
-	if (arguments.length !== 1) {
-		throw new Error("(third) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (!(list instanceof Array)) {
-		throw new Error("(third) requires an Array as its argument " +
-			"(got " + String(list) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(third) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(list instanceof Array, "(third) requires an Array as its argument " +
+		"(got " + toLisp(list) + ")");
+	
 	if (list.length < 3) {
 		return null;
 	}
+	
 	return list[2];
 });
 
@@ -1251,14 +1259,12 @@ defun("third", function (list) {
  * @member lisp.functions
  */
 defun("push", function (list, value) {
-	if (arguments.length !== 2) {
-		throw new Error("(push) requires 2 arguments (got " +
-			arguments.length + ")");
-	}
-	if (!(list instanceof Array)) {
-		throw new Error("(push) requires an Array as its first " +
-			"argument (got " + String(list) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 2, "(push) requires 2 arguments (got " +
+		arguments.length + ")");
+	assert(list instanceof Array, "(push) requires an Array as its first " +
+		"argument (got " + toLisp(list) + ")");
+	
 	list.push(value);
 	return list;
 });
@@ -1276,14 +1282,12 @@ defun("push", function (list, value) {
  * @member lisp.functions
  */
 defun("sort!", function (list) {
-	if (arguments.length !== 1) {
-		throw new Error("(sort!) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (!(list instanceof Array)) {
-		throw new Error("(sort!) requires an Array as its first " +
-			"argument (got " + String(list) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(sort!) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(list instanceof Array, "(sort!) requires an Array as its first " +
+		"argument (got " + toLisp(list) + ")");
+	
 	return list.sort();
 });
 
@@ -1314,9 +1318,9 @@ var _function_sort;
  * @member lisp.functions
  */
 defun("length", function (object) {
-	if (arguments.length !== 1) {
-		throw new Error("(length) requires 1 argument (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(length) requires 1 argument (got " +
+		arguments.length + ")");
+	
 	return object.length;
 });

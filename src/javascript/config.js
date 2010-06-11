@@ -19,10 +19,10 @@ var ROOT_ENV = new Env(new Env(null, global), {
 	 * TODO: Test me
 	 */
 	"eval": function (expression) {
-		if (arguments.length !== 1) {
-			throw new Error("(eval) requires 1 argument (got " +
-				arguments.length + ")");
-		}
+		// Input validation
+		assert(arguments.length === 1, "(eval) requires 1 argument (got " +
+			arguments.length + ")");
+		
 		return resolve(expression);
 	},
 	

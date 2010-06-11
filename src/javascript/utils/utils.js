@@ -1,3 +1,9 @@
+function assert (assertion, errorString) {
+	if (!assertion) {
+		throw new Error(errorString || "");
+	}
+}
+
 /**
  * The method used for (equal) equality in js-lisp.
  * 
@@ -76,10 +82,10 @@ function makeRequest (url, successCallback) {
 	
 	if (request.status == 200) {
 		successCallback(request.responseText);
-	} else if (request.status == 404) {
-		throw new Error("Trying to load lisp script that does not exist: " +
-			url);
 	}
+	
+	assert(request.status != 404, "Trying to load lisp script that " +
+		"does not exist: " + url);
 }
 
 function times (string, num) {

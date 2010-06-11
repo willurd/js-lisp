@@ -1,8 +1,18 @@
 # TODO
 
-* Add tests for everything (including error conditions) and THEN start deving again. It's way too dangerous to be making big changes (or any changes) right now.
+* Finish testing (and preferably documenting) the functionality that already exists.
 * Think of ways to break the current (defmacro) implementation because I don't trust it.
-* Rename all instances of &rest and &body to just &.
+* Start thinking of all of the \*features* that can be set. For example:
+  * What OS you're on: (:os-windows, :linux, :macos, etc)
+  * What OS flavor you're running: (:os-flavor-xp, :os-flavor-ubuntu, :os-flavor-leopard, etc)
+  * What version your OS is: (:os-version-sp2, :os-version-2.62, etc)
+  * What browser you're in: (:browser-chrome, :browser-safari, :browser-firefox, etc)
+  * What version your browser is: (:browser-version-1.2, etc)
+  * Supported features: (:web-sockets, :css3, :web-workers, etc)
+* Put an online book or tutorial/example set into the roadmap (in the distant future). Also, make a roadmap.
+* Put a website into the roadmap (for the not-so-distant future).
+* Create SpecialForm and convert all relevant "macros" to special forms. Update Macro to return expanded code on .expand(), and resolved code on .call() and .apply().
+* Fix backticks, unquotes (commas), and list expanders (@).
 * Do &opt (&optional) and &key stuff.
 * #1 Organize This File
 * Make the browser REPL evaluate expressions each on their own line if it receives more than one
@@ -46,7 +56,7 @@
 * Make a webpage at the root of /src that runs on `rake run`
 	* This webpage should link off to the test runner(s) and all examples
 	* As a demonstration, all the interactions of this page should be written in lisp
-* Think about how to get line numbers for lisp scripts for debugging
+* Think about how to get line numbers from lisp scripts for debugging
 * Make browser extensions:
 	* Chrome
 	* Firefox (using Jetpack)
@@ -73,9 +83,9 @@
 * Think about Cons' and how they'll fit in (or if they will...)
 * Test (Class.extend (object ...))
 * Test defining a class from scratch (using the prototype property)
-* Think about defing a class macro (or maybe reusing CL's defclass, or atleast borrowing from it)
-* Make the repl solid and tell the creator
+* Think about defining a (class) macro (or maybe reusing CL's defclass, or at least borrowing from it)
 * Write the generic do macro
 * Think about beginning to tackle (loop)
 * Think about a (formatcl) function that uses CL's format language
-* Think about writing a mini app/game/widget/whatever in 100% lisp (or maybe just using jquery?)
+* Think about writing a mini app/game/widget/whatever in 100% lisp (or maybe just using jQuery?)
+* Find some better ways to do documentation. Latex? Automatically-generated latex files from jsdoc perhaps? Convert the latex to PDF _and_ HTML?

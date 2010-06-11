@@ -16,6 +16,11 @@ function defmacro (name, func) {
 	env.set(name, new Macro(func));
 }
 
+function isCallable (object) {
+	return typeof(object) === "function" ||
+		   (object instanceof Macro);
+}
+
 function resolve (value) {
 	if (value instanceof Symbol) {
 		return lisp.env.get(value);
@@ -71,9 +76,7 @@ function checkExplode (expression, parent, index) {
 }
 
 function doSExp (sexp) {
-	if (!sexp) {
-		throw new Error("doSExp got empty expression");
-	}
+	assert(!!sexp, "doSExp got empty expression");
 	
 	if (sexp.length === 0) {
 		// An expression with no arguments, in js-lisp, is an empty list.
@@ -83,9 +86,7 @@ function doSExp (sexp) {
 	var first = sexp[0];
 	var object = resolve(first);
 	
-	if (typeof(object) != "function" && !(object instanceof Macro)) {
-		throw new Error("'" + first.value + "' is not callable");
-	}
+	assert(isCallable(object), "'" + first.value + "' is not callable")
 	
 	var thisObject = null;
 	if (first instanceof Symbol) {

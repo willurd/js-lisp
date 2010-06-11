@@ -25,10 +25,10 @@ var macros = {}; // This is just for documentation. It doesn't get used.
  * @returns The given argument, unevaluated.
  */
 defmacro("quote", function (expression) {
-	if (arguments.length !== 1) {
-		throw new Error("(quote) requires 1 argument (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(quote) requires 1 argument (got " +
+		arguments.length + ")");
+	
 	return checkResolve(expression);
 });
 
@@ -45,10 +45,10 @@ defmacro("quote", function (expression) {
  * @member lisp.macros
  */
 defmacro("resolve", function (expression) {
-	if (arguments.length !== 1) {
-		throw new Error("(resolve) requires 1 argument (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(resolve) requires 1 argument (got " +
+		arguments.length + ")");
+	
 	return resolve(expression);
 });
 
@@ -65,10 +65,10 @@ defmacro("resolve", function (expression) {
  * @member lisp.macros
  */
 defmacro("explode", function (expression) {
-	if (arguments.length !== 1) {
-		throw new Error("(explode) requires 1 argument (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length === 1, "(explode) requires 1 argument (got " +
+		arguments.length + ")");
+	
 	return [_S("explode"), expression];
 });
 
@@ -90,29 +90,23 @@ defmacro("explode", function (expression) {
  * @member lisp.macros
  */
 defmacro("defmacro", function (name, arglist /*, &rest */) {
-	if (arguments.length < 2) {
-		throw new Error("(defmacro) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
-	if (!(name instanceof Symbol)) {
-		throw new Error("(defmacro) requires a symbol as its first " +
-			"argument (got " + String(name) + ")");
-	}
-	if (!(arglist instanceof Array)) {
-		throw new Error("(defmacro) requires an Array as its second " +
-			"argument (got " + String(arglist) + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(defmacro) requires at least 2 arguments (got " +
+		arguments.length + ")");
+	assert(name instanceof Symbol, "(defmacro) requires a symbol as its first " +
+		"argument (got " + toLisp(name) + ")");
+	assert(arglist instanceof Array, "(defmacro) requires an Array as its second " +
+		"argument (got " + toLisp(arglist) + ")");
 	
 	function setargs (arglist, args, top) {
 		if (top === undefined) {
 			top = true;
 		}
-		if (!(args instanceof Array)) {
-			throw new Error("Error while parsing arguments to macro " + toLisp(name) + ".\n" +
-				"\tInvalid arguments to:\n" +
-				"\t  " + toLisp(arglist) + "\n" +
-				"\tExpected a list but got '" + toLisp(args) + "'");
-		}
+		assert(args instanceof Array, "Error while parsing arguments to macro " + toLisp(name) + ".\n" +
+			"\tInvalid arguments to:\n" +
+			"\t  " + toLisp(arglist) + "\n" +
+			"\tExpected a list but got '" + toLisp(args) + "'");
+		
 		var i;
 		var j = 0;
 		var arg;
@@ -123,13 +117,11 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 				setargs(arg, args[i], false);
 			} else {
 				if (String(arg) == "&") {
-					if (i == arglist.length - 1) {
-						throw new Error("No argument name after rest identifier");
-					}
-					if (arglist.length > i + 2) {
-						throw new Error("Unexpected arguments (" +
-							arglist.slice(i+1).join(" ") + ") after rest argument");
-					}
+					assert(i != arglist.length - 1,
+						"No argument name after rest identifier");
+					assert(arglist.length <= i + 2, "Unexpected arguments (" +
+						arglist.slice(i+1).join(" ") + ") after rest argument");
+					
 					lisp.env.let(arglist[i+1], args.slice(i));
 					j = args.length;
 					i = args.length;
@@ -139,13 +131,12 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 				}
 			}
 		}
-		if (i != j) {
-			throw new Error("Error while parsing arguments to macro " + toLisp(name) + ".\n" +
-				"\tNot enough arguments to:\n" +
-				"\t  " + toLisp(arglist) + "\n" +
-				"\tGot:\n" +
-				"\t  " + toLisp(args));
-		}
+		
+		assert(i == j, "Error while parsing arguments to macro " + toLisp(name) + ".\n" +
+			"\tNot enough arguments to:\n" +
+			"\t  " + toLisp(arglist) + "\n" +
+			"\tGot:\n" +
+			"\t  " + toLisp(args))
 	}
 	
 	var env  = new Env(lisp.env);
@@ -197,10 +188,9 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
  * @returns The created function.
  */
 defmacro("lambda", function (arglist /*, ... */) {
-	if (arguments.length > 0 && !(arglist instanceof Array)) {
-		throw new Error("(lambda) requires a list as its first expression " +
-			"(got " + String(arglist) + ")");
-	}
+	// Input validation
+	assert(arguments.length === 0 || arglist instanceof Array, "(lambda) requires " +
+		"a list as its first expression (got " + toLisp(arglist) + ")");
 	
 	var env  = new Env(lisp.env);
 	var args = argsToArray(arguments);
@@ -219,13 +209,11 @@ defmacro("lambda", function (arglist /*, ... */) {
 			for (i = 0; i < arglist.length; i++) {
 				var argname = arglist[i];
 				if (argname == "&") {
-					if (i == arglist.length - 1) {
-						throw new Error("No argument name after rest identifier");
-					}
-					if (arglist.length > i + 2) {
-						throw new Error("Unexpected arguments (" +
-							arglist.slice(i+1).join(" ") + ") after rest argument");
-					}
+					assert(i != arglist.length - 1,
+						"No argument name after rest identifier");
+					assert(arglist.length <= i + 2, "Unexpected arguments (" +
+						arglist.slice(i+1).join(" ") + ") after rest argument");
+					
 					lisp.env.let(arglist[i+1], largs.slice(i));
 					break;
 				} else {
@@ -258,17 +246,13 @@ defmacro("lambda", function (arglist /*, ... */) {
  * @member lisp.macros
  */
 defmacro("defun", function (name, arglist /*, ... */) {
-	if (arguments.length === 0) {
-		throw new Error("(defun) requires at least 1 argument.");
-	}
-	if (!(name instanceof Symbol)) {
-		throw new Error("(defun) requires a symbol as its first argument (got " +
-			String(name) + ")");
-	}
-	if (arguments.length > 1 && !(arglist instanceof Array)) {
-		throw new Error("(defun) requires a list of symbols as its second " +
-			"expression (got " + String(arglist) + ")");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(defun) requires at least 1 argument.");
+	assert(name instanceof Symbol, "(defun) requires a symbol as its first argument " +
+		"(got " + toLisp(name) + ")");
+	assert(arguments.length === 1 || arglist instanceof Array, "(defun) requires " +
+		"a list of symbols as its second expression (got " + toLisp(arglist) + ")");
+	
 	var body = argsToArray(arguments).slice(2);
 	var lambda = [_S("lambda"), arglist].concat(body);
 	resolve([_S("setq"), name, lambda]);
@@ -417,28 +401,33 @@ defmacro("try", function () {
  * @member lisp.macros
  */
 defmacro("funcall", function (object, dotpath) {
-	if (arguments.length < 2) {
-		throw new Error("(funcall) requires at least 2 arguments " +
-			"(got " + arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(funcall) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	// Grab the object.
 	object = resolve(object);
+	
 	// Make sure we can get a string dotpath from the supplied argument.
 	if (dotpath instanceof Symbol || dotpath instanceof Keyword) {
 		dotpath = dotpath.value;
-	} else if (typeof(dotpath) != "string") {
-		throw new Error("Unknown function key in (funcall): " + String(dotpath));
 	}
+	
+	assert(typeof(dotpath) === "string", "Unknown key in " +
+		"(funcall): " + String(dotpath));
+	
 	// Resolve the object down to the second-to-last part of the dot path.
 	var parts = String(dotpath).split(".");
 	for (var i = 0; i < parts.length-1; i++) {
 		object = object[parts[i]];
 	}
+	
 	// Make sure what's being "called" is actually a function.
 	var funckey = parts[parts.length-1];
-	if (typeof(object[funckey]) != "function") {
-		throw new Error(String(dotpath) + " on " + object + " is not a function");
-	}
+	
+	assert(typeof(object[funckey]) === "function", String(dotpath) +
+		" on " + object + " is not a function");
+	
 	var args = argsToArray(arguments).slice(2).map(resolve);
 	return object[funckey].apply(object, args);
 });
@@ -542,9 +531,8 @@ defmacro("progn", function (/* .. */) {
 defmacro("cond", function () {
 	for (var i = 0; i < arguments.length; i++) {
 		var clause = arguments[i];
-		if (clause.length === 0) {
-			throw new Error("(cond) clauses must contain an expression to evaluate");
-		}
+		assert(clause.length > 0, "(cond) clauses must contain an " +
+			"expression to evaluate")
 		var condition = clause[0];
 		if (!!resolve(condition)) {
 			var ret;
@@ -581,10 +569,10 @@ defmacro("cond", function () {
  *          remaining expressions to evaluate.
  */
 defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
-	if (arguments.length < 2) {
-		throw new Error("(if) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(if) requires at least 2 arguments (got " +
+		arguments.length + ")");
+	
 	if (!!resolve(testExpression)) { // testExpression evaluates to true
 		return resolve(ifTrueExpression);
 	} else { // Evaluate all of the expressions after ifTrueExpression
@@ -616,10 +604,10 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
  * @returns The return value of the last expression.
  */
 defmacro("when", function () {
-	if (arguments.length === 0) {
-		throw new Error("(when) requires at least 1 argument " +
-			"(got " + arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 1, "(when) requires at least 1 argument " +
+		"(got " + arguments.length + ")");
+	
 	if (!!resolve(arguments[0])) {
 		var args = argsToArray(arguments).slice(1).map(resolve);
 		return args[args.length-1];
@@ -642,9 +630,9 @@ defmacro("when", function () {
  * @member lisp.macros
  */
 defmacro("not", function (value) {	
-	if (arguments.length === 0) {
-		throw new Error("(not) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(not) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return !value;
 	});
@@ -705,10 +693,10 @@ defmacro("and", function () {
  * @member lisp.macros
  */
 defmacro("equal", function () {
-	if (arguments.length < 2) {
-		throw new Error("(equal) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(equal) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	return comparator(arguments, function (a, b) {
 		return equal(a, b);
 	});
@@ -727,10 +715,10 @@ defmacro("equal", function () {
  * @member lisp.macros
  */
 defmacro("not-equal", function () {
-	if (arguments.length < 2) {
-		throw new Error("(not-equal) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(not-equal) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	return comparator(arguments, function (a, b) {
 		return !equal(a, b);
 	});
@@ -749,10 +737,10 @@ defmacro("not-equal", function () {
  * @member lisp.macros
  */
 defmacro("==", function () {
-	if (arguments.length < 2) {
-		throw new Error("(==) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(==) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	return comparator(arguments, function (a, b) {
 		return a == b;
 	});
@@ -771,10 +759,10 @@ defmacro("==", function () {
  * @member lisp.macros
  */
 defmacro("===", function () {
-	if (arguments.length < 2) {
-		throw new Error("(===) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(===) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	return comparator(arguments, function (a, b) {
 		return a === b;
 	});
@@ -793,10 +781,10 @@ defmacro("===", function () {
  * @member lisp.macros
  */
 defmacro("!=", function () {
-	if (arguments.length < 2) {
-		throw new Error("(!=) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(!=) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	return comparator(arguments, function (a, b) {
 		return a != b;
 	});
@@ -815,10 +803,10 @@ defmacro("!=", function () {
  * @member lisp.macros
  */
 defmacro("!==", function () {
-	if (arguments.length < 2) {
-		throw new Error("(!==) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(!==) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	return comparator(arguments, function (a, b) {
 		return a !== b;
 	});
@@ -844,10 +832,10 @@ defmacro("!==", function () {
  *     => false
  */
 defmacro("<", function () {
-	if (arguments.length < 2) {
-		throw new Error("(<) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(<) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	return comparator(arguments, function (a, b) {
 		return a < b;
 	});
@@ -873,10 +861,10 @@ defmacro("<", function () {
  *     => false
  */
 defmacro(">", function () {
-	if (arguments.length < 2) {
-		throw new Error("(>) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(>) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	return comparator(arguments, function (a, b) {
 		return a > b;
 	});
@@ -902,10 +890,10 @@ defmacro(">", function () {
  *     => false
  */
 defmacro("<=", function () {
-	if (arguments.length < 2) {
-		throw new Error("(<=) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(<=) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	return comparator(arguments, function (a, b) {
 		return a <= b;
 	});
@@ -931,10 +919,10 @@ defmacro("<=", function () {
  *     => false
  */
 defmacro(">=", function () {
-	if (arguments.length < 2) {
-		throw new Error("(>=) requires at least 2 arguments (got " +
-			arguments.length + ")");
-	}
+	// Input validation
+	assert(arguments.length >= 2, "(>=) requires at least 2 arguments " +
+		"(got " + arguments.length + ")");
+	
 	return comparator(arguments, function (a, b) {
 		return a >= b;
 	});
@@ -954,9 +942,9 @@ defmacro(">=", function () {
  * @member lisp.macros
  */
 defmacro("is-true", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-true) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-true) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return value === true;
 	});
@@ -976,9 +964,9 @@ defmacro("is-true", function () {
  * @member lisp.macros
  */
 defmacro("is-false", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-false) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-false) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return value === false;
 	});
@@ -998,9 +986,9 @@ defmacro("is-false", function () {
  * @member lisp.macros
  */
 defmacro("is-null", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-null) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-null) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return value === null;
 	});
@@ -1018,9 +1006,9 @@ defmacro("is-null", function () {
  * @member lisp.macros
  */
 defmacro("is-undefined", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-undefined) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-undefined) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return value === undefined;
 	});
@@ -1040,9 +1028,9 @@ defmacro("is-undefined", function () {
  * @member lisp.macros
  */
 defmacro("is-string", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-string) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-string) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return typeof(value) == "string";
 	});
@@ -1062,9 +1050,9 @@ defmacro("is-string", function () {
  * @member lisp.macros
  */
 defmacro("is-number", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-number) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-number) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return typeof(value) == "number";
 	});
@@ -1084,9 +1072,9 @@ defmacro("is-number", function () {
  * @member lisp.macros
  */
 defmacro("is-boolean", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-boolean) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-boolean) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return typeof(value) == "boolean";
 	});
@@ -1106,9 +1094,9 @@ defmacro("is-boolean", function () {
  * @member lisp.macros
  */
 defmacro("is-function", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-function) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-function) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return typeof(value) == "function";
 	});
@@ -1128,9 +1116,9 @@ defmacro("is-function", function () {
  * @member lisp.macros
  */
 defmacro("is-object", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-object) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-object) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return typeof(value) == "object";
 	});
@@ -1151,9 +1139,9 @@ defmacro("is-object", function () {
  * @member lisp.macros
  */
 defmacro("is-array", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-array) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-array) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return value instanceof Array;
 	});
@@ -1174,9 +1162,9 @@ defmacro("is-array", function () {
  * @member lisp.macros
  */
 defmacro("is-list", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-list) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-list) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return value instanceof Array;
 	});
@@ -1196,9 +1184,9 @@ defmacro("is-list", function () {
  * @member lisp.macros
  */
 defmacro("is-symbol", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-symbol) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-symbol) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return value instanceof Symbol;
 	});
@@ -1218,9 +1206,9 @@ defmacro("is-symbol", function () {
  * @member lisp.macros
  */
 defmacro("is-keyword", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-keyword) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-keyword) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return value instanceof Keyword;
 	});
@@ -1240,9 +1228,9 @@ defmacro("is-keyword", function () {
  * @member lisp.macros
  */
 defmacro("is-macro", function () {
-	if (arguments.length === 0) {
-		throw new Error("(is-macro) requires at least 1 argument");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(is-macro) requires at least 1 argument");
+	
 	return predicate(arguments, function (value) {
 		return value instanceof Macro;
 	});
@@ -1262,29 +1250,23 @@ defmacro("is-macro", function () {
  * @member lisp.macros
  */
 defmacro("dolist", function (arglist /*, ... */) {
-	if (arguments.length === 0) {
-		throw new Error("(dolist) requires at least 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (!(arglist instanceof Array)) {
-		throw new Error("(dolist) got invalid argument list: " + String(arglist));
-	}
-	if (arglist.length < 2 || arglist.length > 3) {
-		throw new Error("(dolist) got invalid argument list. Requires at least " +
-			"2 arguments and no more than 3 (got " + arglist.length + ")");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(dolist) requires at least 1 argument " +
+		"(got " + arguments.length + ")");
+	assert(arglist instanceof Array, "(dolist) got invalid argument " +
+		"list: " + toLisp(arglist));
+	assert(arglist.length >= 2 && arglist.length <= 3, "(dolist) got " +
+		"invalid argument list. Requires at least 2 arguments and no " +
+		"more than 3 (got " + arglist.length + ")");
 	
 	var itemName = arglist[0];
 	var list     = resolve(arglist[1]);
 	
-	if (!(itemName instanceof Symbol)) {
-		throw new Error("(dolist) got invalid argument list. First argument " +
-			"must be a symbol (got " + String(itemName) + ")");
-	}
-	if (!(list instanceof Array)) {
-		throw new Error("(dolist) got invalid argument list. Second argument " +
-			"must be a list (got " + String(list) + ")");
-	}
+	assert(itemName instanceof Symbol, "(dolist) got invalid argument " +
+		"list. First argument must be a symbol (got " +
+		toLisp(itemName) + ")");
+	assert(list instanceof Array, "(dolist) got invalid argument list. " +
+		"Second argument must be a list (got " + toLisp(list) + ")");
 	
 	lisp.env = new Env(lisp.env);
 	var body = argsToArray(arguments).slice(1);
@@ -1329,29 +1311,21 @@ defmacro("dolist", function (arglist /*, ... */) {
  *     => nil
  */
 defmacro("foreach", function (arglist /*, &rest */) {
-	if (arguments.length === 0) {
-		throw new Error("(foreach) requires at least 1 argument");
-	}
-	if (!(arglist instanceof Array)) {
-		throw new Error("(foreach) requires a list as its first " +
-			" argument (got " + String(arglist) + ")");
-	}
-	if (arglist.length !== 2) {
-		throw new Error("(foreach) got invalid argument list. Requires " +
-			"2 arguments (got " + arglist.length + ")");
-	}
+	// Input validation
+	assert(arguments.length > 0, "(foreach) requires at least 1 argument");
+	assert(arglist instanceof Array, "(foreach) requires a list as its " +
+		"first argument (got " + toLisp(arglist) + ")");
+	assert(arglist.length === 2, "(foreach) got invalid argument list. " +
+		"Requires 2 arguments (got " + arglist.length + ")");
 	
 	var itemName = arglist[0];
 	var object   = resolve(arglist[1]);
 	
-	if (!(itemName instanceof Symbol)) {
-		throw new Error("(foreach) got invalid argument list. First argument " +
-			"must be a symbol (got " + String(itemName) + ")");
-	}
-	if (!(object instanceof Object)) {
-		throw new Error("(foreach) got invalid argument list. Second argument " +
-			"must be an object (got " + String(object) + ")");
-	}
+	assert(itemName instanceof Symbol, "(foreach) got invalid argument " +
+		"list. First argument must be a symbol (got " +
+		toLisp(itemName) + ")");
+	assert(object instanceof Object, "(foreach) got invalid argument list. " +
+		"Second argument must be an object (got " + toLisp(object) + ")");
 	
 	var body = argsToArray(arguments).slice(1);
 	
@@ -1384,14 +1358,12 @@ defmacro("foreach", function (arglist /*, &rest */) {
  * @member lisp.macros
  */
 defmacro("char", function (symbol) {
-	if (arguments.length !== 1) {
-		throw new Error("(char) requires 1 argument (got " +
-			arguments.length + ")");
-	}
-	if (!(symbol instanceof Symbol)) {
-		throw new Error("(char) requires a symbol as its argument " +
-			"(got " + toLisp(symbol) + ")");
-	}
+	// Input validation
+	assert(arguments.length !== 1, "(char) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(symbol instanceof Symbol, "(char) requires a symbol as its " +
+		"argument (got " + toLisp(symbol) + ")");
+	
 	return _char_table[String(symbol)];
 });
 

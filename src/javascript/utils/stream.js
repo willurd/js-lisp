@@ -18,10 +18,9 @@ var StreamEOFException = StreamException.extend({
 
 var StringStream = Class.extend({
 	init: function (data) {
-		if (typeof(data) != "string") {
-			throw new Error("Invalid object as StringStream input: " + data);
-		}
-
+		assert(typeof(data) === "string", "Invalid object as " +
+			"StringStream input: " + data)
+		
 		this.data = data;
 		this.length = data.length;
 		this.position = 0;
@@ -73,11 +72,9 @@ var StringStream = Class.extend({
 	prev: function (count) {
 		count = count || 1;
 		this.position -= count;
-
-		if (this.bof()) {
-			throw new Error("Cannot access character at position " + this.position +
-				" of StringStream");
-		}
+		
+		assert(!this.bof(), "Cannot access character at position " +
+			this.position + " of StringStream")
 		
 		return this.charAt(this.position);
 	},
