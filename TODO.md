@@ -1,6 +1,7 @@
 # TODO
 
 * Finish testing (and preferably documenting) the functionality that already exists.
+* Add number of assertions, failed and passed, to JSTest
 * Think of ways to break the current (defmacro) implementation because I don't trust it.
 * Start thinking of all of the \*features* that can be set. For example:
   * What OS you're on: (:os-windows, :linux, :macos, etc)
@@ -9,6 +10,8 @@
   * What browser you're in: (:browser-chrome, :browser-safari, :browser-firefox, etc)
   * What version your browser is: (:browser-version-1.2, etc)
   * Supported features: (:web-sockets, :css3, :web-workers, etc)
+  * Whether you're in the browser or a console: (:browser, :console)
+  * What console you're in: (:node, :rhino, etc)
 * Put an online book or tutorial/example set into the roadmap (in the distant future). Also, make a roadmap.
 * Put a website into the roadmap (for the not-so-distant future).
 * Create SpecialForm and convert all relevant "macros" to special forms. Update Macro to return expanded code on .expand(), and resolved code on .call() and .apply().

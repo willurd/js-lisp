@@ -86,7 +86,7 @@ function doSExp (sexp) {
 	var first = sexp[0];
 	var object = resolve(first);
 	
-	assert(isCallable(object), "'" + first.value + "' is not callable")
+	assert(isCallable(object), "'" + first.value + "' is not callable");
 	
 	var thisObject = null;
 	if (first instanceof Symbol) {

@@ -136,7 +136,7 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 			"\tNot enough arguments to:\n" +
 			"\t  " + toLisp(arglist) + "\n" +
 			"\tGot:\n" +
-			"\t  " + toLisp(args))
+			"\t  " + toLisp(args));
 	}
 	
 	var env  = new Env(lisp.env);
@@ -187,7 +187,7 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
  * 
  * @returns The created function.
  */
-defmacro("lambda", function (arglist /*, ... */) {
+defmacro("lambda", function (arglist /*, &rest */) {
 	// Input validation
 	assert(arguments.length === 0 || arglist instanceof Array, "(lambda) requires " +
 		"a list as its first expression (got " + toLisp(arglist) + ")");
@@ -198,9 +198,6 @@ defmacro("lambda", function (arglist /*, ... */) {
 	return (function (env, args) {
 		var body = args.slice(1);
 		return function () {
-			if (args.length < 2) {
-				return null; // This function does nothing
-			}
 			var largs = argsToArray(arguments);
 			var tempEnv = lisp.env;
 			var i;
@@ -211,8 +208,8 @@ defmacro("lambda", function (arglist /*, ... */) {
 				if (argname == "&") {
 					assert(i != arglist.length - 1,
 						"No argument name after rest identifier");
-					assert(arglist.length <= i + 2, "Unexpected arguments (" +
-						arglist.slice(i+1).join(" ") + ") after rest argument");
+					assert(!(arglist.length > i + 2), "Unexpected arguments (" +
+						arglist.slice(i+2).join(" ") + ") after rest argument");
 					
 					lisp.env.let(arglist[i+1], largs.slice(i));
 					break;
@@ -285,47 +282,52 @@ defmacro("defun", function (name, arglist /*, ... */) {
  *          (i.e. non-catch, non-finally expression).
  * 
  * @example Empty try block
- *   >> (try)
- *   => nil
+ *     >> (try)
+ *     => nil
  * 
  * @example Empty catch block (silences the error)
- *   >> (try
- *          (throw (new Error))
- *        (catch))
- *   => nil
+ *     >> (try
+ *            (throw (new Error))
+ *          (catch))
+ *     => nil
  * 
  * @example Multiple expressions with a full catch block
- *   >> (try
- *          (print "This will print")
- *          (throw (new Error "This cuts the expression short"))
- *          (print "This will not print")
- *        (catch (e)
- *          (format t "This will print when the error is thrown: %s" e)))
- *   => (no return value)
+ *     >> (try
+ *            (print "This will print")
+ *            (throw (new Error "This cuts the expression short"))
+ *            (print "This will not print")
+ *          (catch (e)
+ *            (format t "This will print when the error is thrown: %s" e)))
+ *       This will print
+ *       This will print when the error is thrown: Error: This cuts the expression short
+ *       => nil
  * 
  * @example try/finally
- *   >> (try
- *          (throw (new Error))
- *        (finally
- *          (print "This always runs")))
- *   => (no return value) ; Due to the error that is thrown
+ *     >> (try
+ *            (throw (new Error))
+ *          (finally
+ *            (print "This always runs")))
+ *     This always runs
+ *     Error
  * 
  * @example try/catch/finally
- *   >> (try
- *          "hello" ; This will get returned because it's the last evaluated expression
- *          (throw (new Error))
- *        (catch (e)
- *          (print "This will get called"))
- *        (finally
- *          (print "This always runs")))
- *   => "hello" ; The error is caught, so there is a return value
+ *     >> (try
+ *            "hello" ; This will get returned because it's the last evaluated expression
+ *            (throw (new Error))
+ *          (catch (e)
+ *            (print "This will get called"))
+ *          (finally
+ *            (print "This always runs")))
+ *     This will get called
+ *     This always runs
+ *     => "hello" ; The error is caught, so there is a return value
  * 
  * @example catch/finally symbols as keywords
- *   >> (try
- *          (throw (new Error))
- *        (:catch) ; This will work
- *        (:finally)) ; And so will this
- *   => nil
+ *     >> (try
+ *            (throw (new Error))
+ *          (:catch) ; This will work
+ *          (:finally)) ; And so will this
+ *     => nil
  */
 defmacro("try", function () {
 	var args = argsToArray(arguments);
@@ -531,8 +533,10 @@ defmacro("progn", function (/* .. */) {
 defmacro("cond", function () {
 	for (var i = 0; i < arguments.length; i++) {
 		var clause = arguments[i];
+		
 		assert(clause.length > 0, "(cond) clauses must contain an " +
-			"expression to evaluate")
+			"expression to evaluate");
+		
 		var condition = clause[0];
 		if (!!resolve(condition)) {
 			var ret;

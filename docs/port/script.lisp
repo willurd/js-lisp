@@ -1,6 +1,6 @@
 (defun toggle-non-planned-items ()
   (let ((items            ($ ".noPlans"))
-		(first            (getkey 0 items))
+		(first            (first items))
 		(tool-non-planned ($ "#tool-non-planned")))
 	(if (== first.style.display "none")
 		(progn

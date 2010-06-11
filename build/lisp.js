@@ -805,7 +805,7 @@ var StreamEOFException = StreamException.extend({
 var StringStream = Class.extend({
 	init: function (data) {
 		assert(typeof(data) === "string", "Invalid object as " +
-			"StringStream input: " + data)
+			"StringStream input: " + data);
 		
 		this.data = data;
 		this.length = data.length;
@@ -860,7 +860,7 @@ var StringStream = Class.extend({
 		this.position -= count;
 		
 		assert(!this.bof(), "Cannot access character at position " +
-			this.position + " of StringStream")
+			this.position + " of StringStream");
 		
 		return this.charAt(this.position);
 	},
@@ -960,7 +960,7 @@ function doSExp (sexp) {
 	var first = sexp[0];
 	var object = resolve(first);
 	
-	assert(isCallable(object), "'" + first.value + "' is not callable")
+	assert(isCallable(object), "'" + first.value + "' is not callable");
 	
 	var thisObject = null;
 	if (first instanceof Symbol) {
@@ -1609,7 +1609,7 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 			"\tNot enough arguments to:\n" +
 			"\t  " + toLisp(arglist) + "\n" +
 			"\tGot:\n" +
-			"\t  " + toLisp(args))
+			"\t  " + toLisp(args));
 	}
 	
 	var env  = new Env(lisp.env);
@@ -1660,7 +1660,7 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
  * 
  * @returns The created function.
  */
-defmacro("lambda", function (arglist /*, ... */) {
+defmacro("lambda", function (arglist /*, &rest */) {
 	// Input validation
 	assert(arguments.length === 0 || arglist instanceof Array, "(lambda) requires " +
 		"a list as its first expression (got " + toLisp(arglist) + ")");
@@ -1671,9 +1671,6 @@ defmacro("lambda", function (arglist /*, ... */) {
 	return (function (env, args) {
 		var body = args.slice(1);
 		return function () {
-			if (args.length < 2) {
-				return null; // This function does nothing
-			}
 			var largs = argsToArray(arguments);
 			var tempEnv = lisp.env;
 			var i;
@@ -1684,8 +1681,8 @@ defmacro("lambda", function (arglist /*, ... */) {
 				if (argname == "&") {
 					assert(i != arglist.length - 1,
 						"No argument name after rest identifier");
-					assert(arglist.length <= i + 2, "Unexpected arguments (" +
-						arglist.slice(i+1).join(" ") + ") after rest argument");
+					assert(!(arglist.length > i + 2), "Unexpected arguments (" +
+						arglist.slice(i+2).join(" ") + ") after rest argument");
 					
 					lisp.env.let(arglist[i+1], largs.slice(i));
 					break;
@@ -1758,47 +1755,52 @@ defmacro("defun", function (name, arglist /*, ... */) {
  *          (i.e. non-catch, non-finally expression).
  * 
  * @example Empty try block
- *   >> (try)
- *   => nil
+ *     >> (try)
+ *     => nil
  * 
  * @example Empty catch block (silences the error)
- *   >> (try
- *          (throw (new Error))
- *        (catch))
- *   => nil
+ *     >> (try
+ *            (throw (new Error))
+ *          (catch))
+ *     => nil
  * 
  * @example Multiple expressions with a full catch block
- *   >> (try
- *          (print "This will print")
- *          (throw (new Error "This cuts the expression short"))
- *          (print "This will not print")
- *        (catch (e)
- *          (format t "This will print when the error is thrown: %s" e)))
- *   => (no return value)
+ *     >> (try
+ *            (print "This will print")
+ *            (throw (new Error "This cuts the expression short"))
+ *            (print "This will not print")
+ *          (catch (e)
+ *            (format t "This will print when the error is thrown: %s" e)))
+ *       This will print
+ *       This will print when the error is thrown: Error: This cuts the expression short
+ *       => nil
  * 
  * @example try/finally
- *   >> (try
- *          (throw (new Error))
- *        (finally
- *          (print "This always runs")))
- *   => (no return value) ; Due to the error that is thrown
+ *     >> (try
+ *            (throw (new Error))
+ *          (finally
+ *            (print "This always runs")))
+ *     This always runs
+ *     Error
  * 
  * @example try/catch/finally
- *   >> (try
- *          "hello" ; This will get returned because it's the last evaluated expression
- *          (throw (new Error))
- *        (catch (e)
- *          (print "This will get called"))
- *        (finally
- *          (print "This always runs")))
- *   => "hello" ; The error is caught, so there is a return value
+ *     >> (try
+ *            "hello" ; This will get returned because it's the last evaluated expression
+ *            (throw (new Error))
+ *          (catch (e)
+ *            (print "This will get called"))
+ *          (finally
+ *            (print "This always runs")))
+ *     This will get called
+ *     This always runs
+ *     => "hello" ; The error is caught, so there is a return value
  * 
  * @example catch/finally symbols as keywords
- *   >> (try
- *          (throw (new Error))
- *        (:catch) ; This will work
- *        (:finally)) ; And so will this
- *   => nil
+ *     >> (try
+ *            (throw (new Error))
+ *          (:catch) ; This will work
+ *          (:finally)) ; And so will this
+ *     => nil
  */
 defmacro("try", function () {
 	var args = argsToArray(arguments);
@@ -2004,8 +2006,10 @@ defmacro("progn", function (/* .. */) {
 defmacro("cond", function () {
 	for (var i = 0; i < arguments.length; i++) {
 		var clause = arguments[i];
+		
 		assert(clause.length > 0, "(cond) clauses must contain an " +
-			"expression to evaluate")
+			"expression to evaluate");
+		
 		var condition = clause[0];
 		if (!!resolve(condition)) {
 			var ret;
@@ -2905,16 +2909,57 @@ defun("jseval", function (/* &rest */) {
 	return eval.apply(null, arguments);
 });
 
-defun("assert", function (assertion, errorString) {
+/**
+ * <pre>
+ * Raises new Error(errorMessage) if assertion evaluates to false.
+ * </pre>
+ * 
+ * @tested
+ * 
+ * @name assert
+ * @lisp
+ * @function
+ * @member lisp.functions
+ * 
+ * @param {mixed} assertion
+ *     The expression to evaluate in a boolean context.
+ * @param {mixed} [errorMessage]
+ *     The option message to be passed to new Error().
+ * 
+ * @example Asserting a true expression
+ *     >> (assert t "Oh no! t is false!")
+ *     => nil
+ * 
+ * @example Asserting a false expression
+ *     >> (assert f "f is definitely false")
+ *     Error: f is definitely false
+ */
+defun("assert", function (assertion, errorMessage) {
 	// Input validation
 	assert(arguments.length > 0, "(assert) requires at least 1 argument");
+	assert(arguments.length <= 2, "Too many arguments given to (assert). " +
+		"Expected no more than 2 (got " + arguments.length + ")");
 	
 	// This is the assert the user is making
-	assert(assertion, errorString || "");
+	assert(assertion, errorMessage);
 	
 	return null;
 });
 
+/**
+ * <pre>
+ * Returns a symbol that is <em>likely</em> to be unique in your environment.
+ * 
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @tested
+ * 
+ * @name gensym
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
 defun("gensym", function () {
 	// Input validation
 	assert(arguments.length === 0, "(gensym) takes no arguments (got " +
@@ -3155,9 +3200,10 @@ defun("object", function (/* &rest */) {
  * <pre>
  * Returns the function that the given expression evaluates to.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name function
  * @lisp
@@ -3185,23 +3231,24 @@ defun("function", function (value) {
  * Returns a value from an object given a key (will work with
  * array indices as well).
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name getkey
  * @lisp
  * @function
  * @member lisp.functions
  * 
- * @returns The value of "object[key]".
+ * @returns The value of object[key].
  * 
- * @param {mixed} key
- *     The key to access on the given object.
  * @param {object} object
  *     The object on which to access the given key.
+ * @param {mixed} key
+ *     The key to access on the given object.
  */
-defun("getkey", function (key, object) {
+defun("getkey", function (object, key) {
 	// Input validation
 	assert(arguments.length === 2, "(getkey) requires 2 arguments (got " +
 		arguments.length + ")");
@@ -3213,9 +3260,10 @@ defun("getkey", function (key, object) {
  * <pre>
  * Sets a value on the given object using the given key.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name setkey
  * @lisp
@@ -3224,14 +3272,14 @@ defun("getkey", function (key, object) {
  * 
  * @returns The given value.
  * 
+ * @param {object} object
+ *     The object on which to set the given value.
  * @param {mixed} key
  *     The key to set on the given object.
- * @param {object} object
- *     The object on which to set the given key.
  * @param {mixed} value
  *     The value to set to the given key on the given object.
  */
-defun("setkey", function (key, object, value) {
+defun("setkey", function (object, key, value) {
 	// Input validation
 	assert(arguments.length === 3, "(setkey) requires 3 arguments (got " +
 		arguments.length + ")");
@@ -3352,9 +3400,9 @@ defun("join", function (sep /*, &rest */) {
 /**
  * <pre>
  * Returns the type of the given value (the result of "typeof(value)").
- * </pre>
  * 
- * <li>TODO: Add examples
+ * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -3453,9 +3501,10 @@ defun("to-boolean", function (value) {
  * <pre>
  * Converts the given value to a json representation of that value.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name to-json
  * @lisp
@@ -3474,6 +3523,8 @@ defun("to-boolean", function (value) {
 defun("to-json", function (value, pretty, levels) {
 	// Input validation
 	assert(arguments.length > 0, "(to-json) requires at least 1 argument");
+	assert(arguments.length <= 3, "Too many arguments given to (to-json). " +
+		"Expected no more than 3 (got " + arguments.length + ")");
 	
 	return toJSON(value, pretty, levels);
 });
@@ -3833,6 +3884,8 @@ defun("format", function (print, format /*, &rest */) {
  * list as arguments.
  * </pre>
  * 
+ * @tested
+ * 
  * @name apply
  * @lisp
  * @function
@@ -3872,9 +3925,10 @@ defun("apply", function (func, list) {
  * Run each of the items in the given list through the given
  * function and returns a new list with the given return values.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name map
  * @lisp
@@ -3911,9 +3965,10 @@ defun("map", function (func, list) {
  * Returns an object containing the values of each property
  * in the given list on the given object.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name props
  * @lisp
@@ -4005,7 +4060,7 @@ defun("items", function (object) {
  * TODO: Add examples
  * </pre>
  * 
- * @name first
+ * @name nth
  * @lisp
  * @function
  * @member lisp.functions

@@ -482,119 +482,125 @@
 							</div>
 							
 							<for each="member" in="ownMethods">
-								<a name="{+getSlug(member)+}"></a>
-								
-								<div class="fixedFont heading">
-									<if test="!isLisp(member)">
-										<span class='lighter'>
-										{!
-											if (member.isPrivate) output += "&lt;private&gt; ";
-											if (member.isInner) output += "&lt;inner&gt; ";
-											if (member.isStatic) output += "&lt;static&gt; ";
-										!}
-										</span>
-										
-										<if test="member.type"><span class="light">{{+new Link().toSymbol(member.type)+}}</span></if>
-									</if>
+								<div class="methodDetail {+isTested(member) ? 'tested' : 'untested'+}">
+									<a name="{+getSlug(member)+}"></a>
 									
-									{+getPrettyName(member)+}
-								</div>
-								
-								<div class="description">
-									{+resolveLinks(member.desc)+}
-									
-									<if test="member.srcFile != data.srcFile">
-										<br />
-										<i>Defined in: </i> {+new Link().toSrc(member.srcFile)+}.
-									</if>
-									
-									<if test="member.author"><br /><i>Author: </i>{+member.author+}.</if>
-								</div>
-								
-								<if test="member.params.length">
-									<dl class="detailList params">
-										<dt class="heading">Parameters:</dt>
-										{! inOptional = false; !}
-										{! inRest = false; !}
-										<for each="item" in="member.params">
+									<div class="fixedFont heading">
+										<if test="!isLisp(member)">
+											<span class='lighter'>
 											{!
-												if (!inOptional && isOptional(member, item.name)) {
-													inOptional = true;
-													output += '<span class="keywordOptional">&amp;optional</span>';
-												} else if (!inRest && isRest(member, item.name)) {
-													inRest = true;
-													output += '<span class="keywordRest">&amp;rest</span>';
-												}
+												if (member.isPrivate) output += "&lt;private&gt; ";
+												if (member.isInner) output += "&lt;inner&gt; ";
+												if (member.isStatic) output += "&lt;static&gt; ";
 											!}
-											<dt>
-												{+((item.type)?"<span class=\"light fixedFont\">{"+(new Link().toSymbol(item.type))+"}</span> " : "")+}<b>{+item.name+}</b>
-												<if test="!isLisp(member) && item.isOptional"><i>Optional<if test="item.defaultValue">, Default: {+item.defaultValue+}</if></i></if>
-												<if test="isLisp(member) && item.isOptional && item.defaultValue"><span class="defaultValue">, Default: {+item.defaultValue+}</span></if>
-											</dt>
-											<dd>{+resolveLinks(item.desc)+}</dd>
-										</for>
-									</dl>
-								</if>
-								
-								<if test="member.deprecated || member.since || member.exceptions.length || member.returns.length || member.requires.length || member.see.length">
-									<dl class="detailList nomargin">
+											</span>
+										
+											<if test="member.type"><span class="light">{{+new Link().toSymbol(member.type)+}}</span></if>
+										</if>
 									
-										<if test="member.deprecated">
-											<dt class="heading">Deprecated:</dt>
-											<dt>
-												{+ resolveLinks(member.deprecated) +}
-											</dt>
+										{+getPrettyName(member)+}
+									</div>
+									
+									<if test="!isTested(member)">
+										<div class="isTestedLabel">untested</div>
+									</if>
+									
+									<div class="description">
+										{+resolveLinks(member.desc)+}
+									
+										<if test="member.srcFile != data.srcFile">
+											<br />
+											<i>Defined in: </i> {+new Link().toSrc(member.srcFile)+}.
 										</if>
-										
-										<if test="member.since">
-											<dt class="heading">Since:</dt>
-											<dd>{+ member.since +}</dd>
-										</if>
-										
-										<if test="member.exceptions.length">
-											<dt class="heading">Throws:</dt>
-											<for each="item" in="member.exceptions">
+									
+										<if test="member.author"><br /><i>Author: </i>{+member.author+}.</if>
+									</div>
+								
+									<if test="member.params.length">
+										<dl class="detailList params">
+											<dt class="heading">Parameters:</dt>
+											{! inOptional = false; !}
+											{! inRest = false; !}
+											<for each="item" in="member.params">
+												{!
+													if (!inOptional && isOptional(member, item.name)) {
+														inOptional = true;
+														output += '<span class="keywordOptional">&amp;optional</span>';
+													} else if (!inRest && isRest(member, item.name)) {
+														inRest = true;
+														output += '<span class="keywordRest">&amp;rest</span>';
+													}
+												!}
 												<dt>
-													{+((item.type)?"<span class=\"light fixedFont\">{"+(new Link().toSymbol(item.type))+"}</span> " : "")+} <b>{+item.name+}</b>
+													{+((item.type)?"<span class=\"light fixedFont\">{"+(new Link().toSymbol(item.type))+"}</span> " : "")+}<b>{+item.name+}</b>
+													<if test="!isLisp(member) && item.isOptional"><i>Optional<if test="item.defaultValue">, Default: {+item.defaultValue+}</if></i></if>
+													<if test="isLisp(member) && item.isOptional && item.defaultValue"><span class="defaultValue">, Default: {+item.defaultValue+}</span></if>
 												</dt>
 												<dd>{+resolveLinks(item.desc)+}</dd>
 											</for>
-										</if>
-										
-										<if test="member.returns.length">
-											<dt class="heading">Returns:</dt>
-											<for each="item" in="member.returns">
-												<dd>{+((item.type)?"<span class=\"light fixedFont\">{"+(new Link().toSymbol(item.type))+"}</span> " : "")+}{+resolveLinks(item.desc)+}</dd>
-											</for>
-										</if>
-										
-										<if test="member.requires.length">
-											<dt class="heading">Requires:</dt>
-											<for each="item" in="member.requires">
-												<dd>{+ resolveLinks(item) +}</dd>
-											</for>
-										</if>
-										
-										<if test="member.see.length">
-											<dt class="heading">See:</dt>
-											<for each="item" in="member.see">
-												<dd>{+ new Link().toSymbol(item) +}</dd>
-											</for>
-										</if>
+										</dl>
+									</if>
+								
+									<if test="member.deprecated || member.since || member.exceptions.length || member.returns.length || member.requires.length || member.see.length">
+										<dl class="detailList nomargin">
 									
-									</dl>
-								</if>
+											<if test="member.deprecated">
+												<dt class="heading">Deprecated:</dt>
+												<dt>
+													{+ resolveLinks(member.deprecated) +}
+												</dt>
+											</if>
+										
+											<if test="member.since">
+												<dt class="heading">Since:</dt>
+												<dd>{+ member.since +}</dd>
+											</if>
+										
+											<if test="member.exceptions.length">
+												<dt class="heading">Throws:</dt>
+												<for each="item" in="member.exceptions">
+													<dt>
+														{+((item.type)?"<span class=\"light fixedFont\">{"+(new Link().toSymbol(item.type))+"}</span> " : "")+} <b>{+item.name+}</b>
+													</dt>
+													<dd>{+resolveLinks(item.desc)+}</dd>
+												</for>
+											</if>
+										
+											<if test="member.returns.length">
+												<dt class="heading">Returns:</dt>
+												<for each="item" in="member.returns">
+													<dd>{+((item.type)?"<span class=\"light fixedFont\">{"+(new Link().toSymbol(item.type))+"}</span> " : "")+}{+resolveLinks(item.desc)+}</dd>
+												</for>
+											</if>
+										
+											<if test="member.requires.length">
+												<dt class="heading">Requires:</dt>
+												<for each="item" in="member.requires">
+													<dd>{+ resolveLinks(item) +}</dd>
+												</for>
+											</if>
+										
+											<if test="member.see.length">
+												<dt class="heading">See:</dt>
+												<for each="item" in="member.see">
+													<dd>{+ new Link().toSymbol(item) +}</dd>
+												</for>
+											</if>
+									
+										</dl>
+									</if>
 								
-								<if test="member.example.length">
-									<for each="example" in="member.example">
-										<pre class="code">{+example+}</pre>
-									</for>
-								</if>
+									<if test="member.example.length">
+										<for each="example" in="member.example">
+											<pre class="code">{+example+}</pre>
+										</for>
+									</if>
 								
-								<if test="!$member_last">
-									<div class="memberDivider"></div>
-									<div class="hr"></div>
-								</if>
+									<if test="!$member_last">
+										<div class="memberDivider"></div>
+										<div class="hr"></div>
+									</if>
+								</div>
 							</for>
 						</div>
 					</div>

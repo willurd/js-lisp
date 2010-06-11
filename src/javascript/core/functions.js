@@ -41,16 +41,57 @@ defun("jseval", function (/* &rest */) {
 	return eval.apply(null, arguments);
 });
 
-defun("assert", function (assertion, errorString) {
+/**
+ * <pre>
+ * Raises new Error(errorMessage) if assertion evaluates to false.
+ * </pre>
+ * 
+ * @tested
+ * 
+ * @name assert
+ * @lisp
+ * @function
+ * @member lisp.functions
+ * 
+ * @param {mixed} assertion
+ *     The expression to evaluate in a boolean context.
+ * @param {mixed} [errorMessage]
+ *     The option message to be passed to new Error().
+ * 
+ * @example Asserting a true expression
+ *     >> (assert t "Oh no! t is false!")
+ *     => nil
+ * 
+ * @example Asserting a false expression
+ *     >> (assert f "f is definitely false")
+ *     Error: f is definitely false
+ */
+defun("assert", function (assertion, errorMessage) {
 	// Input validation
 	assert(arguments.length > 0, "(assert) requires at least 1 argument");
+	assert(arguments.length <= 2, "Too many arguments given to (assert). " +
+		"Expected no more than 2 (got " + arguments.length + ")");
 	
 	// This is the assert the user is making
-	assert(assertion, errorString || "");
+	assert(assertion, errorMessage);
 	
 	return null;
 });
 
+/**
+ * <pre>
+ * Returns a symbol that is <em>likely</em> to be unique in your environment.
+ * 
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @tested
+ * 
+ * @name gensym
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
 defun("gensym", function () {
 	// Input validation
 	assert(arguments.length === 0, "(gensym) takes no arguments (got " +
@@ -291,9 +332,10 @@ defun("object", function (/* &rest */) {
  * <pre>
  * Returns the function that the given expression evaluates to.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name function
  * @lisp
@@ -321,23 +363,24 @@ defun("function", function (value) {
  * Returns a value from an object given a key (will work with
  * array indices as well).
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name getkey
  * @lisp
  * @function
  * @member lisp.functions
  * 
- * @returns The value of "object[key]".
+ * @returns The value of object[key].
  * 
- * @param {mixed} key
- *     The key to access on the given object.
  * @param {object} object
  *     The object on which to access the given key.
+ * @param {mixed} key
+ *     The key to access on the given object.
  */
-defun("getkey", function (key, object) {
+defun("getkey", function (object, key) {
 	// Input validation
 	assert(arguments.length === 2, "(getkey) requires 2 arguments (got " +
 		arguments.length + ")");
@@ -349,9 +392,10 @@ defun("getkey", function (key, object) {
  * <pre>
  * Sets a value on the given object using the given key.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name setkey
  * @lisp
@@ -360,14 +404,14 @@ defun("getkey", function (key, object) {
  * 
  * @returns The given value.
  * 
+ * @param {object} object
+ *     The object on which to set the given value.
  * @param {mixed} key
  *     The key to set on the given object.
- * @param {object} object
- *     The object on which to set the given key.
  * @param {mixed} value
  *     The value to set to the given key on the given object.
  */
-defun("setkey", function (key, object, value) {
+defun("setkey", function (object, key, value) {
 	// Input validation
 	assert(arguments.length === 3, "(setkey) requires 3 arguments (got " +
 		arguments.length + ")");
@@ -488,9 +532,9 @@ defun("join", function (sep /*, &rest */) {
 /**
  * <pre>
  * Returns the type of the given value (the result of "typeof(value)").
- * </pre>
  * 
- * <li>TODO: Add examples
+ * TODO: Add examples
+ * </pre>
  * 
  * @tested
  * 
@@ -589,9 +633,10 @@ defun("to-boolean", function (value) {
  * <pre>
  * Converts the given value to a json representation of that value.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name to-json
  * @lisp
@@ -610,6 +655,8 @@ defun("to-boolean", function (value) {
 defun("to-json", function (value, pretty, levels) {
 	// Input validation
 	assert(arguments.length > 0, "(to-json) requires at least 1 argument");
+	assert(arguments.length <= 3, "Too many arguments given to (to-json). " +
+		"Expected no more than 3 (got " + arguments.length + ")");
 	
 	return toJSON(value, pretty, levels);
 });
@@ -969,6 +1016,8 @@ defun("format", function (print, format /*, &rest */) {
  * list as arguments.
  * </pre>
  * 
+ * @tested
+ * 
  * @name apply
  * @lisp
  * @function
@@ -1008,9 +1057,10 @@ defun("apply", function (func, list) {
  * Run each of the items in the given list through the given
  * function and returns a new list with the given return values.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name map
  * @lisp
@@ -1047,9 +1097,10 @@ defun("map", function (func, list) {
  * Returns an object containing the values of each property
  * in the given list on the given object.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name props
  * @lisp
@@ -1141,7 +1192,7 @@ defun("items", function (object) {
  * TODO: Add examples
  * </pre>
  * 
- * @name first
+ * @name nth
  * @lisp
  * @function
  * @member lisp.functions

@@ -5,11 +5,6 @@
  * - JsDoc styling
  */
 
-
-
-
-
-
 /*
  * BEGIN BROWSER RESET
  */
@@ -445,3 +440,18 @@ pre.code {
 /*
  * END JSDOC
  */
+
+.methodDetail.tested {
+	}
+
+.methodDetail.untested .isTestedLabel {
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	background: #FFE6EC;
+	color: #800;
+	color: #FF7C98;
+	font: bold 12pt "Myriad Pro", helvetica, verdana, arial, sans-serif;
+	margin: 10px 0px;
+	padding: 3px 10px;
+	text-align: center;
+	}

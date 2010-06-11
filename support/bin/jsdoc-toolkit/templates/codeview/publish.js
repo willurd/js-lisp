@@ -226,11 +226,11 @@ function getName (member) {
 		sig = sig.replace(new RegExp(last + "$"), '');
 		
 		if (optional.length > 0) {
-			sig += ' &amp;optional ' + optional.join(' ');
+			sig += ' &amp;opt ' + optional.join(' ');
 		}
 		
 		if (rest) {
-			sig += ' &amp;rest ' + rest;
+			sig += ' &amp; ' + rest;
 		}
 		
 		return '(' + name + sig + ')';
@@ -248,16 +248,20 @@ function getSlug (member) {
 function getPrettyName (member) {
 	var name = getName(member);
 	if (isLisp(member)) {
-		name = name.replace(/^\((\S+)/, '(<span class="memberName">$1</span>');
-		name = name.replace(/(\&amp\;optional|\&amp\;rest)/g, "<i>$1</i>");
+		name = name.replace(/^\(([^\s\(\)]+)/, '(<span class="memberName">$1</span>');
+		name = name.replace(/(\&amp\;opt|\&amp\;)/g, "<i>$1</i>");
 	} else {
-		name = name.replace(/^(\S+)\(/, '<span class="memberName">$1</span>(');
+		name = name.replace(/^(\S+)\s*\(/, '<span class="memberName">$1</span>(');
 	}
 	return name;
 }
 
 function isLisp (member) {
 	return member.comment.getTag("lisp").length > 0;
+}
+
+function isTested (member) {
+	return member.comment.getTag("tested").length > 0;
 }
 
 function isOptional (member, name) {
