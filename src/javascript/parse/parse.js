@@ -247,7 +247,14 @@ parse.string = function (stream) {
 parse.stringEscape = function (stream) {
 	stream = validateInput(stream);
 	var c = stream.next();
-	return eval('"' + '\\' + c + '"');
+	switch (c)
+	{
+	case "x":
+		var byte = stream.next() + stream.next();
+		return eval('"' + '\\' + c + byte + '"');
+	default:
+		return eval('"' + '\\' + c + '"');
+	}
 };
 
 /**

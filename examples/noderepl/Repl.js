@@ -26,14 +26,14 @@ exports.Repl = lisp.Class.extend({
 			}
 			for (var i in expressions) {
 				expression = expressions[i];
-				str = lisp.env.get("repl-represent")(expression);
+				str = lisp.env.get("lisp-string")(expression);
 				if (expressions.length > 1) {
 					this.newCommand();
 					sys.puts(str);
 				}
 				try {
 					ret = lisp.eval(str);
-					ret = lisp.env.get("repl-represent")(ret); // repl-represent is defined in utils.lisp
+					ret = lisp.env.get("lisp-string")(ret); // repl-represent is defined in utils.lisp
 					sys.puts(this.ps3 + ret);
 				} catch (e) {
 					if (e instanceof lisp.exception.StreamEOFException) {

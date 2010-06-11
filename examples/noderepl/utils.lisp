@@ -1,10 +1,6 @@
-(defun repl-represent (value)
-	"Returns a lispy string representation of the given value"
-	(cond ((is-null value) "nil")
-		  ((is-true value) "t")
-		  ((is-false value) "f")
-		  ((instanceof value lisp.Symbol) (to-string value))
-		  ((instanceof value lisp.Keyword) (concat ":" (to-string value)))
-		  ((instanceof value Array)
-			(concat "(" (join " " (map repl-represent value)) ")"))
-		  (t (to-json value t))))
+(defun clear ()
+	"Clears the screen and returns the cursor to the home position."
+	;; Clear the entire screen
+	(process.stdout.write "\x1b[2J")
+	;; Move the cursor the the top-left of the screen
+	(process.stdout.write "\x1b[H"))
