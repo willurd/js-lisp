@@ -1672,31 +1672,41 @@ defmacro("lambda", function (arglist /*, &rest */) {
 	assert(arguments.length === 0 || arglist instanceof Array, "(lambda) requires " +
 		"a list as its first expression (got " + toLisp(arglist) + ")");
 	
+	arglist = arglist || [];
+	
 	var env  = new Env(lisp.env);
 	var args = argsToArray(arguments);
+	
+	for (i = 0; i < arglist.length; i++) {
+		if (arglist[i] == "&") {
+			assert(i != arglist.length - 1,
+				"No argument name after rest identifier");
+			assert(!(arglist.length > i + 2), "Unexpected arguments (" +
+				arglist.slice(i+2).join(" ") + ") after rest argument");
+			break;
+		}
+	}
 	
 	return (function (env, args) {
 		var body = args.slice(1);
 		return function () {
 			var largs = argsToArray(arguments);
 			var tempEnv = lisp.env;
-			var i;
 			lisp.env = new Env(env);
 			lisp.env.let("this", this);
+			
+			var i;
 			for (i = 0; i < arglist.length; i++) {
 				var argname = arglist[i];
 				if (argname == "&") {
-					assert(i != arglist.length - 1,
-						"No argument name after rest identifier");
-					assert(!(arglist.length > i + 2), "Unexpected arguments (" +
-						arglist.slice(i+2).join(" ") + ") after rest argument");
-					
 					lisp.env.let(arglist[i+1], largs.slice(i));
+					i = largs.length;
 					break;
 				} else {
 					lisp.env.let(argname, largs[i]);
 				}
 			}
+			
 			var ret = null;
 			for (i = 0; i < body.length; i++) {
 				ret = resolve(body[i]);

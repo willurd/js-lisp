@@ -67,7 +67,7 @@ end
 
 task :test => [:build] do
   sh "
-    open http://localhost:8000/tests/tests.html
+    open http://localhost:8000/tests/
   "
   Rake::Task["webserver"].invoke
 end
