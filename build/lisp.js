@@ -1493,9 +1493,10 @@ var macros = {}; // This is just for documentation. It doesn't get used.
  * Takes a single lisp expression (s-expression) and returns it
  * unevaluated.
  * 
- * TODO: Test me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name quote
  * @lisp
@@ -1554,7 +1555,7 @@ defmacro("explode", function (expression) {
 
 /**
  * <pre>
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Document me
  * TODO: Add examples
  * 
@@ -1564,6 +1565,8 @@ defmacro("explode", function (expression) {
  *        I'm happy there is at least a preliminary working version.
  * </pre>
  * 
+ * @tested
+ * 
  * @name defmacro
  * @lisp
  * @function
@@ -1571,12 +1574,13 @@ defmacro("explode", function (expression) {
  */
 defmacro("defmacro", function (name, arglist /*, &rest */) {
 	// Input validation
-	assert(arguments.length >= 2, "(defmacro) requires at least 2 arguments (got " +
-		arguments.length + ")");
+	assert(arguments.length >= 1, "(defmacro) requires at least 1 argument");
 	assert(name instanceof Symbol, "(defmacro) requires a symbol as its first " +
 		"argument (got " + toLisp(name) + ")");
-	assert(arglist instanceof Array, "(defmacro) requires an Array as its second " +
-		"argument (got " + toLisp(arglist) + ")");
+	assert(arguments.length <= 1 || arglist instanceof Array, "(defmacro) " +
+		"requires an Array as its second argument (got " + toLisp(arglist) + ")");
+	
+	arglist = arglist || [];
 	
 	function setargs (arglist, args, top) {
 		if (top === undefined) {
@@ -1658,9 +1662,10 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
  * expression as its arglist and which executes the rest of the
  * expressions when called.
  * 
- * TODO: Test me more
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name lambda
  * @lisp
@@ -1933,11 +1938,13 @@ defmacro("funcall", function (object, dotpath) {
 
 /**
  * <pre>
- * FIXME: This method sucks (actually, env.let sucks)
- * TODO: Test me more
  * TODO: Document me
  * TODO: Add examples
+ * 
+ * FIXME: This method sucks (actually, env.let sucks)
  * </pre>
+ * 
+ * @tested
  * 
  * @name let
  * @lisp
@@ -1971,6 +1978,8 @@ defmacro("let", function () {
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name setq
  * @lisp
@@ -2116,6 +2125,8 @@ defmacro("when", function () {
 	return null;
 });
 
+// TODO: Create (unless) macro
+
 /**
  * <pre>
  * Performs a logical negation on the given value.
@@ -2141,10 +2152,11 @@ defmacro("not", function (value) {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name or
  * @lisp
@@ -2162,10 +2174,11 @@ defmacro("or", function () {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name and
  * @lisp
@@ -2227,10 +2240,11 @@ defmacro("not-equal", function () {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name ==
  * @lisp
@@ -2249,10 +2263,11 @@ defmacro("==", function () {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name ===
  * @lisp
@@ -2271,10 +2286,11 @@ defmacro("===", function () {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name !=
  * @lisp
@@ -2293,10 +2309,11 @@ defmacro("!=", function () {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name !==
  * @lisp
@@ -2315,9 +2332,10 @@ defmacro("!==", function () {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * </pre>
+ * 
+ * @tested
  * 
  * @name <
  * @lisp
@@ -2330,7 +2348,7 @@ defmacro("!==", function () {
  * 
  * @example Comparing many arguments
  *     >> (< 3 4 5 1)
- *     => false
+ *     => f
  */
 defmacro("<", function () {
 	// Input validation
@@ -2344,9 +2362,10 @@ defmacro("<", function () {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * </pre>
+ * 
+ * @tested
  * 
  * @name >
  * @lisp
@@ -2359,7 +2378,7 @@ defmacro("<", function () {
  * 
  * @example Comparing many arguments
  *     >> (> 4 3 2 8)
- *     => false
+ *     => f
  */
 defmacro(">", function () {
 	// Input validation
@@ -2373,9 +2392,10 @@ defmacro(">", function () {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * </pre>
+ * 
+ * @tested
  * 
  * @name <=
  * @lisp
@@ -2388,7 +2408,7 @@ defmacro(">", function () {
  * 
  * @example Comparing many arguments
  *     >> (<= 3 4 4 3)
- *     => false
+ *     => f
  */
 defmacro("<=", function () {
 	// Input validation
@@ -2402,9 +2422,10 @@ defmacro("<=", function () {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * </pre>
+ * 
+ * @tested
  * 
  * @name >=
  * @lisp
@@ -2417,7 +2438,7 @@ defmacro("<=", function () {
  * 
  * @example Comparing many arguments
  *     >> (>= 4 3 3 4)
- *     => false
+ *     => f
  */
 defmacro(">=", function () {
 	// Input validation
@@ -2433,9 +2454,11 @@ defmacro(">=", function () {
  * <pre>
  * Returns true if the given values === true.
  * 
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name is-true
  * @lisp
@@ -2455,9 +2478,11 @@ defmacro("is-true", function () {
  * <pre>
  * Returns true if the given values === false.
  * 
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name is-false
  * @lisp
@@ -2477,9 +2502,11 @@ defmacro("is-false", function () {
  * <pre>
  * Returns true if the given values === null.
  * 
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name is-null
  * @lisp
@@ -2497,9 +2524,11 @@ defmacro("is-null", function () {
 
 /**
  * <pre>
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name is-undefined
  * @lisp
@@ -2519,9 +2548,11 @@ defmacro("is-undefined", function () {
  * <pre>
  * Returns true if the given values are strings.
  * 
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name is-string
  * @lisp
@@ -2541,9 +2572,11 @@ defmacro("is-string", function () {
  * <pre>
  * Returns true if the given values are numbers.
  * 
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name is-number
  * @lisp
@@ -2563,9 +2596,11 @@ defmacro("is-number", function () {
  * <pre>
  * Returns true if the given values are booleans.
  * 
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name is-boolean
  * @lisp
@@ -2585,9 +2620,11 @@ defmacro("is-boolean", function () {
  * <pre>
  * Returns true if the given values are functions.
  * 
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name is-function
  * @lisp
@@ -2607,9 +2644,11 @@ defmacro("is-function", function () {
  * <pre>
  * Returns true if the given values are objects.
  * 
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name is-object
  * @lisp
@@ -2743,6 +2782,8 @@ defmacro("is-macro", function () {
  * 
  * TODO: Test me more
  * TODO: Add examples
+ * 
+ * FIXME: Define this using (defmacro) in macros.lisp
  * </pre>
  * 
  * @name dolist
@@ -2860,7 +2901,7 @@ defmacro("foreach", function (arglist /*, &rest */) {
  */
 defmacro("char", function (symbol) {
 	// Input validation
-	assert(arguments.length !== 1, "(char) requires 1 argument (got " +
+	assert(arguments.length === 1, "(char) requires 1 argument (got " +
 		arguments.length + ")");
 	assert(symbol instanceof Symbol, "(char) requires a symbol as its " +
 		"argument (got " + toLisp(symbol) + ")");
@@ -2870,10 +2911,12 @@ defmacro("char", function (symbol) {
 
 /**
  * <pre>
- * TODO: Test me
+ * TODO: Test me more
  * TODO: Document me
  * TODO: Add more examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name collect
  * @lisp
@@ -2900,7 +2943,7 @@ var functions = {}; // This is just for documentation. It doesn't get used.
 
 /**
  * <pre>
- * Applies the given arguments to the JavaScript eval function.
+ * Evaluates the given expression in JavaScript.
  * </pre>
  * 
  * @tested
@@ -2910,9 +2953,8 @@ var functions = {}; // This is just for documentation. It doesn't get used.
  * @function
  * @member lisp.functions
  * 
- * @param {[mixed]} rest
- *     The arguments to be applied to the JavaScript eval function.
- * @rest rest
+ * @param {mixed} expression
+ *     The expression to be evaluated by JavaScript.
  * 
  * @example eval some JSON
  *     >> (setq some-json "{'key1': 1, 'key2': 2}")
@@ -2929,8 +2971,8 @@ var functions = {}; // This is just for documentation. It doesn't get used.
  *     >> (my-1+ 2)
  *     => 3
  */
-defun("jseval", function (/* &rest */) {
-	return eval.apply(null, arguments);
+defun("jseval", function (expression) {
+	return eval(expression);
 });
 
 /**

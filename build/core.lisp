@@ -12,20 +12,20 @@
 ;        ((>= ,var ,count))
 ;     ,@body))
 
-(defmacro collect ((itemName lst) & body)
+(defmacro collect ((item-name lst) & body)
   "Iterates over each (key,value) pair in `lst' (denoted by
 `itemName'), evaluating each expression in `body' for every
 iteration, and collecting the items, whose last `body' expression
 evaluates to true, into a final list that is returned."
   ;; Input validation
   (let ((basemsg "(collect) expects arguments in the form: ((itemName lst) &body)."))
-	(assert (is-symbol itemName) (format nil "%s Got bad symbol argument: %s" basemsg lst))
-	(assert (is-list lst) (format nil "%s Got bad list argument: %s" basemsg lst)))
+    (assert (is-symbol item-name)
+            (format nil "%s Got bad symbol argument: %s" basemsg item-name)))
   `(let ((set (list)))
-    (foreach (,itemName ,lst)
+    (foreach (,item-name ,lst)
       (when (progn ,@body)
-        (push set ,itemName)))
-	set))
+        (push set ,item-name)))
+  set))
 
 (defun sort (lst)
 	(sort! (lst.concat)))

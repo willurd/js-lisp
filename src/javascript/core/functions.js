@@ -8,7 +8,7 @@ var functions = {}; // This is just for documentation. It doesn't get used.
 
 /**
  * <pre>
- * Applies the given arguments to the JavaScript eval function.
+ * Evaluates the given expression in JavaScript.
  * </pre>
  * 
  * @tested
@@ -18,9 +18,8 @@ var functions = {}; // This is just for documentation. It doesn't get used.
  * @function
  * @member lisp.functions
  * 
- * @param {[mixed]} rest
- *     The arguments to be applied to the JavaScript eval function.
- * @rest rest
+ * @param {mixed} expression
+ *     The expression to be evaluated by JavaScript.
  * 
  * @example eval some JSON
  *     >> (setq some-json "{'key1': 1, 'key2': 2}")
@@ -37,8 +36,8 @@ var functions = {}; // This is just for documentation. It doesn't get used.
  *     >> (my-1+ 2)
  *     => 3
  */
-defun("jseval", function (/* &rest */) {
-	return eval.apply(null, arguments);
+defun("jseval", function (expression) {
+	return eval(expression);
 });
 
 /**

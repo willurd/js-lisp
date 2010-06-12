@@ -69,6 +69,7 @@ string" "a\nstring"))
 		(this.assertEqual (quote (quote hello!)) ''hello! nil #'equal))))
 
 ;; TODO: Test (resolve)
+;; TODO: Test (explode)
 
 (JSTest.TestCase (object
 	:name "macro (defmacro)"
@@ -97,7 +98,9 @@ string" "a\nstring"))
 			(this.assertEqual (nth values 4) '(7 8))
 			(this.assertEqual (nth values 5) 9)
 			(this.assertEqual (nth values 6) 10)
-			(this.assertEqual (nth values 7) '(11))))))
+			(this.assertEqual (nth values 7) '(11))))
+	:testReturnValue (lambda ()
+		(this.assertInstanceOf (defmacro test) lisp.Macro))))
 
 (JSTest.TestCase (object
 	:name "macro (lambda)"
@@ -236,7 +239,6 @@ string" "a\nstring"))
 		  (this.assertEqual x 10)
 		  (this.assertEqual y 20)))))
 
-;; TODO: Test (function)
 ;; TODO: Test (funcall)
 
 (JSTest.TestCase (object
@@ -309,6 +311,8 @@ string" "a\nstring"))
 		  (this.assertEqual x 10)
 		  (this.assertEqual y 0)))))
 
+;; TODO: Test (cond)
+
 (JSTest.TestCase (object
     :name "macro (if)"
 	:testNoArguments (lambda ()
@@ -344,6 +348,9 @@ string" "a\nstring"))
 			(setq y 20))
 		  (this.assertEqual x 10)
 		  (this.assertEqual y 20)))
+	:testOnlyTruthExpression (lambda ()
+		(this.assertEqual (if t "one") "one")
+		(this.assertEqual (if nil "one") nil))
 	:testReturnValues (lambda ()
         (this.assertEqual (if t "one" "two") "one")
 		(this.assertEqual (if nil "one" "two") "two"))))
@@ -426,6 +433,9 @@ string" "a\nstring"))
         (let ((x 5))
             (and t :keyword nil (setq x 10)) ;; The nil makes it cut short
             (this.assertEqual x 5)))))
+
+;; TODO: Test (equal)
+;; TODO: Test (not-equal)
 
 (JSTest.TestCase (object
 	:name "macro (==)"
@@ -901,7 +911,6 @@ string" "a\nstring")))
 	:testMacros (lambda ()
 		(this.assertEqual #'cond cond.callable)
 		(this.assertNotEqual #'cond cond))))
-
 
 (JSTest.TestCase (object
 	:name "function (getkey)"

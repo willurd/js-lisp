@@ -1,7 +1,14 @@
 # TODO
 
 * Finish testing (and preferably documenting) the functionality that already exists.
-* Add number of assertions, failed and passed, to JSTest
+* Update lisp.load for node (using fs.readFileSync)
+* Rewrite the node Repl class in lisp
+* Create ! as a shortcut for (not ...)
+* Create !! as a shortcut for (not (not ...))
+* Create +=, -=, /=, *=, %=, ||=, &&= (and-equal?)
+* Create <<, >>, &, | (bitwise operations)
+* Create <<=, >>=, &=, |=
+* Create all of the rest of the functions/macros that have TODOs in the project ((case) or (switch), etc)
 * Think of ways to break the current (defmacro) implementation because I don't trust it.
 * Start thinking of all of the \*features* that can be set. For example:
   * What OS you're on: (:os-windows, :linux, :macos, etc)
@@ -11,13 +18,18 @@
   * What version your browser is: (:browser-version-1.2, etc)
   * Supported features: (:web-sockets, :css3, :web-workers, etc)
   * Whether you're in the browser or a console: (:browser, :console)
-  * What console you're in: (:node, :rhino, etc)
+  * What JavaScript runtime you're in: (:runtime-node, :runtime-rhino, etc)
+* Add a couple functions and macros to make working with features nicer
+  * Function: (feature :feature), (feature '(:list :of :features))
+    * (defun feature (feature-or-list)
+        (!! (find-any (ensure-list feature-or-list) \*features*)))
+  * Function: (when (feature :feature-name) ...), (when (feature '(:feature :list)) ...)
+  * Macro: (when-feature :feature-name ...) -> `(when (feature ,feature-name) ,@body)
 * Put an online book or tutorial/example set into the roadmap (in the distant future). Also, make a roadmap.
 * Put a website into the roadmap (for the not-so-distant future).
-* Create SpecialForm and convert all relevant "macros" to special forms. Update Macro to return expanded code on .expand(), and resolved code on .call() and .apply().
 * Fix backticks, unquotes (commas), and list expanders (@).
+* Create SpecialForm and convert all relevant "macros" to special forms. Update Macro to return expanded code on .expand(), and resolved code on .call() and .apply().
 * Do &opt (&optional) and &key stuff.
-* #1 Organize This File
 * Make the browser REPL evaluate expressions each on their own line if it receives more than one
 * Add a transcript to the REPL (just use controller.history)
 * Ideas
@@ -27,11 +39,7 @@
 	* Start putting together a library of lisp methods and macros
 	* Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
 * Testing
-    * Write tests for any lisp functions that have not been tested yet
-	* Write tests for each function/macro for invalid input
 	* Test return values of sexps (including null when there is no return)
-* Tools
-    * Make a repl (using jquery-console perhaps)
 * Write better/more documentation for current functions/macros
 * Write macro: (unless) (opposite of (when))
 * Write macros: (incf), (decf)

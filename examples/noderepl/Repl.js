@@ -6,7 +6,7 @@ exports.Repl = lisp.Class.extend({
 		props = props || {};
 		this.ps1 = props.ps1 || ">> ";
 		this.ps2 = props.ps2 || ".. ";
-		this.ps3 = props.ps3 || "\n";
+		this.ps3 = props.ps3 || "=> ";
 		this.multilineCommand = false;
 		this.data = '';
 	},

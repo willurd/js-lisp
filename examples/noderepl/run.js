@@ -18,6 +18,7 @@ repl.newCommand();
 // Setup the lisp environment
 lisp.env.set("lisp", lisp);
 lisp.env.set("this", repl);
+lisp.eval(fs.readFileSync(path.join(__dirname, "../../build/core.lisp")));
 lisp.eval(fs.readFileSync(path.join(__dirname, "utils.lisp")));
 
 // Setup the stdin listeners
