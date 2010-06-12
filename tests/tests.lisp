@@ -1083,7 +1083,32 @@ string" "a\nstring")))
 	:testDates (lambda ()
 		(this.assertEqual (to-json (new Date 1276242254313)) "\"2010-06-11 07:44:14\""))))
 
-;; TODO: Test (lisp-string)
+(JSTest.TestCase (object
+	:name "function (lisp-string)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error #'lisp-string nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error #'lisp-string nil "hello"))
+	:testManyArguments (lambda ()
+		(this.assertRaises Error #'lisp-string nil "arg 1" "arg 2"))
+	:testNumbers (lambda ()
+		(this.assertEqual (lisp-string 10) "10")
+		(this.assertEqual (lisp-string 1e-4) "1e-4")
+		(this.assertEqual (lisp-string (/ 5 2)) "2.5"))
+	:testStrings (lambda ()
+		(this.assertEqual (lisp-string "a string") "\"a string\""))
+	:testArrays (lambda ()
+		(this.assertEqual (lisp-string '(1 2 3)) "(1 2 3)")
+		(this.assertEqual (lisp-string '(1 2 (3 4) 5)) "(1 2 (3 4) 5)"))
+	:testObjects (lambda ()
+		(this.assertEqual (lisp-string (object)) "{}")
+		(this.assertEqual (lisp-string (object :one 1 :two 2)) "{
+  \"one\": 1, 
+  \"two\": 2
+}"))
+	:testFormatDirective (lambda ()
+		(dolist (value '(one "two" (object) (list 1 2 3) 12))
+			(this.assertEqual (lisp-string value) (format nil "%l" value) nil #'equal)))))
 
 (JSTest.TestCase (object
     :name "function (to-upper)"

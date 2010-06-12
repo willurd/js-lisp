@@ -3,6 +3,7 @@
 * Finish testing (and preferably documenting) the functionality that already exists.
 * Update lisp.load for node (using fs.readFileSync)
 * Rewrite the node Repl class in lisp
+* Rewrite cond with (defmacro)
 * Create ! as a shortcut for (not ...)
 * Create !! as a shortcut for (not (not ...))
 * Create +=, -=, /=, *=, %=, ||=, &&= (and-equal?)

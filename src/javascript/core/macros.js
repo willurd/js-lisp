@@ -274,8 +274,7 @@ defmacro("defun", function (name, arglist /*, ... */) {
 	
 	var body = argsToArray(arguments).slice(2);
 	var lambda = [_S("lambda"), arglist].concat(body);
-	resolve([_S("setq"), name, lambda]);
-	return null;
+	return resolve([_S("setq"), name, lambda]);
 });
 
 /**

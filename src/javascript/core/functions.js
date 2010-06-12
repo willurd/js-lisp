@@ -662,19 +662,43 @@ defun("to-json", function (value, pretty, levels) {
 
 /**
  * <pre>
- * TODO: Test me
- * TODO: Document me
- * TODO: Add examples
+ * Returns a string that is the lisp representation of the given value.
  * </pre>
+ * 
+ * @tested
  * 
  * @name lisp-string
  * @lisp
  * @function
  * @member lisp.functions
+ * 
+ * @param {mixed} value
+ *     The value whose lisp representation is returned.
+ * 
+ * @example Numbers
+ *     >> (lisp-string 12)
+ *     => "12"
+ * 
+ * @example Strings
+ *     >> (lisp-string "hello")
+ *     => "\"hello\""
+ * 
+ * @example Arrays
+ *     >> (lisp-string [1, 2, [3, 4], 5, 6])
+ *     => (1 2 (3 4) 5 6)
+ * 
+ * @example Objects
+ * Note: The current (lisp-string) representation of objects can't
+ * then be interpreted again in js-lisp.
+ *     >> (lisp-string (object :one 2 :three 4))
+ *     => "{
+ *       \"one\": 2, 
+ *       \"three\": 4
+ *     }"
  */
 defun("lisp-string", function (value) {
 	// Input validation
-	assert(arguments.length, "(lisp-string) requires at least 1 argument " +
+	assert(arguments.length == 1, "(lisp-string) requires 1 argument " +
 		"(got " + arguments.length + ")");
 	
 	return toLisp(value);
@@ -683,8 +707,6 @@ defun("lisp-string", function (value) {
 /**
  * <pre>
  * Converts the given string to uppercase.
- * 
- * TODO: Add examples
  * </pre>
  * 
  * @tested
@@ -698,6 +720,17 @@ defun("lisp-string", function (value) {
  * 
  * @param {string} string
  *     The string to convert to uppercase.
+ * 
+ * @example Basic usage
+ *     >> (to-upper "hello")
+ *     => "HELLO"
+ * 
+ * @example Practical usage
+ *     >> (defun yell (message)
+ *     ..   (concat (to-upper message) "!"))
+ *     => function () { ... }
+ *     >> (yell "hello")
+ *     => "HELLO!"
  */
 defun("to-upper", function (string) {
 	// Input validation
@@ -711,9 +744,7 @@ defun("to-upper", function (string) {
 
 /**
  * <pre>
- * Converts the given string to uppercase.
- * 
- * TODO: Add examples
+ * Converts the given string to lowercase.
  * </pre>
  * 
  * @tested
@@ -727,6 +758,18 @@ defun("to-upper", function (string) {
  * 
  * @param {string} string
  *     The string to convert to lowercase.
+ * 
+ * @example Basic usage
+ *     >> (to-lower "HELLO")
+ *     => "hello"
+ * 
+ * @example Practical usage
+ *     >> (defun whisper (message)
+ *     ..   (setq message (message.replace "!" ""))
+ *     ..   (concat "(" (to-lower message) ")"))
+ *     => function () { ... }
+ *     >> (whisper "HELLO!")
+ *     => "(hello)"
  */
 defun("to-lower", function (string) {
 	// Input validation
