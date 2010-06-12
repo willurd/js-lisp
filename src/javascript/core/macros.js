@@ -1447,7 +1447,7 @@ defmacro("char", function (symbol) {
  *     >> (let ((obj (object :name "js-lisp" :age 0)))
  *          (collect (item obj)
  *            (is-number (second item))))
- *     => (("age" 0)) ; Returns every (key,value) pair where the last 
+ *     => (("age" 0)) ; Returns every (key value) pair where the last 
  *                    ; expression of the body evaluates to true.
  */
 var _macro_collect; // Defined in /src/lisp/macros.lisp

@@ -13,20 +13,26 @@
 ;     ,@body))
 
 (defmacro collect ((item-name lst) & body)
-  "Iterates over each (key,value) pair in `lst' (denoted by
-`itemName'), evaluating each expression in `body' for every
-iteration, and collecting the items, whose last `body' expression
-evaluates to true, into a final list that is returned."
+  "Creates a list of (key value) pairs from `object', iterates over
+each one, evaluating all of the expressions in `body' for every
+iteration, and collecting into a list every item where the last
+`body' expression evaluates to true."
   ;; Input validation
-  (let ((basemsg "(collect) expects arguments in the form: ((itemName lst) &body)."))
+  (let ((basemsg "(collect) expects arguments in the form: ((item-name lst) &body)."))
     (assert (is-symbol item-name)
-            (format nil "%s Got bad symbol argument: %s" basemsg item-name)))
+            (format nil "%s item-name must be a symbol (got %s)" basemsg item-name)))
   `(let ((set (list)))
     (foreach (,item-name ,lst)
       (when (progn ,@body)
         (push set ,item-name)))
   set))
 
-(defun sort (lst)
-	(sort! (lst.concat)))
+(defun sort (array)
+  "Returns a sorted copy of the given Array."
+  ;; Input validation
+  (assert (=== (length arguments) 1)
+          (format nil "(sort) requires 1 argument (got %l)" (length arguments)))
+  (assert (is-array array)
+          (format nil "(sort) requires an Array as its argument (got %l)" array))
+  (sort! (lst.concat)))
 

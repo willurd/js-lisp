@@ -1,7 +1,7 @@
 (JSTest.TestCase (object
 	:name "this Object in Lambdas"
 	:testThisWorks (lambda ()
-		(this.message "It works!"))))
+		(this.message "It works!")))) ;; The very fact the this.message works _is_ the test
 
 (JSTest.TestCase (object
 	:name "Numbers"
@@ -1316,8 +1316,43 @@ string" "a\nstring")))
 				(this.assertEqual newobj.five.six 6)
 				(this.assertEqual newobj.five.eight 8))))))
 
-;; TODO: Test (items)
-;; TODO: Test (nth)
+(JSTest.TestCase (object
+	:name "function (items)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error #'items nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error #'items nil (object)))
+	:testManyArguments (lambda ()
+		(this.assertRaises Error #'items nil (object) "arg 2"))
+	:testNonObjectArgument (lambda ()
+		(this.assertRaises Error #'items nil 1))
+	:testBasicObjects (lambda ()
+		(let ((obj (object :one 2 :three 4 :five 6)))
+			(this.assertEqual (items obj) '(("one" 2) ("three" 4) ("five" 6)) nil #'equal)))
+	:testArrays (lambda ()
+		(let ((obj '(one two three)))
+			(this.assertEqual (items obj) '(("0" one) ("1" two) ("2" three)) nil #'equal)))))
+
+(JSTest.TestCase (object
+	:name "function (nth)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error #'nth nil))
+	:testOneArgument (lambda ()
+		(this.assertRaises Error #'nth nil (array)))
+	:testTwoArguments (lambda ()
+		(this.assertNotRaises Error #'nth nil (array 1) 0))
+	:testManyArguments (lambda ()
+		(this.assertRaises Error #'nth nil (array 1) 0 "arg 3"))
+	:testNonArrayFirstArgument (lambda ()
+		(this.assertRaises Error #'nth nil "arg 1" 0))
+	:testNonNumberSecondArgument (lambda ()
+		(this.assertRaises Error #'nth nil (array 1) "arg 2"))
+	:testIndexArrayDoesntHave (lambda ()
+		(this.assertNotRaises Error #'nth nil (array) 10)
+		(this.assertEqual (nth (array) 10) nil))
+	:testBasic (lambda ()
+		(this.assertEqual (nth '(one two) 1) 'two nil #'equal))))
+
 ;; TODO: Test (first)
 ;; TODO: Test (second)
 ;; TODO: Test (third)

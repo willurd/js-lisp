@@ -1203,15 +1203,26 @@ defun("props", function (object, list) {
 
 /**
  * <pre>
- * TODO: Test me
- * TODO: Document me
- * TODO: Add examples
+ * Creates and returns a list of (key value) pairs from the given object.
  * </pre>
+ * 
+ * @tested
  * 
  * @name items
  * @lisp
  * @function
  * @member lisp.functions
+ * 
+ * @param {object} object
+ *     The object from which to create the (key value) pairs.
+ * 
+ * @example Basic objects
+ *     >> (items (object :one 2 :three 4 :five 6))
+ *     => (("one" 2) ("three" 4) ("five" 6))
+ * 
+ * @example Arrays
+ *     >> (items '(one two three))
+ *     => (("0" one) ("1" two) ("2" three))
  */
 defun("items", function (object) {
 	// Input validation
@@ -1229,9 +1240,13 @@ defun("items", function (object) {
 
 /**
  * <pre>
- * TODO: Test me
+ * Returns the element at the given index in the given array.
+ * 
  * TODO: Document me
  * TODO: Add examples
+ * 
+ * FIXME: Should this method accept any object that has a concept
+ *        of positional elements, like strings?
  * </pre>
  * 
  * @name nth
