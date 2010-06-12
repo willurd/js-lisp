@@ -25,4 +25,4 @@ iteration, and collecting into a list every item where the last
     (foreach (,item-name ,lst)
       (when (progn ,@body)
         (push set ,item-name)))
-  set))
+    set))

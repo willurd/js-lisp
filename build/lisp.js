@@ -4180,42 +4180,52 @@ defun("items", function (object) {
  * <pre>
  * Returns the element at the given index in the given array.
  * 
- * TODO: Document me
- * TODO: Add examples
- * 
- * FIXME: Should this method accept any object that has a concept
- *        of positional elements, like strings?
+ * FIXME: Should this accept any object that has a concept of positional
+ *        elements, like strings?
+ * FIXME: Should this accept a list of indexes as well? e.g. (nth a '(1 3))
  * </pre>
  * 
  * @name nth
  * @lisp
  * @function
  * @member lisp.functions
+ * 
+ * @param {Array} array
+ *     The array that contains the value to return.
+ * @param {Number} index
+ *     The index to return on the given array.
+ * 
+ * @example Basic usage
+ *     >> (nth '(one two three) 1)
+ *     => two
  */
-defun("nth", function (list, index) {
+defun("nth", function (array, index) {
 	// Input validation
 	assert(arguments.length === 2, "(nth) requires 2 arguments (got " +
 		arguments.length + ")");
-	assert(list instanceof Array, "(nth) requires an Array as its first argument " +
-		"(got " + toLisp(list) + ")");
+	assert(array instanceof Array, "(nth) requires an Array as its first argument " +
+		"(got " + toLisp(array) + ")");
 	assert(typeof(index) === "number", "(nth) requires a number as its second argument " +
 		"(got " + toLisp(index) + ")");
 	
-	if (list.length === 0) {
+	if (array.length === 0) {
 		return null;
 	}
 	
-	return list[index];
+	return array[index];
 });
 
 /**
  * <pre>
- * TODO: Test me
+ * Returns the first element in the given array.
+ * 
  * TODO: Document me
  * TODO: Add examples
  * 
- * FIXME: This should be a macro: `(nth 0 ,list)
+ * FIXME: This should be a macro: `(nth ,list 0)
  * </pre>
+ * 
+ * @tested
  * 
  * @name first
  * @lisp
@@ -4238,12 +4248,15 @@ defun("first", function (list) {
 
 /**
  * <pre>
- * TODO: Test me
+ * Returns the second element in the given array.
+ * 
  * TODO: Document me
  * TODO: Add examples
  * 
- * FIXME: This should be a macro: `(nth 1 ,list)
+ * FIXME: This should be a macro: `(nth ,list 1)
  * </pre>
+ * 
+ * @tested
  * 
  * @name second
  * @lisp
@@ -4266,12 +4279,15 @@ defun("second", function (list) {
 
 /**
  * <pre>
- * TODO: Test me
+ * Returns the third element in the given array.
+ * 
  * TODO: Document me
  * TODO: Add examples
  * 
- * FIXME: This should be a macro: `(nth 2 ,list)
+ * FIXME: This should be a macro: `(nth ,list 2)
  * </pre>
+ * 
+ * @tested
  * 
  * @name third
  * @lisp

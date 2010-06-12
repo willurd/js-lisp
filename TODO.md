@@ -10,6 +10,8 @@
 * Create <<, >>, &, | (bitwise operations)
 * Create <<=, >>=, &=, |=
 * Write the generic (do) macro
+* Think about adding the concept of generators
+  * (yield 'some 'values) throws a lisp.exception.YieldException
 * Create all of the rest of the functions/macros that have TODOs in the project ((case) or (switch), etc)
 * Think of ways to break the current (defmacro) implementation because I don't trust it.
 * Start thinking of all of the \*features* that can be set. For example:
