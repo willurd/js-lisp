@@ -70,13 +70,17 @@ var Env = Class.extend({
 				if (this.symbols.hasOwnProperty(symbol)) {
 					this.symbols[symbol] = value;
 				} else if (this.parent instanceof Env) {
-					this.parent.set(symbol, value);
+					try {
+						this.parent.set(symbol, value);
+					} catch (e) {
+						this.symbols[symbol] = value;
+					}
 				} else {
 					this.parent[symbol] = value;
 				}
 			} else {
 				var object = this;
-				while (object.parent) {
+				while (object.parent && object.parent.symbols != global) {
 					object = object.parent;
 				}
 				object.symbols[symbol] = value;

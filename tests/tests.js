@@ -6,8 +6,9 @@ if ((typeof(window) == "undefined") &&
 	// We are probably running in node.js now.
 	// FIXME: Find a better way to tell we're running in node.js
 	var JSTest = require("../support/vendor/JSTest/src/jstest"),
-		lisp   = require("../build/lisp"),
-		window = global;
+		lisp   = require("../build/lisp");
+} else {
+	var global = window;
 }
 
 JSTest.TestCase({
@@ -75,7 +76,7 @@ JSTest.TestCase({
 	name: 'Environment (Env class)',
 	
 	setup: function () {
-		this.env = new lisp.Env(new lisp.Env(null, window), {});
+		this.env = new lisp.Env(new lisp.Env(null, global), {});
 	},
 	
 	testBasicGet: function () {
@@ -88,14 +89,12 @@ JSTest.TestCase({
 	},
 	
 	testGlobalGet: function () {
-		this.assertTrue(this.env.get("window") == window);
-		this.assertTrue(this.env.get("document") == document);
+		this.assertTrue(this.env.get("global") == global);
 	},
 	
 	testHas: function () {
 		this.assertFalse(this.env.has("bob"));
-		this.assertTrue(this.env.has("window"));
-		this.assertTrue(this.env.has("document"));
+		this.assertTrue(this.env.has("global"));
 		
 		this.env.set("bob", false);
 		this.assertTrue(this.env.has("bob"));
@@ -103,12 +102,12 @@ JSTest.TestCase({
 	
 	testGetDotPath: function () {
 		this.assertEqual(this.env.get("document.getElementById"), document.getElementById);
-		this.assertEqual(this.env.get("window.Array.prototype"), window.Array.prototype);
+		this.assertEqual(this.env.get("global.Array.prototype"), global.Array.prototype);
 	},
 	
 	testSetDotPath: function () {
-		this.assertNotEqual(window.firstName, "Bill");
-		this.env.set("window.firstName", "Bill");
+		this.assertNotEqual(global.firstName, "Bill");
+		this.env.set("global.firstName", "Bill");
 		this.assertEqual(firstName, "Bill");
 	}
 });
