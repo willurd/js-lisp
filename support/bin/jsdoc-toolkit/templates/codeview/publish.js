@@ -240,7 +240,7 @@ function getName (member) {
 }
 
 function getSlug (member) {
-	var slug = getName(member);
+	var slug = member.name.replace(/\^\d+$/, '');
 	slug = slug.replace(/\s+/g, '-');
 	return slug;
 }

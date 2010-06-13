@@ -28,3 +28,14 @@
 	;; Initialize the "non-planned" toggler and do the initial toggle
 	(tool-non-planned.click toggle-non-planned-items)
 	(toggle-non-planned-items))))
+
+(defun window.docsymbol (id)
+	(setq window.location (concat "http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node"
+								  id ".html"))
+	false)
+
+(defun window.docfunction (name)
+	(setq window.location (concat "../symbols/lisp.functions.html#" name)))
+
+(defun window.docmacro (name)
+	(setq window.location (concat "../symbols/lisp.macros.html#" name)))

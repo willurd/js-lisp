@@ -23,6 +23,11 @@ h1 {
 	margin: 0px;
 	}
 
+h3 {
+	font-size: 14pt;
+	margin: 30px 2px 10px;
+	}
+
 #counts {
 	color: #ccc !important;
 	float: right;

@@ -527,9 +527,8 @@ defmacro("let", function () {
 
 /**
  * <pre>
- * TODO: Test me more
- * TODO: Document me
- * TODO: Add examples
+ * Sets the value of the variable represented by the given symbol to
+ * the given value.
  * </pre>
  * 
  * @tested
@@ -538,11 +537,45 @@ defmacro("let", function () {
  * @lisp
  * @function
  * @member lisp.macros
+ * 
+ * @param {symbol} symbol
+ *     The variable whose value is to be set.
+ * @param {mixed} value
+ *     The value to set to the variable represented by the given symbol.
+ * 
+ * @example Basic usage
+ *     >> x
+ *     => undefined
+ *     >> (setq x 1)
+ *     => 1
+ *     >> x
+ *     => 1
+ * 
+ * @example Using the return value
+ *     >> (let ((last nil))
+ *     ..   (try
+ *     ..     (dolist (item '(1 2 3))
+ *     ..       (when (> (setq last item) 1)
+ *     ..         (throw)))
+ *     ..   (:catch))
+ *     ..   last)
+ *     => 2
+ * 
+ * @example Setting a property on an object
+ *     >> (let ((obj (object :one (object :two 3))))
+ *     ..   (print obj.one.two)
+ *     ..   (setq obj.one.two 10)
+ *     ..   (print obj.one.two))
+ *     3
+ *     10
+ *     => nil
  */
-defmacro("setq", function () {
-	var args = argsToArray(arguments);
-	var symbol = args[0];
-	var value  = resolve(args[1]);
+defmacro("setq", function (symbol, expression) {
+	assert(arguments.length === 2, "(setq) requires 2 arguments (got " +
+		arguments.length + ")");
+	assert(symbol instanceof Symbol, "(setq) requires a symbol as its first " +
+		"argument (got " + toLisp(symbol) + ")");
+	var value = resolve(expression);
 	lisp.env.set(symbol, value);
 	return value;
 });
@@ -566,8 +599,12 @@ defmacro("setq", function () {
  * 
  * @returns The return value of the last expression, or nil if there
  *          are no expression.
+ * 
+ * @param {[mixed]} expressions
+ *     The expressions to be evaluated.
+ * @rest expressions
  */
-defmacro("progn", function (/* .. */) {
+defmacro("progn", function (/* &expressions */) {
 	var ret = null;
 	for (var i = 0; i < arguments.length; i++) {
 		ret = resolve(arguments[i]);
