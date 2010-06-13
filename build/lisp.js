@@ -2218,6 +2218,68 @@ defmacro("and", function () {
 
 /**
  * <pre>
+ * Returns the first expression that evaluates to true in a boolean
+ * context, otherwise returns null.
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name ||
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("||", function () {
+	for (var i = 0; i < arguments.length; i++) {
+		var ret = resolve(arguments[i]);
+		if (ret) {
+			return ret;
+		}
+	}
+	
+	return null;
+});
+
+/**
+ * <pre>
+ * If the given symbol resolves to true, simply returns that value,
+ * otherwise evaluates the given expression, sets its value to the
+ * symbol on the env, and returns it.
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name ||
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("||=", function (symbol, expression) {
+	assert(arguments.length === 2, "(||=) requires 2 arguments (got " +
+		arguments.length + ")");
+	assert(symbol instanceof Symbol, "(||=) requires a symbol as its first " +
+		"argument (got " + toLisp(symbol) + ")");
+	
+	// If symbol already evaluates to true, don't set it, and just
+	// return its current value.
+	var ret = resolve(symbol);
+	if (ret) {
+		return ret;
+	}
+	
+	// If symbol evaluates to fales, set it to the value of the given
+	// expression, and return that value.
+	ret = resolve(expression);
+	lisp.env.set(symbol, ret);
+	return ret;
+});
+
+/**
+ * <pre>
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples

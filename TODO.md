@@ -4,7 +4,7 @@
 * Rewrite cond with (defmacro)
 * Create ! as a shortcut for (not ...)
 * Create !! as a shortcut for (not (not ...))
-* Create +=, -=, /=, *=, %=, ||=, &&= (and-equal?)
+* Create +=, -=, /=, *=, %=, &&= (and-equal?)
 * Create <<, >>, &, | (bitwise operations)
 * Create <<=, >>=, &=, |=
 * Write the generic (do) macro

@@ -2,10 +2,10 @@
   "A \"read-eval-print loop\" written in lisp, for lisp."
   :init (lambda (props)
     "Initializes the repl with the given properties, or the defaults."
-    (setq props (if props props (object)))
-    (setq this.ps1 (if props.ps1 props.ps1 ">> "))
-    (setq this.ps2 (if props.ps2 props.ps2 ".. "))
-    (setq this.ps3 (if props.ps3 props.ps3 "=> "))
+    (||= props (object))
+    (setq this.ps1 (|| props.ps1 ">> "))
+    (setq this.ps2 (|| props.ps2 ".. "))
+    (setq this.ps3 (|| props.ps3 "=> "))
     (setq this.multilineCommand false)
     (setq this.data "")
     (this.newCommand))
