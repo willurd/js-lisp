@@ -577,10 +577,14 @@ defmacro("progn", function (/* .. */) {
 
 /**
  * <pre>
- * TODO: Test me
- * TODO: Document me
- * TODO: Add examples
+ * Takes a list of lists of expressions. Evaluates the first expression
+ * of each top-level list until one evaluates to true, then it evaluates
+ * the rest of the expressions in that list only, returning the return
+ * value of its last expression. If no list contains a first expression
+ * that evaluates to true, cond returns nil.
  * </pre>
+ * 
+ * @tested
  * 
  * @name cond
  * @lisp
@@ -588,17 +592,39 @@ defmacro("progn", function (/* .. */) {
  * @member lisp.macros
  * 
  * @returns The value of the last evaluated expression, or nil.
+ * 
+ * @param {[Array]} rest
+ *     A list of lists of expressions to be evaluated (until one
+ *     contains a first expression that evaluates to true).
+ * @rest rest
+ * 
+ * @example Empty cond
+ *     >> (cond)
+ *     => nil
+ * 
+ * @example Default expression
+ *     >> (cond ((== 1 2) "this wont get evaluated, at least not in this universe")
+ *              (nil "neither will this")
+ *              (t "but this will")) ;; Acts like a "default" expression
+ *     => "but this will"
+ * 
+ * @example Short circuiting
+ *     >> (cond (t "this always gets avaluated")
+ *              (t "this will never get evaluated"))
+ *     => "this always gets avaluated"
  */
-defmacro("cond", function () {
+defmacro("cond", function (/* &rest */) {
 	for (var i = 0; i < arguments.length; i++) {
 		var clause = arguments[i];
 		
+		assert(clause instanceof Array, "(cond) clause must be a list " +
+			"(got " + toLisp(clause) + ")");
 		assert(clause.length > 0, "(cond) clauses must contain an " +
 			"expression to evaluate");
 		
 		var condition = clause[0];
 		if (!!resolve(condition)) {
-			var ret;
+			var ret = null;
 			for (var j = 1; j < clause.length; j++) {
 				ret = resolve(clause[j]);
 			}
@@ -1459,9 +1485,10 @@ defmacro("dolist", function (arglist /*, ... */) {
  * @member lisp.macros
  * 
  * @example Basic usage
- *     >> (let ((set (object :one 1 :two 2 :three 3)))
- *          (foreach (item set)
- *            (print (first item))))
+ *     >> (let ((obj (object :one 1 :two 2 :three 3)))
+ *          (foreach (item obj)
+ *            (let ((key (first item)))
+ *              (print (first item)))))
  *     one
  *     two
  *     three

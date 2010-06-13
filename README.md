@@ -70,7 +70,7 @@ And I suggest using [rlwrap][rlwrap] (for readline support):
 
 	$ rlwrap node run.js
 	# or
-	$ rlwrap noderepl
+	$ rlwrap ./noderepl
 
 Have fun!
 
