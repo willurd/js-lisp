@@ -1,10 +1,18 @@
-(JSTest.TestCase (object
-	:name "this Object in Lambdas"
-	:testThisWorks (lambda ()
-		(this.message "It works!")))) ;; The very fact the this.message works _is_ the test
+(defmacro test (name & plist)
+  "This is just a nicer syntax for defining a JSTest test case."
+  `(JSTest.TestCase (object
+	:name ,name
+    ,@plist)))
 
-(JSTest.TestCase (object
-	:name "Numbers"
+(defmacro divider (name)
+  `(JSTest.Divider ,name))
+
+(test "this Object in Lambdas"
+  :testThisWorks (lambda ()
+    ;; The very fact the this.message works _is_ the test
+    (this.message "It works!")))
+
+(test "Numbers"
 	:testOctals (lambda ()
 		(this.assertEqual 0100 64))
 	:testHex (lambda ()
@@ -17,32 +25,29 @@
 		(this.assertEqual 0.2 .2))
 	:testScientificNotation (lambda ()
 		(this.assertEqual 20e2 2000)
-		(this.assertEqual 20e-2 0.2))))
+		(this.assertEqual 20e-2 0.2)))
 
-(JSTest.TestCase (object
-	:name "Strings"
+(test "Strings"
 	:testHardNewline (lambda ()
 		(this.assertEqual "a
 string" "a\nstring"))
 	:testHardTab (lambda ()
-		(this.assertEqual "a	string" "a\tstring"))))
+		(this.assertEqual "a	string" "a\tstring")))
 
-(JSTest.TestCase (object
-	:name "Functions As Function Calls"
+(test "Functions As Function Calls"
 	:testFunctionCallAsFirstArg (lambda ()
 		(let ((o (object :func (lambda (x) (1+ x)))))
-			(this.assertEqual 2 ((getkey o :func) 1))))
+			  (this.assertEqual 2 ((getkey o :func) 1))))
 	:testLambdaAsFirstArg (lambda ()
-		(this.assertEqual 2 ((lambda (x) (1+ x)) 1)))))
+		(this.assertEqual 2 ((lambda (x) (1+ x)) 1))))
 
 ;; ================================================================================
 ;; MACROS
 ;; ================================================================================
 
-(JSTest.Divider "macros")
+(divider "macros")
 
-(JSTest.TestCase (object
-	:name "macro (quote)"
+(test "macro (quote)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'quote nil))
 	:testOneArgument (lambda ()
@@ -53,11 +58,11 @@ string" "a\nstring"))
 		(this.assertEqual (quote hello) (quote hello) nil #'equal)
 		(this.assertEqual (quote hello) (lisp.parse.any "hello") nil #'equal)
 		(this.assertEqual (quote hello) (new lisp.Symbol "hello") nil #'equal)
-		(this.assertNotEqual (quote hello) (quote goodbye)) nil #'not-equal)
+		(this.assertTrue (not-equal (quote hello) (quote goodbye))))
 	:testQuoteList (lambda ()
 		(this.assertEqual (quote (one two)) (quote (one two)) nil #'equal)
 		(this.assertEqual (quote (one two)) (lisp.parse.any "(one two)") nil #'equal)
-		(this.assertEqual (quote (one two)) (list "one" "two")) nil #'equal)
+		(this.assertTrue (equal (quote (one two)) (list (to-symbol "one") (to-symbol "two")))))
 	:testQuoteKeywords (lambda ()
 		(this.assertEqual ':hello :hello nil #'equal))
 	:testEvalQuoted (lambda ()
@@ -66,21 +71,20 @@ string" "a\nstring"))
 	:testQuoteLiteral (lambda ()
 		(this.assertEqual (quote hello!) 'hello! nil #'equal)
 		(this.assertEqual (quote (hello!)) '(hello!) nil #'equal)
-		(this.assertEqual (quote (quote hello!)) ''hello! nil #'equal))))
+		(this.assertEqual (quote (quote hello!)) ''hello! nil #'equal)))
 
 ;; TODO: Test (resolve)
 ;; TODO: Test (explode)
 
-(JSTest.TestCase (object
-	:name "macro (defmacro)"
+(test "macro (defmacro)"
 	:testBasic (lambda ()
-		(let ((collect nil))
+		(let ((my-collect nil))
 			(defmacro my-collect ((itemName lst) & body)
-			  `(let ((set (list)))
-		        (foreach (,itemName ,lst)
-		          (when (progn ,@body)
-		            (push set ,itemName)))
-				set))
+				`(let ((set (list)))
+					(foreach (,itemName ,lst)
+						(when (progn ,@body)
+							(push set ,itemName)))
+					set))
 			(let ((lt3 (my-collect (item (list 1 2 3))
 						 (< (second item) 3))))
 				(this.assertEqual (map second lt3) '(1 2)))))
@@ -100,10 +104,9 @@ string" "a\nstring"))
 			(this.assertEqual (nth values 6) 10)
 			(this.assertEqual (nth values 7) '(11))))
 	:testReturnValue (lambda ()
-		(this.assertInstanceOf (defmacro test) lisp.Macro))))
+		(this.assertInstanceOf (defmacro test) lisp.Macro)))
 
-(JSTest.TestCase (object
-	:name "macro (lambda)"
+(test "macro (lambda)"
 	:testNoArguments (lambda ()
 		(this.assertNotRaises Error #'lambda nil))
 	:testOneArgument (lambda ()
@@ -157,13 +160,12 @@ string" "a\nstring"))
 			(this.assertEqual (func) 1)
 			(this.assertEqual (func) 2)
 			(this.assertEqual (func) 3)
-			(this.assertUndefined x)))))
+			(this.assertUndefined x))))
 
 ;; TODO: Test (defun)
 ;;   * Test defuns as closures
 
-(JSTest.TestCase (object
-    :name "macro (try)"
+(test "macro (try)"
 	:testEmptyExpression (lambda ()
         (this.assertNotRaises Error #'try nil))
 	:testOneExpression (lambda ()
@@ -237,12 +239,11 @@ string" "a\nstring"))
 		    (:finally
 			  (setq y 20)))
 		  (this.assertEqual x 10)
-		  (this.assertEqual y 20)))))
+		  (this.assertEqual y 20))))
 
 ;; TODO: Test (funcall)
 
-(JSTest.TestCase (object
-	:name "macro (let)"
+(test "macro (let)"
 	:testScoping (lambda ()
 		(this.assertUndefined somevar)
 		(let ((somevar nil))
@@ -262,11 +263,10 @@ string" "a\nstring"))
 				(setq test (lambda () (setq x (1+ x)))))
 	        (this.assertEqual (test) 4)	
 	        (this.assertEqual (test) 5)	
-	        (this.assertEqual (test) 6)))))
+	        (this.assertEqual (test) 6))))
 
 ;; TODO: There are probably more things to test here
-(JSTest.TestCase (object
-    :name "macro (setq)"
+(test "macro (setq)"
     :testScoping (lambda ()
         (setq x 1)
         (this.assertEqual x 1)
@@ -276,10 +276,9 @@ string" "a\nstring"))
             (this.assertEqual x 3))
         (this.assertEqual x 1))
     :testReturnValue (lambda ()
-        (this.assertEqual (setq somevar "hello") "hello"))))
+        (this.assertEqual (setq somevar "hello") "hello")))
 
-(JSTest.TestCase (object
-    :name "macro (progn)"
+(test "macro (progn)"
 	:testNoExpressions (lambda ()
         (this.assertNotRaises Error #'progn nil))
 	:testOneExpression (lambda ()
@@ -309,12 +308,13 @@ string" "a\nstring"))
 			  (setq y 20)
 			(catch)) ;; Just silence the error
 		  (this.assertEqual x 10)
-		  (this.assertEqual y 0)))))
+		  (this.assertEqual y 0))))
 
-;; TODO: Test (cond)
+(test "macro (cond)"
+	:testStuff (lambda ()
+		(this.todo "Test (cond)")))
 
-(JSTest.TestCase (object
-    :name "macro (if)"
+(test "macro (if)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error #'if nil))
 	:testOneArgument (lambda ()
@@ -353,10 +353,9 @@ string" "a\nstring"))
 		(this.assertEqual (if nil "one") nil))
 	:testReturnValues (lambda ()
         (this.assertEqual (if t "one" "two") "one")
-		(this.assertEqual (if nil "one" "two") "two"))))
+		(this.assertEqual (if nil "one" "two") "two")))
 
-(JSTest.TestCase (object
-	:name "macro (when)"
+(test "macro (when)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'when null))
 	:testOneArgument (lambda ()
@@ -380,10 +379,9 @@ string" "a\nstring"))
 			(this.assertEqual x 20)))
 	:testReturnValues (lambda ()
 		(let ((x 5))
-			(this.assertEqual (when t (setq x 20)) 20)))))
+			(this.assertEqual (when t (setq x 20)) 20))))
 
-(JSTest.TestCase (object
-	:name "macro (not)"
+(test "macro (not)"
 	:testNoArguments (lambda ()
 		;; The nil is for 'custom message' in JSTest, so it doesn't get
 		;; applied to (not). This is testing that (not) will throw an error
@@ -402,10 +400,9 @@ string" "a\nstring"))
 	:testShortCircuiting (lambda ()
         (let ((x 5))
             (not nil false t (setq x 10)) ;; The t makes it cut short
-            (this.assertEqual x 5)))))
+            (this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (or)"
+(test "macro (or)"
 	:testNoArguments (lambda ()
 		(this.assertFalse (or)))
 	:testOneArgument (lambda ()
@@ -417,10 +414,9 @@ string" "a\nstring"))
 	:testShortCircuiting (lambda ()
         (let ((x 5))
             (or nil false t (setq x 10)) ;; The t makes it cut short
-            (this.assertEqual x 5)))))
+            (this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (and)"
+(test "macro (and)"
 	:testNoArguments (lambda ()
 		(this.assertTrue (and)))
 	:testOneArgument (lambda ()
@@ -432,13 +428,12 @@ string" "a\nstring"))
 	:testShortCircuiting (lambda ()
         (let ((x 5))
             (and t :keyword nil (setq x 10)) ;; The nil makes it cut short
-            (this.assertEqual x 5)))))
+            (this.assertEqual x 5))))
 
 ;; TODO: Test (equal)
 ;; TODO: Test (not-equal)
 
-(JSTest.TestCase (object
-	:name "macro (==)"
+(test "macro (==)"
 	:testOneArgument (lambda ()
 		(this.assertRaises Error #'== nil 2))
 	:testTwoArguments (lambda ()
@@ -452,10 +447,9 @@ string" "a\nstring"))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (== 2 3 (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (===)"
+(test "macro (===)"
 	:testOneArgument (lambda ()
 		(this.assertRaises Error #'=== nil 2))
 	:testTwoArguments (lambda ()
@@ -471,10 +465,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (=== 2 "2" (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (!=)"
+(test "macro (!=)"
 	:testOneArgument (lambda ()
 		(this.assertRaises Error #'!= nil 2))
 	:testTwoArguments (lambda ()
@@ -487,10 +480,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (!= 2 "2" (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (!==)"
+(test "macro (!==)"
 	:testOneArgument (lambda ()
 		(this.assertRaises Error #'!== nil 2))
 	:testTwoArguments (lambda ()
@@ -503,10 +495,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (!== 2 2 (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (<)"
+(test "macro (<)"
 	:testOneArgument (lambda ()
 		(this.assertRaises Error #'< nil 2))
 	:testTwoArguments (lambda ()
@@ -520,10 +511,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (< 2 2 (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (>)"
+(test "macro (>)"
 	:testOneArgument (lambda ()
 		(this.assertRaises Error #'> nil 2))
 	:testTwoArguments (lambda ()
@@ -538,10 +528,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (> 2 2 (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (<=)"
+(test "macro (<=)"
 	:testOneArgument (lambda ()
 		(this.assertRaises Error #'<= nil 2))
 	:testTwoArguments (lambda ()
@@ -557,10 +546,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (<= 2 1 (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (>=)"
+(test "macro (>=)"
 	:testOneArgument (lambda ()
 		(this.assertRaises Error #'>= nil 2))
 	:testTwoArguments (lambda ()
@@ -576,10 +564,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (>= 2 3 (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (is-true)"
+(test "macro (is-true)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-true t))
 		(this.assertTrue (is-true true))
@@ -587,20 +574,18 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (is-true t nil (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (is-false)"
+(test "macro (is-false)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-false false))
 		(this.assertTrue (is-false false false)))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (is-false false nil (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (is-null)"
+(test "macro (is-null)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-null nil))
 		(this.assertTrue (is-null null))
@@ -608,20 +593,18 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (is-null nil t (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (is-undefined)"
+(test "macro (is-undefined)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-undefined undefined))
 		(this.assertTrue (is-undefined undefined undefined)))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (is-undefined undefined nil (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (is-string)"
+(test "macro (is-string)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-string "hello"))
 		(this.assertTrue (is-string "these" "are" "strings"))
@@ -632,10 +615,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (is-string "hello" 2 (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (is-number)"
+(test "macro (is-number)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-number 345))
 		(this.assertTrue (is-number 34.5))
@@ -646,10 +628,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (is-number 2 "hello" (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (is-boolean)"
+(test "macro (is-boolean)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-boolean false))
 		(this.assertTrue (is-boolean true))
@@ -657,10 +638,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (is-boolean t nil (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (is-function)"
+(test "macro (is-function)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-function this.assertTrue))
 		(this.assertTrue (is-function /))
@@ -668,10 +648,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (is-function (lambda ()) nil (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (is-object)"
+(test "macro (is-object)"
 	:testBasic (lambda ()
 		(this.assertTrue (is-object window))
 		(this.assertTrue (is-object this))
@@ -679,10 +658,9 @@ string" "a\nstring")))
 	:testShortCircuiting (lambda ()
 		(let ((x 5))
 			(this.assertFalse (is-object (object) "hi" (setq x 10)))
-			(this.assertEqual x 5)))))
+			(this.assertEqual x 5))))
 
-(JSTest.TestCase (object
-	:name "macro (dolist)"
+(test "macro (dolist)"
 	;; TODO: Test error conditions
 	;; TODO: Test explicit return value
 	:testBasic (lambda ()
@@ -693,12 +671,11 @@ string" "a\nstring")))
 				(this.assertTrue (is-number x))
 				(this.assertTrue (and (> x 0) (< x 6))))
 			(this.assertEqual x 0)	
-			(this.assertEqual y 5)))))
+			(this.assertEqual y 5))))
 
 ;; TODO: Test (foreach)
 
-(JSTest.TestCase (object
-	:name "macro (collect)"
+(test "macro (collect)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'collect nil))
 	:testOneArgument (lambda ()
@@ -710,16 +687,15 @@ string" "a\nstring")))
 	:testBasic (lambda ()
 		(let ((lt3 (collect (item (list 1 2 3))
 					 (< (second item) 3))))
-			(this.assertEqual (map second lt3) '(1 2))))))
+			(this.assertEqual (map second lt3) '(1 2)))))
 
 ;; ================================================================================
 ;; FUNCTIONS
 ;; ================================================================================
 
-(JSTest.Divider "functions")
+(divider "functions")
 
-(JSTest.TestCase (object
-	:name "function (jseval)"
+(test "function (jseval)"
 	:testNoArguments (lambda ()
 		(this.assertNotRaises Error #'jseval nil)
 		(this.assertUndefined (jseval)))
@@ -731,10 +707,9 @@ string" "a\nstring")))
 	:testEvalNewFunction (lambda ()
 		(let ((func (jseval "new Function('x', 'return x + 1')")))
 			(this.assertType func "function")
-			(this.assertEqual (func 2) 3)))))
+			(this.assertEqual (func 2) 3))))
 
-(JSTest.TestCase (object
-	:name "function (assert)"
+(test "function (assert)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'assert nil))
 	:testOneArgument (lambda ()
@@ -754,10 +729,9 @@ string" "a\nstring")))
 		(this.assertRaises Error #'assert nil nil)
 		(this.assertRaises Error #'assert nil undefined)
 		(this.assertRaises Error #'assert nil "")
-		(this.assertRaises Error #'assert nil 0))))
+		(this.assertRaises Error #'assert nil 0)))
 
-(JSTest.TestCase (object
-	:name "function (gensym)"
+(test "function (gensym)"
 	:testNoArguments (lambda ()
 		(this.assertNotRaises Error #'gensym nil))
 	:testOneArgument (lambda ()
@@ -767,10 +741,9 @@ string" "a\nstring")))
 	:testReturnType (lambda ()
 		(this.assertInstanceOf (gensym) lisp.Symbol))
 	:testLength (lambda ()
-		(this.assertEqual (length (to-string (gensym))) 36))))
+		(this.assertEqual (length (to-string (gensym))) 36)))
 
-(JSTest.TestCase (object
-    :name "function (new)"
+(test "function (new)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error #'new nil))
 	:testOneArgument (lambda ()
@@ -786,10 +759,9 @@ string" "a\nstring")))
 						   (setq this.arg2 arg2)))
 			  (instance  (new SomeClass "hello" "goodbye")))
 		  (this.assertEqual instance.arg1 "hello")
-		  (this.assertEqual instance.arg2 "goodbye")))))
+		  (this.assertEqual instance.arg2 "goodbye"))))
 
-(JSTest.TestCase (object
-	:name "function (instanceof)"
+(test "function (instanceof)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'instanceof nil))
 	:testOneArgument (lambda ()
@@ -800,10 +772,9 @@ string" "a\nstring")))
 		(this.assertRaises Error #'instanceof nil "value" "not a class"))
 	:testBasic (lambda ()
 		(this.assertTrue (instanceof (new Error) Error))
-		(this.assertFalse (instanceof "not an error" Error)))))
+		(this.assertFalse (instanceof "not an error" Error))))
 
-(JSTest.TestCase (object
-    :name "function (throw)"
+(test "function (throw)"
 	:testDefaultValue (lambda ()
         (let ((self this))
 		  (try
@@ -827,10 +798,9 @@ string" "a\nstring")))
 		  (try
 		      (throw 12)
 			(catch (e)
-			  (self.assertTrue (=== e 12))))))))
+			  (self.assertTrue (=== e 12)))))))
 
-(JSTest.TestCase (object
-	:name "function (array)"
+(test "function (array)"
 	:testNoArguments (lambda ()
 		(this.assertNotRaises Error #'array nil))
 	:testEmptyArray (lambda ()
@@ -838,10 +808,9 @@ string" "a\nstring")))
 	:testOneValue (lambda ()
 		(this.assertEqual (array 'hello) '(hello) nil #'equal))
 	:testManyValues (lambda ()
-		(this.assertEqual (array 1 2 3) '(1 2 3) nil #'equal))))
+		(this.assertEqual (array 1 2 3) '(1 2 3) nil #'equal)))
 
-(JSTest.TestCase (object
-	:name "function (list)"
+(test "function (list)"
 	:testNoArguments (lambda ()
 		(this.assertNotRaises Error #'list nil))
 	:testEmptyArray (lambda ()
@@ -849,10 +818,9 @@ string" "a\nstring")))
 	:testOneValue (lambda ()
 		(this.assertEqual (list 'hello) '(hello) nil #'equal))
 	:testManyValues (lambda ()
-		(this.assertEqual (list 1 2 3) '(1 2 3) nil #'equal))))
+		(this.assertEqual (list 1 2 3) '(1 2 3) nil #'equal)))
 
-(JSTest.TestCase (object
-    :name "function (object)"
+(test "function (object)"
     :testGetValue (lambda ()
         (let ((o (object :key "value")))
             (this.assertEqual (getkey o :key) "value")))
@@ -892,10 +860,9 @@ string" "a\nstring")))
     :testNewWithArgs (lambda ()
         (let ((d (new Date 1234567890000)))
             (this.assertNotUndefined d)
-            (this.assertEqual (d.getTime) 1234567890000)))))
+            (this.assertEqual (d.getTime) 1234567890000))))
 
-(JSTest.TestCase (object
-	:name "function (function)"
+(test "function (function)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'function nil))
 	:testOneArgument (lambda ()
@@ -910,10 +877,9 @@ string" "a\nstring")))
 		(this.assertNotEqual #'function 'function))
 	:testMacros (lambda ()
 		(this.assertEqual #'cond cond.callable)
-		(this.assertNotEqual #'cond cond))))
+		(this.assertNotEqual #'cond cond)))
 
-(JSTest.TestCase (object
-	:name "function (getkey)"
+(test "function (getkey)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'getkey nil))
 	:testOneArgument (lambda ()
@@ -928,10 +894,9 @@ string" "a\nstring")))
 			(this.assertEqual (getkey obj :key2) 2)))
 	:testObjectDoesNotHaveKey (lambda ()
 		(let ((obj (object)))
-			(this.assertUndefined (getkey obj :key1))))))
+			(this.assertUndefined (getkey obj :key1)))))
 
-(JSTest.TestCase (object
-	:name "function (setkey)"
+(test "function (setkey)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'setkey nil))
 	:testOneArgument (lambda ()
@@ -952,10 +917,9 @@ string" "a\nstring")))
 		(let ((obj (object :key1 1)))
 			(this.assertEqual (getkey obj :key1) 1)
 			(setkey obj :key1 2)
-			(this.assertEqual (getkey obj :key1) 2)))))
+			(this.assertEqual (getkey obj :key1) 2))))
 
-(JSTest.TestCase (object
-    :name "function (print)"
+(test "function (print)"
 	:testNoArguments (lambda ()
         (this.assertNotRaises Error #'print nil))
 	:testOneArgument (lambda ()
@@ -963,10 +927,9 @@ string" "a\nstring")))
 	:testManyArguments (lambda ()
         (this.assertNotRaises Error #'print nil "(print) test" "arg 2"))
 	:testReturnValue (lambda ()
-        (this.assertEqual (print) nil))))
+        (this.assertEqual (print) nil)))
 
-(JSTest.TestCase (object
-    :name "function (concat)"
+(test "function (concat)"
 	:testNoArguments (lambda ()
         (this.assertNotRaises Error #'concat nil)
 		(this.assertEqual (concat) ""))
@@ -975,10 +938,9 @@ string" "a\nstring")))
 		(this.assertEqual (concat "hello") "hello"))
 	:testManyArguments (lambda ()
         (this.assertNotRaises Error #'concat nil "arg 1" "arg 2")
-		(this.assertEqual (concat "one, " "two") "one, two"))))
+		(this.assertEqual (concat "one, " "two") "one, two")))
 
-(JSTest.TestCase (object
-    :name "function (join)"
+(test "function (join)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error #'join nil))
 	:testOneArgument (lambda ()
@@ -995,10 +957,9 @@ string" "a\nstring")))
 		(this.assertEqual (join ", " (list 1) (list 2)) "1, 2"))
 	:testStrings (lambda ()
 		(this.assertEqual (join ", " (list "one" "two")) "one, two")
-		(this.assertEqual (join ", " (list "one") (list "two")) "one, two"))))
+		(this.assertEqual (join ", " (list "one") (list "two")) "one, two")))
 
-(JSTest.TestCase (object
-    :name "function (typeof)"
+(test "function (typeof)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error #'typeof nil))
 	:testManyArguments (lambda ()
@@ -1017,10 +978,9 @@ string" "a\nstring")))
 	:testNull (lambda ()
         (this.assertEqual (typeof nil) "object"))
 	:testUndefined (lambda ()
-		(this.assertEqual (typeof undefined) "undefined"))))
+		(this.assertEqual (typeof undefined) "undefined")))
 
-(JSTest.TestCase (object
-	:name "function (to-string)"
+(test "function (to-string)"
 	:testNoArguments (lambda ()
 	    (this.assertRaises Error #'to-string nil))
 	:testOneArgument (lambda ()
@@ -1028,10 +988,9 @@ string" "a\nstring")))
 	:testManyArguments (lambda ()
         (this.assertRaises Error #'to-string nil 1 2))
 	:testBasic (lambda ()
-		(this.assertTrue (=== "3" (to-string 3))))))
+		(this.assertTrue (=== "3" (to-string 3)))))
 
-(JSTest.TestCase (object
-	:name "function (to-number)"
+(test "function (to-number)"
 	:testStringToNumber (lambda ()
 		(this.assertTrue (=== 3 (to-number "3")))
 		(this.assertTrue (isNaN (to-number "hello"))))
@@ -1040,10 +999,9 @@ string" "a\nstring")))
 		(this.assertEqual 0 (to-number false)))
 	:testNullToNumber (lambda ()
 		(this.assertEqual 0 (to-number nil))
-		(this.assertEqual 0 (to-number null)))))
+		(this.assertEqual 0 (to-number null))))
 
-(JSTest.TestCase (object
-	:name "function (to-boolean)"
+(test "function (to-boolean)"
 	:testNoArguments (lambda ()
 	    (this.assertRaises Error #'to-boolean nil))
 	:testOneArgument (lambda ()
@@ -1054,10 +1012,9 @@ string" "a\nstring")))
 		(this.assertTrue (is-true (to-boolean "hi")))
 		(this.assertTrue (is-true (to-boolean (object))))
 		(this.assertTrue (is-false (to-boolean nil)))
-		(this.assertTrue (is-false (to-boolean 0))))))
+		(this.assertTrue (is-false (to-boolean 0)))))
 
-(JSTest.TestCase (object
-	:name "function (to-json)"
+(test "function (to-json)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'to-json nil))
 	:testOneArgument (lambda ()
@@ -1081,10 +1038,9 @@ string" "a\nstring")))
 		(this.assertEqual (to-json (object)) "{}")
 		(this.assertEqual (to-json (object :one 1 :two 2)) "{\"one\": 1, \"two\": 2}"))
 	:testDates (lambda ()
-		(this.assertEqual (to-json (new Date 1276242254313)) "\"2010-06-11 07:44:14\""))))
+		(this.assertEqual (to-json (new Date 1276242254313)) "\"2010-06-11 07:44:14\"")))
 
-(JSTest.TestCase (object
-	:name "function (lisp-string)"
+(test "function (lisp-string)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'lisp-string nil))
 	:testOneArgument (lambda ()
@@ -1108,10 +1064,9 @@ string" "a\nstring")))
 }"))
 	:testFormatDirective (lambda ()
 		(dolist (value '(one "two" (object) (list 1 2 3) 12))
-			(this.assertEqual (lisp-string value) (format nil "%l" value) nil #'equal)))))
+			(this.assertEqual (lisp-string value) (format nil "%l" value) nil #'equal))))
 
-(JSTest.TestCase (object
-    :name "function (to-upper)"
+(test "function (to-upper)"
 	:testNoArguments (lambda ()
 	    (this.assertRaises Error #'to-upper nil))
 	:testOneArgument (lambda ()
@@ -1121,10 +1076,9 @@ string" "a\nstring")))
 	:testNonStringArgument (lambda ()
         (this.assertRaises Error #'to-upper nil 0))
     :testBasic (lambda ()
-		(this.assertEqual (to-upper "hello") "HELLO"))))
+		(this.assertEqual (to-upper "hello") "HELLO")))
 
-(JSTest.TestCase (object
-    :name "function (to-lower)"
+(test "function (to-lower)"
 	:testNoArguments (lambda ()
 	    (this.assertRaises Error #'to-lower nil))
 	:testOneArgument (lambda ()
@@ -1134,10 +1088,9 @@ string" "a\nstring")))
 	:testNonStringArgument (lambda ()
         (this.assertRaises Error #'to-lower nil 0))
 	:testBasic (lambda ()
-		(this.assertEqual (to-lower "HELLO") "hello"))))
+		(this.assertEqual (to-lower "HELLO") "hello")))
 
-(JSTest.TestCase (object
-    :name "function (/)"
+(test "function (/)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error #'/ nil))
 	:testOneArgument (lambda ()
@@ -1149,10 +1102,9 @@ string" "a\nstring")))
 	:testDividingTwoNumbers (lambda ()
         (this.assertEqual (/ 4 2) 2))
 	:testDividingManyNumbers (lambda ()
-        (this.assertEqual (/ 4 2 4) 0.5))))
+        (this.assertEqual (/ 4 2 4) 0.5)))
 
-(JSTest.TestCase (object
-    :name "function (*)"
+(test "function (*)"
 	:testNoArguments (lambda ()
         (this.assertNotRaises Error #'* nil))
 	:testOneArgument (lambda ()
@@ -1166,10 +1118,9 @@ string" "a\nstring")))
 	:testMultiplyingTwoNumbers (lambda ()
         (this.assertEqual (* 4 2) 8))
 	:testMultiplyingManyNumbers (lambda ()
-        (this.assertEqual (* 2 3 4) 24))))
+        (this.assertEqual (* 2 3 4) 24)))
 
-(JSTest.TestCase (object
-    :name "function (+)"
+(test "function (+)"
 	:testNoArguments (lambda ()
         (this.assertNotRaises Error #'+ nil))
 	:testOneArgument (lambda ()
@@ -1183,10 +1134,9 @@ string" "a\nstring")))
 	:testAddingTwoNumbers (lambda ()
         (this.assertEqual (+ 4 2) 6))
 	:testAddingManyNumbers (lambda ()
-        (this.assertEqual (+ 2 3 4) 9))))
+        (this.assertEqual (+ 2 3 4) 9)))
 
-(JSTest.TestCase (object
-    :name "function (-)"
+(test "function (-)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error #'- nil))
 	:testOneArgument (lambda ()
@@ -1198,10 +1148,9 @@ string" "a\nstring")))
 	:testSubtractingTwoNumbers (lambda ()
         (this.assertEqual (- 4 2) 2))
 	:testSubtractingManyNumbers (lambda ()
-        (this.assertEqual (- 2 3 4) -5))))
+        (this.assertEqual (- 2 3 4) -5)))
 
-(JSTest.TestCase (object
-    :name "function (%)"
+(test "function (%)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error #'% nil))
 	:testOneArgument (lambda ()
@@ -1211,10 +1160,9 @@ string" "a\nstring")))
 	:testManyArguments (lambda ()
         (this.assertNotRaises Error #'% nil 1 2 3))
 	:testBasic (lambda ()
-	    (this.assertEqual (% 3 2) 1))))
+	    (this.assertEqual (% 3 2) 1)))
 
-(JSTest.TestCase (object
-    :name "function (1+)"
+(test "function (1+)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error #'1+ nil))
 	:testOneArgument (lambda ()
@@ -1224,10 +1172,9 @@ string" "a\nstring")))
 	:testNonNumberArgument (lambda ()
         (this.assertRaises Error #'1+ nil "hi"))
 	:testBasic (lambda ()
-	    (this.assertEqual (1+ 2) 3))))
+	    (this.assertEqual (1+ 2) 3)))
 
-(JSTest.TestCase (object
-    :name "function (1-)"
+(test "function (1-)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error #'1- nil))
 	:testOneArgument (lambda ()
@@ -1237,10 +1184,9 @@ string" "a\nstring")))
 	:testNonNumberArgument (lambda ()
         (this.assertRaises Error #'1- nil "hi"))
 	:testBasic (lambda ()
-	    (this.assertEqual (1- 2) 1))))
+	    (this.assertEqual (1- 2) 1)))
 
-(JSTest.TestCase (object
-	:name "function (format)"
+(test "function (format)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'format nil))
 	:testOneArgument (lambda ()
@@ -1260,10 +1206,9 @@ string" "a\nstring")))
 		(this.assertEqual (format nil "I like %s; %1$s are good." "apples")
 									  "I like apples; apples are good.")
 		(this.assertEqual (format nil "I like %1$s; %1$s are good." "apples")
-									  "I like apples; apples are good."))))
+									  "I like apples; apples are good.")))
 
-(JSTest.TestCase (object
-	:name "function (apply)"
+(test "function (apply)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'apply nil))
 	:testOneArgument (lambda ()
@@ -1277,11 +1222,9 @@ string" "a\nstring")))
 	:testNonListSecondArgument (lambda ()
 		(this.assertRaises Error #'apply nil + 1))
 	:testBasic (lambda ()
-		(this.assertEqual (apply + '(1 2 3)) 6))
-))
+		(this.assertEqual (apply + '(1 2 3)) 6)))
 
-(JSTest.TestCase (object
-	:name "function (map)"
+(test "function (map)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'map nil))
 	:testOneArgument (lambda ()
@@ -1296,12 +1239,11 @@ string" "a\nstring")))
 		(this.assertRaises Error #'map nil (lambda) "not a list"))
 	:testBasic (lambda ()
 		(this.assertEqual (map (lambda (x) (1+ x)) '(1 2 3))
-						  '(2 3 4) nil #'equal))))
+						  '(2 3 4) nil #'equal)))
 
 (let ((testobj (object :one 1 :two 2 :three 3 :four 4 :five (object :six 6 :seven 7 :eight 8)))
 	  (v (lambda (o) (map #'second (items o)))))
-	(JSTest.TestCase (object
-		:name "function (props)"
+	(test "function (props)"
 		:testNoArguments (lambda ()
 			(this.assertRaises Error #'props nil))
 		:testOneProperty (lambda ()
@@ -1314,10 +1256,9 @@ string" "a\nstring")))
 			(let ((newobj (props testobj '(five.six five.eight))))
 				(this.assertEqual (length (items newobj.five)) 2)
 				(this.assertEqual newobj.five.six 6)
-				(this.assertEqual newobj.five.eight 8))))))
+				(this.assertEqual newobj.five.eight 8)))))
 
-(JSTest.TestCase (object
-	:name "function (items)"
+(test "function (items)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'items nil))
 	:testOneArgument (lambda ()
@@ -1331,10 +1272,9 @@ string" "a\nstring")))
 			(this.assertEqual (items obj) '(("one" 2) ("three" 4) ("five" 6)) nil #'equal)))
 	:testArrays (lambda ()
 		(let ((obj '(one two three)))
-			(this.assertEqual (items obj) '(("0" one) ("1" two) ("2" three)) nil #'equal)))))
+			(this.assertEqual (items obj) '(("0" one) ("1" two) ("2" three)) nil #'equal))))
 
-(JSTest.TestCase (object
-	:name "function (nth)"
+(test "function (nth)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'nth nil))
 	:testOneArgument (lambda ()
@@ -1351,10 +1291,9 @@ string" "a\nstring")))
 		(this.assertNotRaises Error #'nth nil (array 5) 10)
 		(this.assertEqual (nth (array 6 7 8) 10) nil))
 	:testBasic (lambda ()
-		(this.assertEqual (nth '(one two) 1) 'two nil #'equal))))
+		(this.assertEqual (nth '(one two) 1) 'two nil #'equal)))
 
-(JSTest.TestCase (object
-	:name "function (first)"
+(test "function (first)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'first nil))
 	:testOneArgument (lambda ()
@@ -1364,10 +1303,9 @@ string" "a\nstring")))
 	:testNonArrayArgument (lambda ()
 		(this.assertRaises Error #'first nil "hi"))
 	:testBasic (lambda ()
-		(this.assertEqual (first '(3 2 1)) 3))))
+		(this.assertEqual (first '(3 2 1)) 3)))
 
-(JSTest.TestCase (object
-	:name "function (second)"
+(test "function (second)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'second nil))
 	:testOneArgument (lambda ()
@@ -1377,10 +1315,9 @@ string" "a\nstring")))
 	:testNonArrayArgument (lambda ()
 		(this.assertRaises Error #'second nil "hi"))
 	:testBasic (lambda ()
-		(this.assertEqual (second '(3 2 1)) 2))))
+		(this.assertEqual (second '(3 2 1)) 2)))
 
-(JSTest.TestCase (object
-	:name "function (third)"
+(test "function (third)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'third nil))
 	:testOneArgument (lambda ()
@@ -1390,7 +1327,7 @@ string" "a\nstring")))
 	:testNonArrayArgument (lambda ()
 		(this.assertRaises Error #'third nil "hi"))
 	:testBasic (lambda ()
-		(this.assertEqual (third '(3 2 1)) 1))))
+		(this.assertEqual (third '(3 2 1)) 1)))
 
 ;; TODO: Test (push)
 ;; TODO: Test (sort!)

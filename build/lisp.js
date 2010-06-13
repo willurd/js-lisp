@@ -30,7 +30,6 @@
  * @namespace
  */
 var lisp = (function (global) {
-	var jseval = eval;
 
 /*jsl:ignore*/ // Suppress jsl warnings
 
@@ -810,8 +809,6 @@ var StringStream = Class.extend({
 		this.data = data;
 		this.length = data.length;
 		this.position = 0;
-		this.line = 1;
-		this.column = 0;
 	},
 	
 	slice: function () {
@@ -847,11 +844,6 @@ var StringStream = Class.extend({
 		
 		var c = this.charAt(this.position);
 		this.position += 1;
-		this.column++;
-		if (c == "\n") {
-			this.line++;
-			this.column = 0;
-		}
 		return c;
 	},
 	
@@ -869,6 +861,12 @@ var StringStream = Class.extend({
 		while (WHITESPACE.indexOf(this.peek()) != -1 && !this.eof()) {
 			this.position++;
 		}
+	},
+	
+	line: function () {
+		var substr = this.data.slice(0, this.position);
+		var matches = substr.match(/\n/g);
+		return matches ? matches.length+1 : 1;
 	}
 });
 
@@ -1238,10 +1236,12 @@ parse.any = function (stream) {
 	{
 	case '(':
 		return parse.sexp(stream);
-	case "'": // Accept either style for quotes (normal single quote,	
-	case "`": // or backtick)
+	case "'":
 		stream.next();
 		return [_S("quote"), parse.any(stream)];
+	case "`":
+		stream.next();
+		return [_S("backquote"), parse.any(stream)];
 	case "#":
 		stream.next();
 		switch (stream.peek())
@@ -1294,8 +1294,8 @@ parse.sexp = function (stream) {
 	stream = validateInput(stream);
 	stream.swallowWhitespace();
 	if (stream.peek() != '(') {
-		throw new parse.ParserException("Invalid sexp at position " +
-			stream.position + " (starting with: '" + stream.peek() + "')");
+		throw new parse.ParserException("Invalid sexp at line " + stream.line() +
+			" (starting with: '" + stream.peek() + "')");
 	}
 	stream.next();
 	stream.swallowWhitespace();
@@ -1335,8 +1335,8 @@ parse.symbol = function (stream) {
 	stream.swallowWhitespace();
 	var badChars = WHITESPACE + '()';
 	if (badChars.indexOf(stream.peek()) != -1) {
-		throw new parse.ParserException("Invalid symbol at position " +
-			stream.position + " (starting with: '" + stream.peek() + "')");
+		throw new parse.ParserException("Invalid symbol at line " + stream.line() +
+			" (starting with: '" + stream.peek() + "')");
 	}
 	var symbol = "";
 	while (badChars.indexOf(stream.peek()) == -1 && !stream.eof()) {
@@ -1352,8 +1352,9 @@ parse.keyword = function (stream) {
 	stream = validateInput(stream);
 	stream.swallowWhitespace();
 	if (stream.peek() != ':') {
-		throw new parse.ParserException("Invalid keyword at position " +
-			stream.position + " (starting with: '" + stream.peek() + "')");
+		throw new parse.ParserException("Invalid keyword at line " + stream.line() +
+			", position " + stream.position + " (starting with: '" +
+			stream.peek() + "')");
 	}
 	stream.next();
 	return new Keyword(parse.symbol(stream).value);
@@ -1366,8 +1367,8 @@ parse.string = function (stream) {
 	stream = validateInput(stream);
 	stream.swallowWhitespace();
 	if (stream.peek() != '"') {
-		throw new parse.ParserException("Invalid string at position " +
-			stream.position + " (starting with: '" + stream.peek() + "')");
+		throw new parse.ParserException("Invalid string at line " + stream.line() +
+			" (starting with: '" + stream.peek() + "')");
 	}
 	var string = "";
 	stream.next();
@@ -1422,7 +1423,7 @@ parse.number = function (stream, match) {
 	}
 	
 	if (!match) {
-		throw new parse.ParserException("Invalid number at position " + stream.position +
+		throw new parse.ParserException("Invalid number at line " + stream.line() +
 			" (starting with: '" + stream.peek() + "')");
 	}
 	
@@ -1437,8 +1438,8 @@ parse.comment = function (stream) {
 	stream = validateInput(stream);
 	stream.swallowWhitespace();
 	if (stream.peek() != ';') {
-		throw new parse.ParserException("Invalid comment at position " +
-			stream.position + " (starting with: '" + stream.peek() + "')");
+		throw new parse.ParserException("Invalid comment at line " + stream.line() +
+			" (starting with: '" + stream.peek() + "')");
 	}
 	var c = '';
 	while ('\n\r'.indexOf(stream.peek()) == -1 &&
@@ -1514,7 +1515,25 @@ defmacro("quote", function (expression) {
 	assert(arguments.length === 1, "(quote) requires 1 argument (got " +
 		arguments.length + ")");
 	
-	return checkResolve(expression);
+	return expression;
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name backquote
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("backquote", function (expression) {
+	expression = checkResolve(expression);
+	expression = checkExplode(expression);
+	return expression;
 });
 
 /**
@@ -1639,20 +1658,17 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 				return null; // This macro does nothing
 			}
 			args = deepCopyArray(args);
-			var tempEnv = lisp.env;
-			lisp.env = new Env(env, {});
-			lisp.env.let("this", this);
+			lisp.env = new Env(lisp.env);
+			//lisp.env.let("this", this); // Is this necessary or even wanted?
 			lisp.env.let("arguments", arguments);
 			setargs(arglist, argsToArray(arguments));
 			var body = deepCopyArray(args.slice(2));
 			var ret;
 			for (var i = 0; i < body.length; i++) {
-				ret = checkResolve(body[i]); // Resolve anything in the expression tree that needs resolving
-				ret = checkExplode(ret); // Check for @ symbols in the expression
-				ret = resolve(ret);
+				ret = resolve(body[i]);
 			}
 			ret = resolve(ret); // FIXME: This extra resolve is a hack
-			lisp.env = tempEnv;
+			lisp.env = lisp.env.parent;
 			return ret;
 		});
 		lisp.env.set(name, macro);
@@ -2253,7 +2269,7 @@ defmacro("||", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @name ||
+ * @name ||=
  * @lisp
  * @function
  * @member lisp.macros
@@ -3645,6 +3661,31 @@ defun("to-boolean", function (value) {
 		arguments.length + ")");
 	
 	return Boolean(value);
+});
+
+/**
+ * <pre>
+ * Converts the given value to a symbol.
+ * 
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @tested
+ * 
+ * @name to-symbol
+ * @lisp
+ * @function
+ * @member lisp.functions
+ * 
+ * @param {mixed} value
+ *     The value to turn into a symbol.
+ */
+defun("to-symbol", function (value) {
+	// Input validation
+	assert(arguments.length === 1, "(to-symbol) requires 1 argument (got " +
+		arguments.length + ")");
+	
+	return new lisp.Symbol(String(value));
 });
 
 /**

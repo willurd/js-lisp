@@ -630,6 +630,31 @@ defun("to-boolean", function (value) {
 
 /**
  * <pre>
+ * Converts the given value to a symbol.
+ * 
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @tested
+ * 
+ * @name to-symbol
+ * @lisp
+ * @function
+ * @member lisp.functions
+ * 
+ * @param {mixed} value
+ *     The value to turn into a symbol.
+ */
+defun("to-symbol", function (value) {
+	// Input validation
+	assert(arguments.length === 1, "(to-symbol) requires 1 argument (got " +
+		arguments.length + ")");
+	
+	return new lisp.Symbol(String(value));
+});
+
+/**
+ * <pre>
  * Converts the given value to a json representation of that value.
  * 
  * TODO: Add examples

@@ -30,7 +30,25 @@ defmacro("quote", function (expression) {
 	assert(arguments.length === 1, "(quote) requires 1 argument (got " +
 		arguments.length + ")");
 	
-	return checkResolve(expression);
+	return expression;
+});
+
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name backquote
+ * @lisp
+ * @function
+ * @member lisp.macros
+ */
+defmacro("backquote", function (expression) {
+	expression = checkResolve(expression);
+	expression = checkExplode(expression);
+	return expression;
 });
 
 /**
@@ -155,20 +173,17 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 				return null; // This macro does nothing
 			}
 			args = deepCopyArray(args);
-			var tempEnv = lisp.env;
-			lisp.env = new Env(env, {});
-			lisp.env.let("this", this);
+			lisp.env = new Env(lisp.env);
+			//lisp.env.let("this", this); // Is this necessary or even wanted?
 			lisp.env.let("arguments", arguments);
 			setargs(arglist, argsToArray(arguments));
 			var body = deepCopyArray(args.slice(2));
 			var ret;
 			for (var i = 0; i < body.length; i++) {
-				ret = checkResolve(body[i]); // Resolve anything in the expression tree that needs resolving
-				ret = checkExplode(ret); // Check for @ symbols in the expression
-				ret = resolve(ret);
+				ret = resolve(body[i]);
 			}
 			ret = resolve(ret); // FIXME: This extra resolve is a hack
-			lisp.env = tempEnv;
+			lisp.env = lisp.env.parent;
 			return ret;
 		});
 		lisp.env.set(name, macro);
@@ -769,7 +784,7 @@ defmacro("||", function () {
  * TODO: Add examples
  * </pre>
  * 
- * @name ||
+ * @name ||=
  * @lisp
  * @function
  * @member lisp.macros

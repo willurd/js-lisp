@@ -92,10 +92,12 @@ parse.any = function (stream) {
 	{
 	case '(':
 		return parse.sexp(stream);
-	case "'": // Accept either style for quotes (normal single quote,	
-	case "`": // or backtick)
+	case "'":
 		stream.next();
 		return [_S("quote"), parse.any(stream)];
+	case "`":
+		stream.next();
+		return [_S("backquote"), parse.any(stream)];
 	case "#":
 		stream.next();
 		switch (stream.peek())
@@ -148,8 +150,8 @@ parse.sexp = function (stream) {
 	stream = validateInput(stream);
 	stream.swallowWhitespace();
 	if (stream.peek() != '(') {
-		throw new parse.ParserException("Invalid sexp at position " +
-			stream.position + " (starting with: '" + stream.peek() + "')");
+		throw new parse.ParserException("Invalid sexp at line " + stream.line() +
+			" (starting with: '" + stream.peek() + "')");
 	}
 	stream.next();
 	stream.swallowWhitespace();
@@ -189,8 +191,8 @@ parse.symbol = function (stream) {
 	stream.swallowWhitespace();
 	var badChars = WHITESPACE + '()';
 	if (badChars.indexOf(stream.peek()) != -1) {
-		throw new parse.ParserException("Invalid symbol at position " +
-			stream.position + " (starting with: '" + stream.peek() + "')");
+		throw new parse.ParserException("Invalid symbol at line " + stream.line() +
+			" (starting with: '" + stream.peek() + "')");
 	}
 	var symbol = "";
 	while (badChars.indexOf(stream.peek()) == -1 && !stream.eof()) {
@@ -206,8 +208,9 @@ parse.keyword = function (stream) {
 	stream = validateInput(stream);
 	stream.swallowWhitespace();
 	if (stream.peek() != ':') {
-		throw new parse.ParserException("Invalid keyword at position " +
-			stream.position + " (starting with: '" + stream.peek() + "')");
+		throw new parse.ParserException("Invalid keyword at line " + stream.line() +
+			", position " + stream.position + " (starting with: '" +
+			stream.peek() + "')");
 	}
 	stream.next();
 	return new Keyword(parse.symbol(stream).value);
@@ -220,8 +223,8 @@ parse.string = function (stream) {
 	stream = validateInput(stream);
 	stream.swallowWhitespace();
 	if (stream.peek() != '"') {
-		throw new parse.ParserException("Invalid string at position " +
-			stream.position + " (starting with: '" + stream.peek() + "')");
+		throw new parse.ParserException("Invalid string at line " + stream.line() +
+			" (starting with: '" + stream.peek() + "')");
 	}
 	var string = "";
 	stream.next();
@@ -276,7 +279,7 @@ parse.number = function (stream, match) {
 	}
 	
 	if (!match) {
-		throw new parse.ParserException("Invalid number at position " + stream.position +
+		throw new parse.ParserException("Invalid number at line " + stream.line() +
 			" (starting with: '" + stream.peek() + "')");
 	}
 	
@@ -291,8 +294,8 @@ parse.comment = function (stream) {
 	stream = validateInput(stream);
 	stream.swallowWhitespace();
 	if (stream.peek() != ';') {
-		throw new parse.ParserException("Invalid comment at position " +
-			stream.position + " (starting with: '" + stream.peek() + "')");
+		throw new parse.ParserException("Invalid comment at line " + stream.line() +
+			" (starting with: '" + stream.peek() + "')");
 	}
 	var c = '';
 	while ('\n\r'.indexOf(stream.peek()) == -1 &&

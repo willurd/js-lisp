@@ -1,5 +1,6 @@
 # TODO
 
+* Port all (JSTest.TestCase ...) to (test ...)
 * Finish testing (and preferably documenting) the functionality that already exists.
 * Rewrite cond with (defmacro)
 * Create ! as a shortcut for (not ...)

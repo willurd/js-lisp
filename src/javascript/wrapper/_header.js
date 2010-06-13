@@ -30,4 +30,3 @@
  * @namespace
  */
 var lisp = (function (global) {
-	var jseval = eval;
