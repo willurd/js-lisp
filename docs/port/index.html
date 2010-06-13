@@ -119,7 +119,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>append</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node246.html"><code>append</code></a></td><td class="type">loop clause</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node246.html"><code>appending</code></a></td><td class="type">loop clause</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node81.html"><code>apply</code></a></td><td class="type">function</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node81.html"><code>apply</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node180.html"><code>applyhook</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node180.html"><code>*applyhook*</code></a></td><td class="type">variable</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node230.html"><code>apropos</code></a></td><td class="type">function</td><td class="notes"></td></tr>
@@ -144,8 +144,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node131.html"><code>ash</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node128.html"><code>asin</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node128.html"><code>asinh</code></a></td><td class="type">function</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node221.html"><code>assert</code></a></td><td class="type">macro</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node336.html"><code>assert</code></a></td><td class="type">macro</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node221.html"><code>assert</code></a></td><td class="type">function (was macro)</td><td class="notes">Modified. As js-lisp doesn't currently have conditions and restarts, that functionality has been removed from assert. Now it only takes 2 arguments -- the expression to evaluate in a boolean context, and the error message should it evaluate to false.</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node153.html"><code>assoc</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node153.html"><code>assoc-if</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node153.html"><code>assoc-if-not</code></a></td><td class="type">function</td><td class="notes"></td></tr>
@@ -314,9 +313,9 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node73.html"><code>complexp</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html"><code>compute-applicable-methods</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node342.html"><code>compute-restarts</code></a></td><td class="type">function</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node143.html"><code>concatenate</code></a></td><td class="type">function</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node143.html"><code>concat</code></a></td><td class="type">function</td><td class="notes">Renamed from "concatenate". Modified. concat only takes a list of strings now, not any type, and thus does not require you supply the return type. It returns the given strings joined together as one.</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node185.html"><code>concatenated-stream-streams</code></a></td><td class="type">function</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node84.html"><code>cond</code></a></td><td class="type">macro</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node84.html"><code>cond</code></a></td><td class="type">macro</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node346.html"><code>condition</code></a></td><td class="type">type</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node125.html"><code>conjugate</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node148.html"><code>cons</code></a></td><td class="type">function</td><td class="notes"></td></tr>
@@ -473,7 +472,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node342.html"><code>find-restart</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node118.html"><code>find-symbol</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node198.html"><code>finish-output</code></a></td><td class="type">function</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>first</code></a></td><td class="type">function</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>first</code></a></td><td class="type">function</td><td class="notes">Modified. Returns the first element of any sequence-like object (actually, simply returns element 0 of any object that has it). This includes arrays, strings, the arguments object passed into functions, etc.</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node83.html"><code>flet</code></a></td><td class="type">special form</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node130.html"><code>float</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node130.html"><code>float-digits</code></a></td><td class="type">function</td><td class="notes"></td></tr>
@@ -485,11 +484,11 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node73.html"><code>floatp</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node130.html"><code>floor</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node244.html"><code>for</code></a></td><td class="type">loop clause</td><td class="notes"></td></tr>
-	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node200.html"><code>format</code></a></td><td class="type">function</td><td class="notes">Modified. The format language is more of a c or php-like format language.</td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node200.html"><code>format</code></a></td><td class="type">function</td><td class="notes">Modified. This function uses a JavaScript version of the php format language.</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node258.html"><code>formatter</code></a></td><td class="type">macro</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>fourth</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node81.html"><code>funcall</code></a></td><td class="type">macro (was function)</td><td class="notes">Modified. Takes an object as its first argument, and a dot-path (e.g. prop.prop.func) pointing to a function on the given object to call.</td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node78.html"><code>function</code></a></td><td class="type">special form</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node78.html"><code>function</code></a></td><td class="type">special form</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node102.html"><code>function-information</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html"><code>function-keywords</code></a></td><td class="type">generic function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node224.html"><code>function-lambda-expression</code></a></td><td class="type">function</td><td class="notes"></td></tr>
@@ -506,7 +505,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html"><code>generic-flet</code></a></td><td class="type">special form</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html"><code>generic-function</code></a></td><td class="type">macro</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node311.html"><code>generic-labels</code></a></td><td class="type">special form</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node110.html"><code>gensym</code></a></td><td class="type">function</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node110.html"><code>gensym</code></a></td><td class="type">function</td><td class="notes">Modified. Does not accept any arguments. Simply returns a random symbol, very much like a guid, and that's it.</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node110.html"><code>*gensym-counter*</code></a></td><td class="type">variable</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node110.html"><code>gentemp</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node108.html"><code>get</code></a></td><td class="type">function</td><td class="notes"></td></tr>
@@ -603,7 +602,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node134.html"><code>least-positive-normalized-single-float</code></a></td><td class="type">constant</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node134.html"><code>least-positive-short-float</code></a></td><td class="type">constant</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node134.html"><code>least-positive-single-float</code></a></td><td class="type">constant</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node142.html"><code>length</code></a></td><td class="type">function</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node142.html"><code>length</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node83.html"><code>let</code></a></td><td class="type">macro (was special form)</td><td class="notes">Modified. Behaves like let* (let expressions can access the values of previous expressions in the let).</td></tr>
 	<tr class="noPlans"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node83.html"><code>let*</code></a></td><td class="type">special form</td><td class="notes">Functionality performed by let.</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node233.html"><code>lisp-implementation-type</code></a></td><td class="type">function</td><td class="notes"></td></tr>
@@ -683,7 +682,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node184.html"><code>make-synonym-stream</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node184.html"><code>make-two-way-stream</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node79.html"><code>makunbound</code></a></td><td class="type">function</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node143.html"><code>map</code></a></td><td class="type">function</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node143.html"><code>map</code></a></td><td class="type">function</td><td class="notes">Modified. Does not require a return type, as it only takes and returns arrays. Only takes one array.</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node351.html"><code>map-fn</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node143.html"><code>map-into</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node90.html"><code>mapc</code></a></td><td class="type">function</td><td class="notes"></td></tr>
@@ -712,7 +711,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node246.html"><code>minimizing</code></a></td><td class="type">loop clause</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node123.html"><code>minusp</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node145.html"><code>mismatch</code></a></td><td class="type">function</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node130.html"><code>mod</code></a></td><td class="type">function</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node130.html"><code>%</code></a></td><td class="type">function</td><td class="notes">Renamed from "mod".</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node119.html"><code>*modules*</code></a></td><td class="type">variable</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node134.html"><code>most-negative-double-float</code></a></td><td class="type">constant</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node134.html"><code>most-negative-fixnum</code></a></td><td class="type">constant</td><td class="notes"></td></tr>
@@ -769,7 +768,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node144.html"><code>nsubstitute</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node144.html"><code>nsubstitute-if</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node144.html"><code>nsubstitute-if-not</code></a></td><td class="type">function</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>nth</code></a></td><td class="type">function</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>nth</code></a></td><td class="type">function</td><td class="notes">Modified. The order of the arguments changed -- it is now (nth list n).</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node94.html"><code>nth-value</code></a></td><td class="type">macro</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>nthcdr</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node73.html"><code>null</code></a></td><td class="type">function</td><td class="notes"></td></tr>
@@ -875,7 +874,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<font size="+3+">Q</font> 
 	<table cellpadding="0" cellspacing="0"> 
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node183.html"><code>*query-io*</code></a></td><td class="type">variable</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node78.html"><code>quote</code></a></td><td class="type">special form</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node78.html"><code>quote</code></a></td><td class="type">special form</td><td class="notes"></td></tr>
 	</table> 
  
 	<a name="R"></a> 
@@ -960,7 +959,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node350.html"><code>scan-symbols</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node165.html"><code>schar</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node145.html"><code>search</code></a></td><td class="type">function</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>second</code></a></td><td class="type">function</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>second</code></a></td><td class="type">function</td><td class="notes">Modified. Returns the second element of any sequence-like object (actually, simply returns element 1 of any object that has it).</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node349.html"><code>series</code></a></td><td class="type">type specifier</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node349.html"><code>series</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node360.html"><code>series-element-type</code></a></td><td class="type">type specifier</td><td class="notes"></td></tr>
@@ -1086,7 +1085,7 @@ Replace: <tr class="notDone"><td class="symbol">$1$2</td><td class="type">$3</td
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node198.html"><code>terpri</code></a></td><td class="type">function</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node106.html"><code>the</code></a></td><td class="type">special form</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node245.html"><code>thereis</code></a></td><td class="type">loop clause</td><td class="notes"></td></tr>
-	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>third</code></a></td><td class="type">function</td><td class="notes"></td></tr>
+	<tr class="done"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node149.html"><code>third</code></a></td><td class="type">function</td><td class="notes">Modified. Returns the third element of any sequence-like object (actually, simple returns element 2 of any object that has it).</td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node96.html"><code>throw</code></a></td><td class="type">special form</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node230.html"><code>time</code></a></td><td class="type">macro</td><td class="notes"></td></tr>
 	<tr class="notDone"><td class="symbol"><a href="http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node355.html"><code>to-alter</code></a></td><td class="type">function</td><td class="notes"></td></tr>

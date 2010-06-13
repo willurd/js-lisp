@@ -1265,11 +1265,9 @@ defun("items", function (object) {
 
 /**
  * <pre>
- * Returns the element at the given index in the given array.
+ * Returns the element at the given index in the given sequence.
  * 
- * FIXME: Should this accept any object that has a concept of positional
- *        elements, like strings?
- * FIXME: Should this accept a list of indexes as well? e.g. (nth a '(1 3))
+ * FIXME: Should this accept a list of indices as well? e.g. (nth a '(1 3))
  * </pre>
  * 
  * @name nth
@@ -1277,34 +1275,32 @@ defun("items", function (object) {
  * @function
  * @member lisp.functions
  * 
- * @param {Array} array
- *     The array that contains the value to return.
- * @param {Number} index
- *     The index to return on the given array.
+ * @param {sequence} sequence
+ *     The sequence that contains the value to return.
+ * @param {number} index
+ *     The index to return on the given sequence.
  * 
  * @example Basic usage
  *     >> (nth '(one two three) 1)
  *     => two
  */
-defun("nth", function (array, index) {
+defun("nth", function (sequence, index) {
 	// Input validation
 	assert(arguments.length === 2, "(nth) requires 2 arguments (got " +
 		arguments.length + ")");
-	assert(array instanceof Array, "(nth) requires an Array as its first argument " +
-		"(got " + toLisp(array) + ")");
 	assert(typeof(index) === "number", "(nth) requires a number as its second argument " +
 		"(got " + toLisp(index) + ")");
 	
-	if (array.length === 0) {
+	if (sequence.length === 0) {
 		return null;
 	}
 	
-	return array[index];
+	return sequence[index];
 });
 
 /**
  * <pre>
- * Returns the first element in the given array.
+ * Returns the first element in the given sequence.
  * 
  * TODO: Document me
  * TODO: Add examples
@@ -1319,23 +1315,21 @@ defun("nth", function (array, index) {
  * @function
  * @member lisp.functions
  */
-defun("first", function (list) {
+defun("first", function (sequence) {
 	// Input validation
 	assert(arguments.length === 1, "(first) requires 1 argument (got " +
 		arguments.length + ")");
-	assert(list instanceof Array, "(first) requires an Array as its argument " +
-		"(got " + toLisp(list) + ")");
 	
-	if (list.length === 0) {
+	if (sequence.length === 0) {
 		return null;
 	}
 	
-	return list[0];
+	return sequence[0];
 });
 
 /**
  * <pre>
- * Returns the second element in the given array.
+ * Returns the second element in the given sequence.
  * 
  * TODO: Document me
  * TODO: Add examples
@@ -1350,23 +1344,21 @@ defun("first", function (list) {
  * @function
  * @member lisp.functions
  */
-defun("second", function (list) {
+defun("second", function (sequence) {
 	// Input validation
 	assert(arguments.length === 1, "(second) requires 1 argument (got " +
 		arguments.length + ")");
-	assert(list instanceof Array, "(second) requires an Array as its argument " +
-		"(got " + toLisp(list) + ")");
 	
-	if (list.length < 2) {
+	if (sequence.length < 2) {
 		return null;
 	}
 	
-	return list[1];
+	return sequence[1];
 });
 
 /**
  * <pre>
- * Returns the third element in the given array.
+ * Returns the third element in the given sequence.
  * 
  * TODO: Document me
  * TODO: Add examples
@@ -1381,18 +1373,16 @@ defun("second", function (list) {
  * @function
  * @member lisp.functions
  */
-defun("third", function (list) {
+defun("third", function (sequence) {
 	// Input validation
 	assert(arguments.length === 1, "(third) requires 1 argument (got " +
 		arguments.length + ")");
-	assert(list instanceof Array, "(third) requires an Array as its argument " +
-		"(got " + toLisp(list) + ")");
 	
-	if (list.length < 3) {
+	if (sequence.length < 3) {
 		return null;
 	}
 	
-	return list[2];
+	return sequence[2];
 });
 
 /**

@@ -9,6 +9,7 @@
 * Create <<, >>, &, | (bitwise operations)
 * Create <<=, >>=, &=, |=
 * Write the generic (do) macro
+* Add regex literals /.../..
 * Think about adding the concept of generators
   * (yield 'some 'values) throws a lisp.exception.YieldException
 * Create all of the rest of the functions/macros that have TODOs in the project ((case) or (switch), etc)
