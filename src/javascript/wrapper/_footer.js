@@ -5,6 +5,16 @@ if ((typeof(window) == "undefined") &&
 	(typeof(global) == "object") && global && // Make sure it isn't null
 	(typeof(require) == "function") &&
 	(typeof(exports) == "object") && exports) {
+	
+	var sys = require("sys"),
+		fs  = require("fs");
+	
+	lisp.log = sys.puts;
+	
+	lisp.load = function (filepath) {
+		exports.eval(fs.readFileSync(filepath));
+	};
+	
 	// We are probably running in node.js now.
 	// FIXME: Find a better way to tell we're running in node.js
 	for (var key in lisp) {
@@ -12,6 +22,4 @@ if ((typeof(window) == "undefined") &&
 			exports[key] = lisp[key];
 		}
 	}
-	
-	lisp.log = require("sys").puts;
 }

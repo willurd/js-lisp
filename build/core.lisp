@@ -1,3 +1,12 @@
+(defmacro defclass (name & params)
+  "Creates a new class, using lisp.Class, passing in the given
+arguments as a plist to lisp.Class.extend()."
+  ;; Check for the existence of a doc string
+  (when (and (== (% (length params) 2) 1)
+             (is-string (first params)))
+    (params.shift))
+  `(setq ,name (lisp.Class.extend (object ,@params))))
+
 ; (defmacro dolist ((var lst) & body)
 ;   (let ((indexname (gensym))
 ;         (count (length lst)))

@@ -1866,22 +1866,41 @@ defmacro("try", function () {
 		for (i = 0; i < args.length; i++) {
 			ret = resolve(args[i]);
 		}
-	} catch (e) {
-		// Evaluate the `catch` expression if there is one.
+	} catch (error) {
+		// Evaluate the catch expression if there is one.
 		if (catchExpression) {
-			var expression = [_S("lambda")].concat(catchExpression.slice(1));
-			if (expression.length === 1) { // Add an arglist if there isn't one
-				expression.push([]);
+			if (catchExpression.length > 0) {
+				var tempEnv = lisp.env;
+				lisp.env = new Env(lisp.env);
+			
+				if (catchExpression.length >= 2) { // If there is an argument list
+					var catchArglist = catchExpression[1];
+					assert(catchArglist instanceof Array, "(catch) expression's first " +
+						"argument must be an Array (got " + toLisp(catchArglist) + ")");
+					assert(catchArglist.length <= 1, "(catch) requires an arglist with " +
+						"either 1 argument or no arguments (got " + catchArglist.length + ")");
+					if (catchArglist.length === 1) {
+						assert(catchArglist[0] instanceof Symbol, "(catch) arglist " +
+							"requires a symbol as its argument, or nothing (got " +
+							toLisp(catchArglist[0]) + ")");
+						lisp.env.let(catchArglist[0], error);
+					}
+				}
+				
+				var expressions = catchExpression.slice(2);
+				for (var i = 0; i < expressions.length; i++) {
+					resolve(expressions[i]);
+				}
+				
+				lisp.env = tempEnv;
 			}
-			var callback = resolve(expression);
-			callback(e);
 		} else {
 			// If there is no catch expression, throw the error for something
 			// else to catch it (or not).
 			throw e;
 		}
 	} finally {
-		// Evaluate all expressions in the `finally` expression if there
+		// Evaluate all expressions in the finally expression if there
 		// is one.
 		if (finallyExpression) {
 			for (i = 0; i < finallyExpression.length; i++) {
@@ -4470,6 +4489,16 @@ if ((typeof(window) == "undefined") &&
 	(typeof(global) == "object") && global && // Make sure it isn't null
 	(typeof(require) == "function") &&
 	(typeof(exports) == "object") && exports) {
+	
+	var sys = require("sys"),
+		fs  = require("fs");
+	
+	lisp.log = sys.puts;
+	
+	lisp.load = function (filepath) {
+		exports.eval(fs.readFileSync(filepath));
+	};
+	
 	// We are probably running in node.js now.
 	// FIXME: Find a better way to tell we're running in node.js
 	for (var key in lisp) {
@@ -4477,7 +4506,5 @@ if ((typeof(window) == "undefined") &&
 			exports[key] = lisp[key];
 		}
 	}
-	
-	lisp.log = require("sys").puts;
 }
 
