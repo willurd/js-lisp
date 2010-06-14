@@ -7,7 +7,7 @@
 ")
 
 (setq symbol-template "
-<tr class=\"<%=status%>\"><td class=\"symbol\"><a href=\"../symbols/lisp.<%=type%>s.html#<%=name%>\"><code><%=name%></code></a></td><td class=\"type\"><%=type%></td><td class=\"notes\"><%=notes%></td></tr>
+<tr class=\"<%=status%>\"><td class=\"symbol\"><a href=\"../symbols/lisp.<%=class%>.html#<%=name%>\"><code><%=name%></code></a></td><td class=\"type\"><%=type%></td><td class=\"notes\"><%=notes%></td></tr>
 ")
 
 (setq symbols
@@ -741,7 +741,7 @@
 		(:name "provide" :status "notDone" :type "function" :notes "")
 		(:name "psetf" :status "notDone" :type "macro" :notes "")
 		(:name "psetq" :status "notDone" :type "macro" :notes "")
-		(:name "push" :status "notDone" :type "macro" :notes "")
+		(:name "push" :status "done" :type "function (was macro)" :notes "Modified. Takes a value and a list (not a place).")
 		(:name "pushnew" :status "notDone" :type "macro" :notes ""))
 	  ("Q"
 		(:name "*query-io*" :status "notDone" :type "variable" :notes "")

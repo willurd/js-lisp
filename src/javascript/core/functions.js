@@ -808,6 +808,35 @@ defun("to-lower", function (string) {
 
 /**
  * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name starts-with
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("starts-with", function (string, pattern) {
+	// Input validation
+	assert(arguments.length === 2, "(starts-with) requires 2 arguments (got " +
+		arguments.length + ")");
+	assert(typeof(string) === "string", "(starts-with) requires a string as " +
+		"it's first argument (got " + toLisp(string) + ")");
+	
+	if (pattern instanceof RegExp) {
+		pattern = pattern.source;
+	}
+	
+	assert(typeof(pattern) === "string", "(starts-with) requires a string or " +
+		"regular expression as it's second argument (got " + toLisp(pattern) + ")");
+	
+	return !!string.match(new RegExp("^" + pattern));
+});
+
+/**
+ * <pre>
  * Reduces the given arguments on the / operator.
  * 
  * TODO: Add examples

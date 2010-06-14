@@ -26,7 +26,12 @@
 			(div.setAttribute "class" "symbolSet")
 			;; Loop over each symbol and add the evaluated symbol-template to html.
 			(dolist (sym syms)
-				(setq html (concat html (tmpl symbol-template (object-from-plist sym)))))
+				(let ((data (object-from-plist sym)))
+					(setq data.class (cond ((starts-with data.type "function") "functions")
+										   ((starts-with data.type "macro") "macros")
+										   ((starts-with data.type "special form") "specialforms")
+										   (t "unknown")))
+					(setq html (concat html (tmpl symbol-template data)))))
 			;; Evaluate the set-template.
 			(setq div.innerHTML (tmpl set-template (object :setname name :symbols html)))
 			(body.appendChild div))))
