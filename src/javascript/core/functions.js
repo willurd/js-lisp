@@ -1300,6 +1300,32 @@ defun("nth", function (sequence, index) {
 
 /**
  * <pre>
+ * Returns all but the first element in the given sequence.
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name rest
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("rest", function (sequence) {
+	// Input validation
+	assert(arguments.length === 1, "(rest) requires 1 argument (got " +
+		arguments.length + ")");
+	
+	if (sequence.length === 0) {
+		return null;
+	}
+	
+	return sequence.slice(1);
+});
+
+/**
+ * <pre>
  * Returns the first element in the given sequence.
  * 
  * TODO: Document me
