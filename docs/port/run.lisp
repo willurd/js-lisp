@@ -1,5 +1,8 @@
 ;; This will run when the page finishes loading.
 ($ (lambda ()
+  ;; Add all the symbols to the page
+  (setup-symbols)
+  
   ;; Count all of the finished and unfinished symbols and place
   ;; their counts in the page header.
   (let ((done             ($ ".done"))
@@ -7,9 +10,6 @@
 		(done-label       ($ "#done-count"))
 		(not-done-label   ($ "#not-done-count"))
 		(tool-non-planned ($ "#tool-non-planned")))
-	;; Add all the symbols to the page
-	(setup-symbols)
-	
 	;; Set the labels for the done/not done counts
 	(done-label.html done.length)
 	(not-done-label.html not-done.length)
