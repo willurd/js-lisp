@@ -732,6 +732,8 @@ defun("lisp-string", function (value) {
 /**
  * <pre>
  * Converts the given string to uppercase.
+ * 
+ * FIXME: Should this support the :start and :end keys?
  * </pre>
  * 
  * @tested
@@ -770,6 +772,8 @@ defun("to-upper", function (string) {
 /**
  * <pre>
  * Converts the given string to lowercase.
+ * 
+ * FIXME: Should this support the :start and :end keys?
  * </pre>
  * 
  * @tested
@@ -1475,14 +1479,19 @@ defun("push", function (list, value) {
  * @function
  * @member lisp.functions
  */
-defun("sort!", function (list) {
+defun("sort!", function (list, compareFunc) {
 	// Input validation
-	assert(arguments.length === 1, "(sort!) requires 1 argument (got " +
-		arguments.length + ")");
+	assert(arguments.length >= 1 && arguments.length <= 2, "(sort!) requires " +
+		"1 or 2 arguments (got " + arguments.length + ")");
 	assert(list instanceof Array, "(sort!) requires an Array as its first " +
 		"argument (got " + toLisp(list) + ")");
+	assert(compareFunc === undefined || typeof(compareFunc) === "function",
+		"(sort!) requires a function (or nothing) as its second argument " +
+		"(got " + toLisp(compareFunc) + ")");
 	
-	return list.sort();
+	compareFunc = compareFunc || function (a, b) { return a > b; };
+	
+	return list.sort(compareFunc);
 });
 
 /**
