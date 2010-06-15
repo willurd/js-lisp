@@ -11,7 +11,8 @@ return {
 	
 	exception: {
 		StreamException: StreamException,
-		StreamEOFException: StreamEOFException
+		StreamEOFException: StreamEOFException,
+		ArgumentError: ArgumentError
 	},
 	
 	parse: parse,
@@ -21,12 +22,15 @@ return {
 	eval: function (string, env) {
 		var tempEnv = lisp.env;
 		lisp.env = env || lisp.env;
-		var expressions = parse.script(string);
-		var ret = null;
-		for (var i = 0; i < expressions.length; i++) {
-			ret = resolve(expressions[i]);
+		try {
+			var expressions = parse.script(string);
+			var ret = null;
+			for (var i = 0; i < expressions.length; i++) {
+				ret = resolve(expressions[i]);
+			}
+		} finally {
+			lisp.env = tempEnv;
 		}
-		lisp.env = tempEnv;
 		return ret;
 	},
 	

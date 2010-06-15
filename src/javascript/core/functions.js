@@ -42,6 +42,27 @@ defun("jseval", function (expression) {
 
 /**
  * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name eval-string
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("eval-string", function (str) {
+	assert(arguments.length === 1, "(eval-string) requires 1 argument (got " +
+		arguments.length + ")");
+	assert(typeof(str) === "string", "(eval-string) requires a string as its " +
+		"argument (got " + toLisp(str) + ")");
+	
+	return lisp.eval(str);
+});
+
+/**
+ * <pre>
  * Raises new Error(errorMessage) if assertion evaluates to false.
  * </pre>
  * 

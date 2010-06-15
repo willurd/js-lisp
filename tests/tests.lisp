@@ -1,3 +1,5 @@
+(setq ArgumentError lisp.exception.ArgumentError)
+
 (defmacro test (name & plist)
   "This is just a nicer syntax for defining a JSTest test case."
   `(JSTest.TestCase (object
@@ -1375,4 +1377,13 @@ string" "a\nstring")))
 ;; TODO: Test (push)
 ;; TODO: Test (sort!)
 ;; TODO: Test (sort)
+
+(test "function (typed-sort)"
+	;:testNoArguments (lambda ())
+	:testNonArrayFirstArgument (lambda ()
+		(this.assertRaises ArgumentError (lambda () (typed-sort "hello"))))
+	:testNonFunctionSecondArgument (lambda ()
+		(this.assertRaises ArgumentError (lambda () (typed-sort '(2 3 1) "hi"))))
+)
+
 ;; TODO: Test (length)

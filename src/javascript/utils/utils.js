@@ -1,3 +1,12 @@
+var ArgumentError = Class.extend({
+	init: function (message) {
+		this.message = message;
+	},
+	toString: function () {
+		return "ArgumentError: " + this.message;
+	}
+});
+
 function assert (assertion, errorString) {
 	if (!assertion) {
 		throw new Error(errorString || "");

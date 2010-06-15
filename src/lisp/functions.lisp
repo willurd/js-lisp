@@ -6,3 +6,6 @@
   (assert (is-array array)
           (format nil "(sort) requires an Array as its argument (got %l)" array))
   (sort! (array.concat) compareFunc))
+
+(defun typed-sort (seq:Array compareFunc::function)
+  (sort! (seq.concat) compareFunc))

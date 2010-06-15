@@ -173,17 +173,23 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 				return null; // This macro does nothing
 			}
 			args = deepCopyArray(args);
-			lisp.env = new Env(lisp.env);
-			//lisp.env.let("this", this); // Is this necessary or even wanted?
-			lisp.env.let("arguments", arguments);
-			setargs(arglist, argsToArray(arguments));
-			var body = deepCopyArray(args.slice(2));
-			var ret;
-			for (var i = 0; i < body.length; i++) {
-				ret = resolve(body[i]);
+			var tempEnv = lisp.env;
+			var ret = null;
+			
+			try {
+				lisp.env = new Env(lisp.env);
+				//lisp.env.let("this", this); // Is this necessary or even wanted?
+				lisp.env.let("arguments", arguments);
+				setargs(arglist, argsToArray(arguments));
+				var body = deepCopyArray(args.slice(2));
+				for (var i = 0; i < body.length; i++) {
+					ret = resolve(body[i]);
+				}
+				ret = resolve(ret); // FIXME: This extra resolve is a hack
+			} finally {
+				lisp.env = tempEnv;
 			}
-			ret = resolve(ret); // FIXME: This extra resolve is a hack
-			lisp.env = lisp.env.parent;
+			
 			return ret;
 		});
 		lisp.env.set(name, macro);
@@ -234,31 +240,55 @@ defmacro("lambda", function (arglist /*, &rest */) {
 		return function () {
 			var largs = argsToArray(arguments);
 			var tempEnv = lisp.env;
-			lisp.env = new Env(env);
-			lisp.env.let("this", this);
-			lisp.env.let("arguments", arguments);
+			var ret = null;
 			
-			var i;
-			for (i = 0; i < arglist.length; i++) {
-				var argname = arglist[i];
-				if (argname == "&") {
-					lisp.env.let(arglist[i+1], largs.slice(i));
-					i = largs.length;
-					break;
-				} else {
-					if (i <= largs.length-1) {
-						lisp.env.let(argname, largs[i]);
+			try {
+				lisp.env = new Env(env);
+				lisp.env.let("this", this);
+				lisp.env.let("arguments", arguments);
+			
+				var i;
+				for (i = 0; i < arglist.length; i++) {
+					var argname = arglist[i];
+					if (argname == "&") {
+						lisp.env.let(arglist[i+1], largs.slice(i));
+						i = largs.length;
+						break;
 					} else {
-						lisp.env.let(argname, undefined);
+						var str = argname.toString();
+						var index = str.indexOf(":");
+						var type;
+						if (index >= 0) {
+							argname = str.slice(0, index);
+							type = lisp.eval(str.slice(index+1));
+						}
+						if (i <= largs.length-1) {
+							var value = largs[i];
+							if (type instanceof Keyword) { // Match on typeof(value)
+								if (typeof(value) != String(type)) {
+									throw new ArgumentError("Got invalid argument for " +
+										toLisp(argname) + ". Expected an argument of type " +
+										toLisp(String(type)) + " (got " + toLisp(value) + ")");
+								}
+							} else if (true) {
+							
+							} else {
+								throw new Error("Invalid type specifier ")
+							}
+							lisp.env.let(argname, value);
+						} else {
+							lisp.env.let(argname, undefined);
+						}
 					}
 				}
+				
+				for (i = 0; i < body.length; i++) {
+					ret = resolve(body[i]);
+				}
+			} finally {
+				lisp.env = tempEnv;
 			}
 			
-			var ret = null;
-			for (i = 0; i < body.length; i++) {
-				ret = resolve(body[i]);
-			}
-			lisp.env = tempEnv;
 			return ret;
 		};
 	})(env, args);
@@ -402,28 +432,33 @@ defmacro("try", function () {
 		if (catchExpression) {
 			if (catchExpression.length > 0) {
 				var tempEnv = lisp.env;
-				lisp.env = new Env(lisp.env);
-			
-				if (catchExpression.length >= 2) { // If there is an argument list
-					var catchArglist = catchExpression[1];
-					assert(catchArglist instanceof Array, "(catch) expression's first " +
-						"argument must be an Array (got " + toLisp(catchArglist) + ")");
-					assert(catchArglist.length <= 1, "(catch) requires an arglist with " +
-						"either 1 argument or no arguments (got " + catchArglist.length + ")");
-					if (catchArglist.length === 1) {
-						assert(catchArglist[0] instanceof Symbol, "(catch) arglist " +
-							"requires a symbol as its argument, or nothing (got " +
-							toLisp(catchArglist[0]) + ")");
-						lisp.env.let(catchArglist[0], error);
+				
+				try {
+					lisp.env = new Env(lisp.env);
+					
+					if (catchExpression.length >= 2) { // If there is an argument list
+						var catchArglist = catchExpression[1];
+					
+						assert(catchArglist instanceof Array, "(catch) expression's first " +
+							"argument must be an Array (got " + toLisp(catchArglist) + ")");
+						assert(catchArglist.length <= 1, "(catch) requires an arglist with " +
+							"either 1 argument or no arguments (got " + catchArglist.length + ")");
+					
+						if (catchArglist.length === 1) {
+							assert(catchArglist[0] instanceof Symbol, "(catch) arglist " +
+								"requires a symbol as its argument, or nothing (got " +
+								toLisp(catchArglist[0]) + ")");
+							lisp.env.let(catchArglist[0], error);
+						}
 					}
+					
+					var expressions = catchExpression.slice(2);
+					for (var i = 0; i < expressions.length; i++) {
+						resolve(expressions[i]);
+					}
+				} finally {
+					lisp.env = tempEnv;
 				}
-				
-				var expressions = catchExpression.slice(2);
-				for (var i = 0; i < expressions.length; i++) {
-					resolve(expressions[i]);
-				}
-				
-				lisp.env = tempEnv;
 			}
 		} else {
 			// If there is no catch expression, throw the error for something
@@ -508,20 +543,27 @@ defmacro("let", function () {
 	var args = argsToArray(arguments);
 	var letset = args[0];
 	var i;
-	lisp.env = new Env(lisp.env);
-	args = args.slice(1);
 	
-	for (i = 0; i < letset.length; i++) {
-		var symbol = letset[i][0];
-		var value = resolve(letset[i][1]);
-		lisp.env.let(symbol, value);
-	}
-	
+	var tempEnv = lisp.env;
 	var ret = null;
-	for (i = 0; i < args.length; i++) {
-		ret = resolve(args[i]);
+	
+	try {
+		lisp.env = new Env(lisp.env);
+		args = args.slice(1);
+	
+		for (i = 0; i < letset.length; i++) {
+			var symbol = letset[i][0];
+			var value = resolve(letset[i][1]);
+			lisp.env.let(symbol, value);
+		}
+	
+		for (i = 0; i < args.length; i++) {
+			ret = resolve(args[i]);
+		}
+	} finally {
+		lisp.env = tempEnv;
 	}
-	lisp.env = lisp.env.parent;
+	
 	return ret;
 });
 
@@ -1488,16 +1530,21 @@ defmacro("dolist", function (arglist /*, ... */) {
 	assert(list instanceof Array, "(dolist) got invalid argument list. " +
 		"Second argument must be a list (got " + toLisp(list) + ")");
 	
-	lisp.env = new Env(lisp.env);
-	var body = argsToArray(arguments).slice(1);
-	var ret;
-	for (var i = 0; i < list.length; i++) {
-		lisp.env.let(itemName, list[i]);
-		for (var j = 0; j < body.length; j++) {
-			ret = resolve(body[j]);
+	var tempEnv = lisp.env;	
+	var ret = null;
+	
+	try {
+		lisp.env = new Env(lisp.env);
+		var body = argsToArray(arguments).slice(1);
+		for (var i = 0; i < list.length; i++) {
+			lisp.env.let(itemName, list[i]);
+			for (var j = 0; j < body.length; j++) {
+				ret = resolve(body[j]);
+			}
 		}
+	} finally {
+		lisp.env = tempEnv;
 	}
-	lisp.env = lisp.env.parent;
 	
 	if (arglist.length === 3) {
 		return resolve(arglist[2]);
@@ -1550,17 +1597,22 @@ defmacro("foreach", function (arglist /*, &rest */) {
 	
 	var body = argsToArray(arguments).slice(1);
 	
-	lisp.env = new Env(lisp.env);
+	var tempEnv = lisp.env;
 	var ret = null;
-	var value;
-	for (var key in object) {
-		value = object[key];
-		lisp.env.let(itemName, [key, value]);
-		for (var i = 0; i < body.length; i++) {
-			ret = resolve(body[i]);
+	
+	try {
+		lisp.env = new Env(lisp.env);
+		var value;
+		for (var key in object) {
+			value = object[key];
+			lisp.env.let(itemName, [key, value]);
+			for (var i = 0; i < body.length; i++) {
+				ret = resolve(body[i]);
+			}
 		}
+	} finally {
+		lisp.env = tempEnv;
 	}
-	lisp.env = lisp.env.parent;
 	
 	return ret;
 });
