@@ -1752,9 +1752,13 @@ defmacro("lambda", function (arglist /*, &rest */) {
 						var str = argname.toString();
 						var index = str.indexOf(":");
 						var type;
+						var typestr;
 						if (index >= 0) {
 							argname = str.slice(0, index);
-							type = lisp.eval(str.slice(index+1));
+							typestr = str.slice(index+1);
+							if (typestr.length > 0) {
+								type = lisp.eval(typestr);
+							}
 						}
 						if (i <= largs.length-1) {
 							var value = largs[i];
@@ -1764,10 +1768,16 @@ defmacro("lambda", function (arglist /*, &rest */) {
 										toLisp(argname) + ". Expected an argument of type " +
 										toLisp(String(type)) + " (got " + toLisp(value) + ")");
 								}
-							} else if (true) {
-							
+							} else if (typeof(type) === "function") {
+								if (!(value instanceof type)) {
+									throw new ArgumentError("Got invalid argument for " +
+										toLisp(argname) + ". Expected an instance of " +
+										typestr + " (got " + toLisp(value) + ")");
+								}
+							} else if (type === undefined) {
+								// There is no type, do nothing
 							} else {
-								throw new Error("Invalid type specifier ")
+								throw new Error("Invalid type specifier: " + toLisp(type));
 							}
 							lisp.env.let(argname, value);
 						} else {
