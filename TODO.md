@@ -23,6 +23,10 @@
   * Supported features: (:web-sockets, :css3, :web-workers, etc)
   * Whether you're in the browser or a console: (:browser, :console)
   * What JavaScript runtime you're in: (:runtime-node, :runtime-rhino, etc)
+* Add support for feature expressions
+  * #+firefox (do something for firefox)
+  * #-windows (only do this if we're not on windows)
+  * #+(or unix macos)
 * Add a couple functions and macros to make working with features nicer
   * Function: (feature :feature), (feature '(:list :of :features))
     * (defun feature (feature-or-list)
