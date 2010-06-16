@@ -4,8 +4,7 @@ parameter type checking to automatically make sure it gets
 the right kinds of arguments. In this function, for example,
 you know that when you reach the function body you have
 an Array as your first argument and a function as your
-second (or undefined for either, as &opt has not been
-implemented yet)."
+second (or undefined, becuase its optional)."
   (||= compare (lambda (a b) (if (> a b) 1 -1)))
   (array.sort compare))
 
