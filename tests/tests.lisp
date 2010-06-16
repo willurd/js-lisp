@@ -1,3 +1,7 @@
+;; ================================================================================
+;; TEST UTILS
+;; ================================================================================
+
 (setq ArgumentError lisp.exception.ArgumentError)
 
 (defmacro test (name & plist)
@@ -8,6 +12,10 @@
 
 (defmacro divider (name)
   `(JSTest.Divider ,name))
+
+;; ================================================================================
+;; GENERAL TESTS
+;; ================================================================================
 
 (test "this Object in Lambdas"
   :testThisWorks (lambda ()
@@ -1387,15 +1395,92 @@ string" "a\nstring")))
 		(this.assertEqual (third '(3 2 1)) 1)))
 
 ;; TODO: Test (push)
-;; TODO: Test (sort!)
-;; TODO: Test (sort)
+
+(test "function (sort!)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error #'sort! nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error #'sort! nil '(1 2 3)))
+	:testTwoArguments (lambda ()
+		(this.assertNotRaises Error #'sort! nil '(1 2 3) (lambda)))
+	:testManyArguments (lambda ()
+		(this.assertRaises Error #'sort! nil '(1 2 3) (lambda) "arg 3"))
+	:testNonArrayFirstArgument (lambda ()
+		(this.assertRaises Error #'sort! nil "arg 1"))
+	:testNonFunctionSecondArgument (lambda ()
+		(this.assertRaises Error #'sort! nil '(1 2 3) "arg 2"))
+	:testSortDefaultOrder (lambda ()
+		(this.assertEqual (sort! '(2 3 1)) '(1 2 3)))
+	:testSortCustomCompareFunc (lambda ()
+		(this.assertEqual (sort! '(2 3 1) (lambda (a b) (if (< a b) 1 -1))) '(3 2 1)))
+	:testDestructiveSort (lambda ()
+		(let ((lst '(3 4 2 5 1)))
+			(this.assertEqual (sort! lst) '(1 2 3 4 5))
+			(this.assertEqual lst '(1 2 3 4 5)))))
+
+(test "function (sort)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error #'sort nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error #'sort nil '(1 2 3)))
+	:testTwoArguments (lambda ()
+		(this.assertNotRaises Error #'sort nil '(1 2 3) (lambda)))
+	:testManyArguments (lambda ()
+		(this.assertRaises Error #'sort nil '(1 2 3) (lambda) "arg 3"))
+	:testNonArrayFirstArgument (lambda ()
+		(this.assertRaises Error #'sort nil "arg 1"))
+	:testNonFunctionSecondArgument (lambda ()
+		(this.assertRaises Error #'sort nil '(1 2 3) "arg 2"))
+	:testSortDefaultOrder (lambda ()
+		(this.assertEqual (sort '(2 3 1)) '(1 2 3)))
+	:testSortCustomCompareFunc (lambda ()
+		(this.assertEqual (sort '(2 3 1) (lambda (a b) (if (< a b) 1 -1))) '(3 2 1)))
+	:testNonDestructiveSort (lambda ()
+		(let ((lst '(3 4 2 5 1)))
+			(this.assertEqual (sort lst) '(1 2 3 4 5))
+			(this.assertEqual lst '(3 4 2 5 1)))))
+
+(test "function (typed-sort!)"
+	;; TODO: Test &opt when it's written
+	;;:testNoArguments (lambda () ;; For testing &opt
+	;;	(this.assertRaises Error #'sort! nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error #'typed-sort! nil '(1 2 3)))
+	:testTwoArguments (lambda ()
+		(this.assertNotRaises Error #'typed-sort! nil '(1 2 3) (lambda)))
+	:testNonArrayFirstArgument (lambda ()
+		(this.assertRaises ArgumentError #'typed-sort! nil "arg 1"))
+	:testNonFunctionSecondArgument (lambda ()
+		(this.assertRaises ArgumentError #'typed-sort! nil '(1 2 3) "arg 2"))
+	:testSortDefaultOrder (lambda ()
+		(this.assertEqual (typed-sort! '(2 3 1)) '(1 2 3)))
+	:testSortCustomCompareFunc (lambda ()
+		(this.assertEqual (typed-sort! '(2 3 1) (lambda (a b) (if (< a b) 1 -1))) '(3 2 1)))
+	:testDestructiveSort (lambda ()
+		(let ((lst '(3 4 2 5 1)))
+			(this.assertEqual (typed-sort! lst) '(1 2 3 4 5))
+			(this.assertEqual lst '(1 2 3 4 5)))))
 
 (test "function (typed-sort)"
-	;:testNoArguments (lambda ()) ;; For testing &opt
+	;; TODO: Test &opt when it's written
+	;;:testNoArguments (lambda () ;; For testing &opt
+	;;	(this.assertRaises Error #'typed-sort nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error #'typed-sort nil '(1 2 3)))
+	:testTwoArguments (lambda ()
+		(this.assertNotRaises Error #'typed-sort nil '(1 2 3) (lambda)))
 	:testNonArrayFirstArgument (lambda ()
-		(this.assertRaises ArgumentError (lambda () (typed-sort "hello"))))
+		(this.assertRaises ArgumentError #'typed-sort nil "hello"))
 	:testNonFunctionSecondArgument (lambda ()
-		(this.assertRaises ArgumentError (lambda () (typed-sort '(2 3 1) "hi")))))
+		(this.assertRaises ArgumentError #'typed-sort nil '(2 3 1) "hi"))
+	:testSortDefaultOrder (lambda ()
+		(this.assertEqual (typed-sort '(2 3 1)) '(1 2 3)))
+	:testSortCustomCompareFunc (lambda ()
+		(this.assertEqual (typed-sort '(2 3 1) (lambda (a b) (if (< a b) 1 -1))) '(3 2 1)))
+	:testNonDestructiveSort (lambda ()
+		(let ((lst '(3 4 2 5 1)))
+			(this.assertEqual (typed-sort lst) '(1 2 3 4 5))
+			(this.assertEqual lst '(3 4 2 5 1)))))
 
 (test "function (length)"
 	:testNoArguments (lambda ()

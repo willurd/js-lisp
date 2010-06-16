@@ -1492,10 +1492,14 @@ defun("push", function (list, value) {
 
 /**
  * <pre>
- * TODO: Test me
+ * Sorts and returns the given array. The original array is
+ * actually modified by this function.
+ * 
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name sort!
  * @lisp
@@ -1512,36 +1516,57 @@ defun("sort!", function (list, compareFunc) {
 		"(sort!) requires a function (or nothing) as its second argument " +
 		"(got " + toLisp(compareFunc) + ")");
 	
-	compareFunc = compareFunc || function (a, b) { return a > b; };
+	compareFunc = compareFunc || function (a, b) { return a > b ? 1 : -1; };
 	
 	return list.sort(compareFunc);
 });
 
 /**
  * <pre>
- * TODO: Test me
+ * Sorts and returns a copy of the given array. The original
+ * array is left untouched.
+ * 
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name sort
  * @lisp
  * @function
  * @member lisp.functions
  */
-var _function_sort;
+var _function_sort; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
- * TODO: Test me
- * TODO: Document me
- * TODO: Add examples
+ * Takes an object and returns its length property. This is just another
+ * way of doing "return object.length".
+ * 
+ * Works with arrays, strings, the arguments object, and anything else
+ * that has a length property.
  * </pre>
+ * 
+ * @tested
  * 
  * @name length
  * @lisp
  * @function
  * @member lisp.functions
+ * 
+ * @param {object} object
+ *     The object whose length is to be returned.
+ * 
+ * @example Get the length of a string
+ *     >> (length "hello, lisp")
+ *     => 11
+ * 
+ * @example Get the length of an array
+ *     >> (items this)
+ *     => (("ps1" ">> ") ...) ; 8 more items
+ *     >> (length (items this))
+ *     => 9
  */
 defun("length", function (object) {
 	// Input validation

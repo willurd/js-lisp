@@ -1,5 +1,12 @@
 # TODO
 
+* js-lisp needs:
+  * A good name
+  * A bunch of use cases + examples + tutorials, etc
+  * Better documentation (Racket's documentation might be a good model to follow)
+  * Support for more browsers
+  * A website
+
 * Finish testing (and preferably documenting) the functionality that already exists.
 * Maybe: Rewrite (cond) with (defmacro)
 * Maybe: Write = as a shortcut for (setq ...)
@@ -15,7 +22,7 @@
 * Do &opt (&optional) and &key stuff
 * Write the generic (do) macro
 * Write the (reduce) function (or macro?)
-* Add regex literals /.../..
+* Add regex literals /.../[a-zA-Z]+
 * Rewrite the parser to handle macro expansion
 * Think about adding the concept of generators
   * (yield 'some 'values) throws a lisp.exception.YieldException
