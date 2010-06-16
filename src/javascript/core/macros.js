@@ -227,6 +227,7 @@ defmacro("lambda", function (arglist /*, &rest */) {
 	
 	var env  = new Env(lisp.env);
 	var args = argsToArray(arguments);
+	var restname;
 	
 	for (i = 0; i < arglist.length; i++) {
 		if (arglist[i] == "&") {
@@ -234,12 +235,14 @@ defmacro("lambda", function (arglist /*, &rest */) {
 				"No argument name after rest identifier");
 			assert(!(arglist.length > i + 2), "Unexpected arguments (" +
 				arglist.slice(i+2).join(" ") + ") after rest argument");
+			restname = arglist[i+1];
 			break;
 		}
 	}
 	
 	return (function (env, args) {
 		var body = args.slice(1);
+		
 		return function () {
 			var largs = argsToArray(arguments);
 			var tempEnv = lisp.env;
@@ -251,17 +254,33 @@ defmacro("lambda", function (arglist /*, &rest */) {
 				lisp.env.let("arguments", arguments);
 			
 				var i;
-				for (i = 0; i < arglist.length; i++) {
-					var argname = arglist[i];
+				var j;
+				var str;
+				var index;
+				var type;
+				var typestr;
+				var argname;
+				var value;
+				var optional = false;
+				
+				for (i = 0, j = 0; i < arglist.length; i++, j++) {
+					argname = arglist[i];
+					
 					if (argname == "&") {
-						lisp.env.let(arglist[i+1], largs.slice(i));
-						i = largs.length;
+						// The rest of the arguments should be collected into a list
+						lisp.env.let(restname, largs.slice(j));
 						break;
+					} else if (argname == "&opt") {
+						// The rest of the arguments are optional
+						optional = true;
+						j--; // Go back one in the given arguments so we don't miss anything
+						continue;
 					} else {
-						var str = argname.toString();
-						var index = str.indexOf(":");
-						var type;
-						var typestr;
+						str = argname.toString();
+						index = str.indexOf(":");
+						type = undefined;
+						typestr = undefined;
+						
 						if (index >= 0) {
 							argname = str.slice(0, index);
 							typestr = str.slice(index+1);
@@ -269,8 +288,9 @@ defmacro("lambda", function (arglist /*, &rest */) {
 								type = lisp.eval(typestr);
 							}
 						}
-						if (i <= largs.length-1) {
-							var value = largs[i];
+						
+						if (j <= largs.length-1) {
+							value = largs[j];
 							if (type instanceof Keyword) {
 								if (typeof(value) != String(type)) {
 									throw new ArgumentError("Got invalid argument for " +
@@ -289,8 +309,12 @@ defmacro("lambda", function (arglist /*, &rest */) {
 								throw new Error("Invalid type specifier: " + toLisp(type));
 							}
 							lisp.env.let(argname, value);
-						} else {
+						} else if (optional) {
 							lisp.env.let(argname, undefined);
+						} else {
+							lisp.log("missing argument " + toLisp(argname));
+							throw new ArgumentError("Missing argument " + toLisp(argname) +
+								" in function call.");
 						}
 					}
 				}

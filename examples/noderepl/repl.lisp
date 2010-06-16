@@ -1,6 +1,6 @@
 (defclass Repl
   "A \"read-eval-print loop\" written in lisp, for lisp."
-  :init (lambda (props)
+  :init (lambda (&opt props)
     "Initializes the repl with the given properties, or the defaults."
     (||= props (object))
     (setq this.ps1 (|| props.ps1 ">> "))

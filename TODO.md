@@ -19,7 +19,8 @@
   * They all take the form (name #'predicate sequence)
 * Write macro: (unless) (opposite of (when))
 * Write macros: (incf), (decf)
-* Do &opt (&optional) and &key stuff
+* Add default values for &opt arguments
+* Do &key stuff
 * Write the generic (do) macro
 * Write the (reduce) function (or macro?)
 * Add regex literals /.../[a-zA-Z]+
@@ -47,6 +48,7 @@
         (!! (find-any (ensure-list feature-or-list) \*features*)))
   * Function: (when (feature :feature-name) ...), (when (feature '(:feature :list)) ...)
   * Macro: (when-feature :feature-name ...) -> `(when (feature ,feature-name) ,@body)
+* Think about a (formatcl) function that uses CL's format language (the spec: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node200.html)
 * Put an online book or tutorial/example set into the roadmap (in the distant future). Also, make a roadmap.
 * Put a website into the roadmap (for the not-so-distant future).
 * Fix backticks, unquotes (commas), and list expanders (@).
@@ -112,11 +114,9 @@
     * Closures copy scopes (which takes the current values, instead of the old values)
 * Handle empty list: if an sexp has no arguments, it's an empty list
 * Think about Cons' and how they'll fit in (or if they will...)
-* Test (Class.extend (object ...))
 * Test defining a class from scratch (using the prototype property)
-* Think about defining a (class) macro (or maybe reusing CL's defclass, or at least borrowing from it)
-* Write the generic do macro
+* Think about implementing generic methods
+* Is a CLOS-like class system worth looking into (considering JavaScript is object-oriented)?
 * Think about beginning to tackle (loop)
-* Think about a (formatcl) function that uses CL's format language
 * Think about writing a mini app/game/widget/whatever in 100% lisp (or maybe just using jQuery?)
 * Find some better ways to do documentation. Latex? Automatically-generated latex files from jsdoc perhaps? Convert the latex to PDF _and_ HTML?

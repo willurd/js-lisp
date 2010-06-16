@@ -126,11 +126,11 @@ string" "a\nstring"))
 	:testNonListFirstExpression (lambda ()
 		(this.assertRaises Error #'lambda nil 'hello))
 	:testUnsuppliedArguments (lambda ()
-		(let ((func (lambda (one))))
-			(this.assertNotRaises Error #'func nil))
+		(let ((func (lambda (&opt one))))
+			(this.assertNotRaises ArgumentError #'func nil))
 		(let ((func (lambda (one two three))))
-			(this.assertNotRaises Error #'func nil "arg 1" "arg 2"))
-		((lambda (this two three)
+			(this.assertRaises ArgumentError #'func nil "arg 1" "arg 2"))
+		((lambda (this two &opt three)
 			(this.assertUndefined three))
 		 this "arg 2"))
 	:testExtraArguments (lambda ()
@@ -1420,13 +1420,13 @@ string" "a\nstring")))
 
 (test "function (sort)"
 	:testNoArguments (lambda ()
-		(this.assertRaises Error #'sort nil))
+		(this.assertRaises ArgumentError #'sort nil))
 	:testOneArgument (lambda ()
-		(this.assertNotRaises Error #'sort nil '(1 2 3)))
+		(this.assertNotRaises ArgumentError #'sort nil '(1 2 3)))
 	:testTwoArguments (lambda ()
-		(this.assertNotRaises Error #'sort nil '(1 2 3) (lambda)))
+		(this.assertNotRaises ArgumentError #'sort nil '(1 2 3) (lambda)))
 	:testManyArguments (lambda ()
-		(this.assertRaises Error #'sort nil '(1 2 3) (lambda) "arg 3"))
+		(this.assertNotRaises ArgumentError #'sort nil '(1 2 3) (lambda) "arg 3"))
 	:testNonArrayFirstArgument (lambda ()
 		(this.assertRaises Error #'sort nil "arg 1"))
 	:testNonFunctionSecondArgument (lambda ()
@@ -1441,9 +1441,8 @@ string" "a\nstring")))
 			(this.assertEqual lst '(3 4 2 5 1)))))
 
 (test "function (typed-sort!)"
-	;; TODO: Test &opt when it's written
-	;;:testNoArguments (lambda () ;; For testing &opt
-	;;	(this.assertRaises Error #'sort! nil))
+	:testNoArguments (lambda () ;; For testing &opt
+		(this.assertRaises ArgumentError #'typed-sort! nil))
 	:testOneArgument (lambda ()
 		(this.assertNotRaises Error #'typed-sort! nil '(1 2 3)))
 	:testTwoArguments (lambda ()
@@ -1462,9 +1461,8 @@ string" "a\nstring")))
 			(this.assertEqual lst '(1 2 3 4 5)))))
 
 (test "function (typed-sort)"
-	;; TODO: Test &opt when it's written
-	;;:testNoArguments (lambda () ;; For testing &opt
-	;;	(this.assertRaises Error #'typed-sort nil))
+	:testNoArguments (lambda () ;; For testing &opt
+		(this.assertRaises ArgumentError #'typed-sort nil))
 	:testOneArgument (lambda ()
 		(this.assertNotRaises Error #'typed-sort nil '(1 2 3)))
 	:testTwoArguments (lambda ()
