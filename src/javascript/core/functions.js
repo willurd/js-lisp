@@ -1506,20 +1506,7 @@ defun("push", function (list, value) {
  * @function
  * @member lisp.functions
  */
-defun("sort!", function (list, compareFunc) {
-	// Input validation
-	assert(arguments.length >= 1 && arguments.length <= 2, "(sort!) requires " +
-		"1 or 2 arguments (got " + arguments.length + ")");
-	assert(list instanceof Array, "(sort!) requires an Array as its first " +
-		"argument (got " + toLisp(list) + ")");
-	assert(compareFunc === undefined || typeof(compareFunc) === "function",
-		"(sort!) requires a function (or nothing) as its second argument " +
-		"(got " + toLisp(compareFunc) + ")");
-	
-	compareFunc = compareFunc || function (a, b) { return a > b ? 1 : -1; };
-	
-	return list.sort(compareFunc);
-});
+var _function_sort_exc; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>

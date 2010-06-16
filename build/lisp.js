@@ -1785,28 +1785,29 @@ defmacro("lambda", function (arglist /*, &rest */) {
 						
 						if (j <= largs.length-1) {
 							value = largs[j];
-							if (type instanceof Keyword) {
-								if (typeof(value) != String(type)) {
-									throw new ArgumentError("Got invalid argument for " +
-										toLisp(argname) + ". Expected a value of type " +
-										toLisp(String(type)) + " (got " + toLisp(value) + ").");
+							if (value !== undefined || !optional) {
+								if (type instanceof Keyword) {
+									if (typeof(value) != String(type)) {
+										throw new ArgumentError("Got invalid argument for " +
+											toLisp(argname) + ". Expected a value of type " +
+											toLisp(String(type)) + " (got " + toLisp(value) + ").");
+									}
+								} else if (typeof(type) === "function") {
+									if (!(value instanceof type)) {
+										throw new ArgumentError("Got invalid argument for " +
+											toLisp(argname) + ". Expected an instance of " +
+											typestr + " (got " + toLisp(value) + ").");
+									}
+								} else if (type === undefined) {
+									// There is no type, do nothing
+								} else {
+									throw new ArgumentError("Invalid type specifier: " + toLisp(type));
 								}
-							} else if (typeof(type) === "function") {
-								if (!(value instanceof type)) {
-									throw new ArgumentError("Got invalid argument for " +
-										toLisp(argname) + ". Expected an instance of " +
-										typestr + " (got " + toLisp(value) + ").");
-								}
-							} else if (type === undefined) {
-								// There is no type, do nothing
-							} else {
-								throw new Error("Invalid type specifier: " + toLisp(type));
 							}
 							lisp.env.let(argname, value);
 						} else if (optional) {
 							lisp.env.let(argname, undefined);
 						} else {
-							lisp.log("missing argument " + toLisp(argname));
 							throw new ArgumentError("Missing argument " + toLisp(argname) +
 								" in function call.");
 						}
@@ -4703,20 +4704,7 @@ defun("push", function (list, value) {
  * @function
  * @member lisp.functions
  */
-defun("sort!", function (list, compareFunc) {
-	// Input validation
-	assert(arguments.length >= 1 && arguments.length <= 2, "(sort!) requires " +
-		"1 or 2 arguments (got " + arguments.length + ")");
-	assert(list instanceof Array, "(sort!) requires an Array as its first " +
-		"argument (got " + toLisp(list) + ")");
-	assert(compareFunc === undefined || typeof(compareFunc) === "function",
-		"(sort!) requires a function (or nothing) as its second argument " +
-		"(got " + toLisp(compareFunc) + ")");
-	
-	compareFunc = compareFunc || function (a, b) { return a > b ? 1 : -1; };
-	
-	return list.sort(compareFunc);
-});
+var _function_sort_exc; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>

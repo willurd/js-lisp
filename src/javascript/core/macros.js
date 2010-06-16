@@ -291,28 +291,29 @@ defmacro("lambda", function (arglist /*, &rest */) {
 						
 						if (j <= largs.length-1) {
 							value = largs[j];
-							if (type instanceof Keyword) {
-								if (typeof(value) != String(type)) {
-									throw new ArgumentError("Got invalid argument for " +
-										toLisp(argname) + ". Expected a value of type " +
-										toLisp(String(type)) + " (got " + toLisp(value) + ").");
+							if (value !== undefined || !optional) {
+								if (type instanceof Keyword) {
+									if (typeof(value) != String(type)) {
+										throw new ArgumentError("Got invalid argument for " +
+											toLisp(argname) + ". Expected a value of type " +
+											toLisp(String(type)) + " (got " + toLisp(value) + ").");
+									}
+								} else if (typeof(type) === "function") {
+									if (!(value instanceof type)) {
+										throw new ArgumentError("Got invalid argument for " +
+											toLisp(argname) + ". Expected an instance of " +
+											typestr + " (got " + toLisp(value) + ").");
+									}
+								} else if (type === undefined) {
+									// There is no type, do nothing
+								} else {
+									throw new ArgumentError("Invalid type specifier: " + toLisp(type));
 								}
-							} else if (typeof(type) === "function") {
-								if (!(value instanceof type)) {
-									throw new ArgumentError("Got invalid argument for " +
-										toLisp(argname) + ". Expected an instance of " +
-										typestr + " (got " + toLisp(value) + ").");
-								}
-							} else if (type === undefined) {
-								// There is no type, do nothing
-							} else {
-								throw new Error("Invalid type specifier: " + toLisp(type));
 							}
 							lisp.env.let(argname, value);
 						} else if (optional) {
 							lisp.env.let(argname, undefined);
 						} else {
-							lisp.log("missing argument " + toLisp(argname));
 							throw new ArgumentError("Missing argument " + toLisp(argname) +
 								" in function call.");
 						}
