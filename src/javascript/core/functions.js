@@ -42,6 +42,8 @@ defun("jseval", function (expression) {
 
 /**
  * <pre>
+ * Parses and evaluates a string as lisp.
+ * 
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
@@ -1545,6 +1547,8 @@ defun("length", function (object) {
 	// Input validation
 	assert(arguments.length === 1, "(length) requires 1 argument (got " +
 		arguments.length + ")");
+	assert(object.hasOwnProperty("length"), "(length) requires a sequence " +
+		"argument (got " + toLisp(object) + ")");
 	
 	return object.length;
 });

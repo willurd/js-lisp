@@ -436,9 +436,6 @@ string" "a\nstring"))
 
 (test "macro (not)"
 	:testNoArguments (lambda ()
-		;; The nil is for 'custom message' in JSTest, so it doesn't get
-		;; applied to (not). This is testing that (not) will throw an error
-		;; when it isn't given any arguments.
 		(this.assertRaises Error #'not nil))
 	:testOneArgument (lambda ()
 		(this.assertTrue (not nil))
@@ -483,6 +480,8 @@ string" "a\nstring"))
             (and t :keyword nil (setq x 10)) ;; The nil makes it cut short
             (this.assertEqual x 5))))
 
+;; TODO: Test (||)
+;; TODO: Test (||=)
 ;; TODO: Test (equal)
 ;; TODO: Test (not-equal)
 
@@ -713,6 +712,12 @@ string" "a\nstring")))
 			(this.assertFalse (is-object (object) "hi" (setq x 10)))
 			(this.assertEqual x 5))))
 
+;; TODO: Test (is-array)
+;; TODO: Test (is-list)
+;; TODO: Test (is-symbol)
+;; TODO: Test (is-keyword)
+;; TODO: Test (is-macro)
+
 (test "macro (dolist)"
 	;; TODO: Test error conditions
 	;; TODO: Test explicit return value
@@ -727,6 +732,7 @@ string" "a\nstring")))
 			(this.assertEqual y 5))))
 
 ;; TODO: Test (foreach)
+;; TODO: Test (char)
 
 (test "macro (collect)"
 	:testNoArguments (lambda ()
@@ -761,6 +767,8 @@ string" "a\nstring")))
 		(let ((func (jseval "new Function('x', 'return x + 1')")))
 			(this.assertType func "function")
 			(this.assertEqual (func 2) 3))))
+
+;; TODO: Test (eval-string)
 
 (test "function (assert)"
 	:testNoArguments (lambda ()
@@ -1143,6 +1151,8 @@ string" "a\nstring")))
 	:testBasic (lambda ()
 		(this.assertEqual (to-lower "HELLO") "hello")))
 
+;; TODO: Test (starts-with)
+
 (test "function (/)"
 	:testNoArguments (lambda ()
         (this.assertRaises Error #'/ nil))
@@ -1344,6 +1354,8 @@ string" "a\nstring")))
 	:testBasic (lambda ()
 		(this.assertEqual (nth '(one two) 1) 'two nil #'equal)))
 
+;; TODO: Test (rest)
+
 (test "function (first)"
 	:testNoArguments (lambda ()
 		(this.assertRaises Error #'first nil))
@@ -1379,11 +1391,27 @@ string" "a\nstring")))
 ;; TODO: Test (sort)
 
 (test "function (typed-sort)"
-	;:testNoArguments (lambda ())
+	;:testNoArguments (lambda ()) ;; For testing &opt
 	:testNonArrayFirstArgument (lambda ()
 		(this.assertRaises ArgumentError (lambda () (typed-sort "hello"))))
 	:testNonFunctionSecondArgument (lambda ()
-		(this.assertRaises ArgumentError (lambda () (typed-sort '(2 3 1) "hi"))))
-)
+		(this.assertRaises ArgumentError (lambda () (typed-sort '(2 3 1) "hi")))))
 
-;; TODO: Test (length)
+(test "function (length)"
+	:testNoArguments (lambda ()
+		(this.assertRaises Error #'length nil))
+	:testOneArgument (lambda ()
+		(this.assertNotRaises Error #'length nil '(1 2 3)))
+	:testManyArguments (lambda ()
+		(this.assertRaises Error #'length nil '(1 2 3) "arg 2"))
+	:testNonSequenceArgument (lambda ()
+		(this.assertRaises Error #'length nil 12))
+	:testArrayArgument (lambda ()
+		(this.assertNotRaises Error #'length nil (array))
+		(this.assertEqual (length '(t f)) 2))
+	:testArgumentsObjectArgument (lambda ()
+		(this.assertNotRaises Error #'length nil arguments)
+		(this.assertEqual (length arguments) 0)) ;; There are no arguments to test functions
+	:testStringArgument (lambda ()
+		(this.assertNotRaises Error #'length nil "hi")
+		(this.assertEqual (length "hello") 5)))

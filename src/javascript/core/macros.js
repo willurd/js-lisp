@@ -38,6 +38,9 @@ defmacro("quote", function (expression) {
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * 
+ * FIXME: At some point macros will be expanded by the parser, so
+ *        this will be unnecessary.
  * </pre>
  * 
  * @name backquote
@@ -268,17 +271,17 @@ defmacro("lambda", function (arglist /*, &rest */) {
 						}
 						if (i <= largs.length-1) {
 							var value = largs[i];
-							if (type instanceof Keyword) { // Match on typeof(value)
+							if (type instanceof Keyword) {
 								if (typeof(value) != String(type)) {
 									throw new ArgumentError("Got invalid argument for " +
-										toLisp(argname) + ". Expected an argument of type " +
-										toLisp(String(type)) + " (got " + toLisp(value) + ")");
+										toLisp(argname) + ". Expected a value of type " +
+										toLisp(String(type)) + " (got " + toLisp(value) + ").");
 								}
 							} else if (typeof(type) === "function") {
 								if (!(value instanceof type)) {
 									throw new ArgumentError("Got invalid argument for " +
 										toLisp(argname) + ". Expected an instance of " +
-										typestr + " (got " + toLisp(value) + ")");
+										typestr + " (got " + toLisp(value) + ").");
 								}
 							} else if (type === undefined) {
 								// There is no type, do nothing

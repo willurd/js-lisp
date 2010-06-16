@@ -19,6 +19,9 @@ return {
 	defun: defun,
 	defmacro: defmacro,
 	
+	/**
+	 * Evaluates a string as lisp code.
+	 */
 	eval: function (string, env) {
 		var tempEnv = lisp.env;
 		lisp.env = env || lisp.env;
@@ -46,6 +49,9 @@ return {
 		}
 	},
 	
+	/**
+	 * Loads an arbitrary file and evaluates it as lisp code.
+	 */
 	load: function (source, callback) {
 		makeRequest(source, function (script) {
 			lisp.eval(script);
@@ -55,6 +61,11 @@ return {
 		});
 	},
 	
+	/**
+	 * Handles a script tag by loading and evaluating the script pointed
+	 * to by its src attribute (if there is one), and then by evaluating
+	 * its inner content (if there is any).
+	 */
 	dotag: function (tag) {
 		if (tag.src) {
 			lisp.load(tag.src, function (script) {
@@ -67,6 +78,10 @@ return {
 		}
 	},
 	
+	/**
+	 * Grabs all of the unevaluated text/lisp script tags so far in the
+	 * html document and evaluates their contents.
+	 */
 	run: function () {
 		var tags = document.getElementsByTagName("script");
 		for (var i = 0; i < tags.length; i++) {

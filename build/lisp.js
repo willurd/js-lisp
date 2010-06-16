@@ -1532,6 +1532,9 @@ defmacro("quote", function (expression) {
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
+ * 
+ * FIXME: At some point macros will be expanded by the parser, so
+ *        this will be unnecessary.
  * </pre>
  * 
  * @name backquote
@@ -1762,17 +1765,17 @@ defmacro("lambda", function (arglist /*, &rest */) {
 						}
 						if (i <= largs.length-1) {
 							var value = largs[i];
-							if (type instanceof Keyword) { // Match on typeof(value)
+							if (type instanceof Keyword) {
 								if (typeof(value) != String(type)) {
 									throw new ArgumentError("Got invalid argument for " +
-										toLisp(argname) + ". Expected an argument of type " +
-										toLisp(String(type)) + " (got " + toLisp(value) + ")");
+										toLisp(argname) + ". Expected a value of type " +
+										toLisp(String(type)) + " (got " + toLisp(value) + ").");
 								}
 							} else if (typeof(type) === "function") {
 								if (!(value instanceof type)) {
 									throw new ArgumentError("Got invalid argument for " +
 										toLisp(argname) + ". Expected an instance of " +
-										typestr + " (got " + toLisp(value) + ")");
+										typestr + " (got " + toLisp(value) + ").");
 								}
 							} else if (type === undefined) {
 								// There is no type, do nothing
@@ -3212,6 +3215,8 @@ defun("jseval", function (expression) {
 
 /**
  * <pre>
+ * Parses and evaluates a string as lisp.
+ * 
  * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
@@ -4715,6 +4720,8 @@ defun("length", function (object) {
 	// Input validation
 	assert(arguments.length === 1, "(length) requires 1 argument (got " +
 		arguments.length + ")");
+	assert(object.hasOwnProperty("length"), "(length) requires a sequence " +
+		"argument (got " + toLisp(object) + ")");
 	
 	return object.length;
 });
@@ -4740,6 +4747,9 @@ return {
 	defun: defun,
 	defmacro: defmacro,
 	
+	/**
+	 * Evaluates a string as lisp code.
+	 */
 	eval: function (string, env) {
 		var tempEnv = lisp.env;
 		lisp.env = env || lisp.env;
@@ -4767,6 +4777,9 @@ return {
 		}
 	},
 	
+	/**
+	 * Loads an arbitrary file and evaluates it as lisp code.
+	 */
 	load: function (source, callback) {
 		makeRequest(source, function (script) {
 			lisp.eval(script);
@@ -4776,6 +4789,11 @@ return {
 		});
 	},
 	
+	/**
+	 * Handles a script tag by loading and evaluating the script pointed
+	 * to by its src attribute (if there is one), and then by evaluating
+	 * its inner content (if there is any).
+	 */
 	dotag: function (tag) {
 		if (tag.src) {
 			lisp.load(tag.src, function (script) {
@@ -4788,6 +4806,10 @@ return {
 		}
 	},
 	
+	/**
+	 * Grabs all of the unevaluated text/lisp script tags so far in the
+	 * html document and evaluates their contents.
+	 */
 	run: function () {
 		var tags = document.getElementsByTagName("script");
 		for (var i = 0; i < tags.length; i++) {
