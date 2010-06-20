@@ -408,7 +408,7 @@ var _function_exc_exc; // Defined in /src/lisp/functions.lisp
  * TODO: Add examples
  * </pre>
  * 
- * @name !!
+ * @name regex
  * @lisp
  * @function
  * @member lisp.functions
