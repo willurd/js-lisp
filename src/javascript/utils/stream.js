@@ -52,14 +52,16 @@ var StringStream = Class.extend({
 		return this.data.charAt(index);
 	},
 	
-	next: function () {
+	next: function (count) {
 		if (this.eof()) {
 			throw new StreamEOFException("EOF reached in StringStream");
 		}
 		
-		var c = this.charAt(this.position);
-		this.position += 1;
-		return c;
+		count = count || 1;
+		
+		var slice = this.slice(this.position, this.position+count);
+		this.position += count;
+		return slice;
 	},
 	
 	prev: function (count) {

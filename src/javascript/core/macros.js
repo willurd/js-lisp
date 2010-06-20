@@ -253,8 +253,7 @@ defmacro("lambda", function (arglist /*, &rest */) {
 				lisp.env.let("this", this);
 				lisp.env.let("arguments", arguments);
 			
-				var i;
-				var j;
+				var i, j;
 				var str;
 				var index;
 				var type;
@@ -264,32 +263,34 @@ defmacro("lambda", function (arglist /*, &rest */) {
 				var optional = false;
 				
 				for (i = 0, j = 0; i < arglist.length; i++, j++) {
-					argname = arglist[i];
+					argname = String(arglist[i]);
 					
 					if (argname == "&") {
 						// The rest of the arguments should be collected into a list
 						lisp.env.let(restname, largs.slice(j));
+						i = arglist.length;
+						j = largs.length;
 						break;
 					} else if (argname == "&opt") {
 						// The rest of the arguments are optional
 						optional = true;
-						j--; // Go back one in the given arguments so we don't miss anything
+						j--;
 						continue;
 					} else {
-						str = argname.toString();
-						index = str.indexOf(":");
+						index = argname.indexOf(":");
 						type = undefined;
 						typestr = undefined;
 						
 						if (index >= 0) {
-							argname = str.slice(0, index);
-							typestr = str.slice(index+1);
+							str = argname.slice(0, index);
+							typestr = argname.slice(index+1);
+							argname = str;
 							if (typestr.length > 0) {
 								type = lisp.eval(typestr);
 							}
 						}
 						
-						if (j <= largs.length-1) {
+						if (j < largs.length) {
 							value = largs[j];
 							if (value !== undefined || !optional) {
 								if (type instanceof Keyword) {
@@ -317,8 +318,16 @@ defmacro("lambda", function (arglist /*, &rest */) {
 							throw new ArgumentError("Missing argument " + toLisp(argname) +
 								" in function call.");
 						}
+						
 					}
 				}
+				
+				// Uncommenting this will throw an ArgumentError if the function
+				// receives _too many_ arguments.
+				// if (j < largs.length) {
+				// 	throw new ArgumentError("Too many arguments passed to function " +
+				// 		"with arglist " + toLisp(arglist));
+				// }
 				
 				for (i = 0; i < body.length; i++) {
 					ret = resolve(body[i]);
@@ -706,6 +715,7 @@ defmacro("progn", function (/* &expressions */) {
  * @name cond
  * @lisp
  * @function
+ * @macro
  * @member lisp.macros
  * 
  * @returns The value of the last evaluated expression, or nil.
@@ -751,7 +761,46 @@ defmacro("cond", function (/* &rest */) {
 	return null;
 });
 
-// TODO: Create (case) or (switch) macro
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add Examples
+ * TODO: Add support for 'otherwise
+ * </pre>
+ * 
+ * @name switch
+ * @lisp
+ * @function
+ * @macro
+ * @member lisp.macros
+ */
+defmacro("switch", function (valueExpression /*, &rest */) {
+	assert(arguments.length >= 1, "(switch) requires at least one argument");
+	var value = resolve(valueExpression);
+	var rest = argsToArray(arguments).slice(1);
+	var ret = null;
+	var clause;
+	var key;
+	
+	for (var i = 0; i < rest.length; i++) {
+		clause = rest[i];
+		assert(clause instanceof Array, "(switch) requires an array for each " +
+			"clause (got " + toLisp(clause) + ")");
+		assert(clause.length >= 1, "(switch) requires each clause list have at " +
+			"least one value");
+		key = clause[0];
+		if (equal(value, key)) {
+			var expressions = clause.slice(1);
+			for (var j = 0; j < expressions.length; j++) {
+				ret = resolve(expressions[j]);
+			}
+			break;
+		}
+	}
+	
+	return ret;
+});
 
 /**
  * <pre>
@@ -1701,3 +1750,49 @@ defmacro("char", function (symbol) {
  *                    ; expression of the body evaluates to true.
  */
 var _macro_collect; // Defined in /src/lisp/macros.lisp
+
+/**
+* <pre>
+* TODO: Test me more
+* TODO: Document me
+* TODO: Add more examples
+* </pre>
+* 
+* @tested
+* 
+* @name inc
+* @lisp
+* @function
+* @macro
+* @member lisp.macros
+ */
+defmacro("inc", function (varName, amountName) {
+	assert(arguments.length >= 1, "(inc) requires at least 1 argument");
+	
+	var amount = (amountName === undefined) ? 1 : resolve(amountName);
+	var oldValue = lisp.env.get(varName);
+	lisp.env.set(varName, oldValue + amount);
+});
+
+/**
+* <pre>
+* TODO: Test me more
+* TODO: Document me
+* TODO: Add more examples
+* </pre>
+* 
+* @tested
+* 
+* @name dec
+* @lisp
+* @function
+* @macro
+* @member lisp.macros
+ */
+defmacro("dec", function (varName, amountName) {
+	assert(arguments.length >= 1, "(dec) requires at least 1 argument");
+	
+	var amount = (amountName === undefined) ? 1 : resolve(amountName);
+	var oldValue = lisp.env.get(varName);
+	lisp.env.set(varName, oldValue - amount);
+});

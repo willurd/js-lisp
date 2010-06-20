@@ -10,8 +10,8 @@
 * Finish testing (and preferably documenting) the functionality that already exists.
 * Maybe: Rewrite (cond) with (defmacro)
 * Maybe: Write = as a shortcut for (setq ...)
-* Write ! as a shortcut for (not ...)
 * Write !! as a shortcut for (not (not ...))
+* Write ! as an alias for (not ...)
 * Write +=, -=, /=, *=, %=, &&= (and-equal?)
 * Write <<, >>, &, | (bitwise operations)
 * Write <<=, >>=, &=, |=

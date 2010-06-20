@@ -846,14 +846,16 @@ var StringStream = Class.extend({
 		return this.data.charAt(index);
 	},
 	
-	next: function () {
+	next: function (count) {
 		if (this.eof()) {
 			throw new StreamEOFException("EOF reached in StringStream");
 		}
 		
-		var c = this.charAt(this.position);
-		this.position += 1;
-		return c;
+		count = count || 1;
+		
+		var slice = this.slice(this.position, this.position+count);
+		this.position += count;
+		return slice;
 	},
 	
 	prev: function (count) {
@@ -1406,8 +1408,8 @@ parse.stringEscape = function (stream) {
 	switch (c)
 	{
 	case "x":
-		var byte = stream.next() + stream.next();
-		return eval('"' + '\\' + c + byte + '"');
+		var hex = stream.next(2);
+		return eval('"' + '\\' + c + hex + '"');
 	default:
 		return eval('"' + '\\' + c + '"');
 	}
@@ -1747,8 +1749,7 @@ defmacro("lambda", function (arglist /*, &rest */) {
 				lisp.env.let("this", this);
 				lisp.env.let("arguments", arguments);
 			
-				var i;
-				var j;
+				var i, j;
 				var str;
 				var index;
 				var type;
@@ -1758,32 +1759,34 @@ defmacro("lambda", function (arglist /*, &rest */) {
 				var optional = false;
 				
 				for (i = 0, j = 0; i < arglist.length; i++, j++) {
-					argname = arglist[i];
+					argname = String(arglist[i]);
 					
 					if (argname == "&") {
 						// The rest of the arguments should be collected into a list
 						lisp.env.let(restname, largs.slice(j));
+						i = arglist.length;
+						j = largs.length;
 						break;
 					} else if (argname == "&opt") {
 						// The rest of the arguments are optional
 						optional = true;
-						j--; // Go back one in the given arguments so we don't miss anything
+						j--;
 						continue;
 					} else {
-						str = argname.toString();
-						index = str.indexOf(":");
+						index = argname.indexOf(":");
 						type = undefined;
 						typestr = undefined;
 						
 						if (index >= 0) {
-							argname = str.slice(0, index);
-							typestr = str.slice(index+1);
+							str = argname.slice(0, index);
+							typestr = argname.slice(index+1);
+							argname = str;
 							if (typestr.length > 0) {
 								type = lisp.eval(typestr);
 							}
 						}
 						
-						if (j <= largs.length-1) {
+						if (j < largs.length) {
 							value = largs[j];
 							if (value !== undefined || !optional) {
 								if (type instanceof Keyword) {
@@ -1811,8 +1814,16 @@ defmacro("lambda", function (arglist /*, &rest */) {
 							throw new ArgumentError("Missing argument " + toLisp(argname) +
 								" in function call.");
 						}
+						
 					}
 				}
+				
+				// Uncommenting this will throw an ArgumentError if the function
+				// receives _too many_ arguments.
+				// if (j < largs.length) {
+				// 	throw new ArgumentError("Too many arguments passed to function " +
+				// 		"with arglist " + toLisp(arglist));
+				// }
 				
 				for (i = 0; i < body.length; i++) {
 					ret = resolve(body[i]);
@@ -2200,6 +2211,7 @@ defmacro("progn", function (/* &expressions */) {
  * @name cond
  * @lisp
  * @function
+ * @macro
  * @member lisp.macros
  * 
  * @returns The value of the last evaluated expression, or nil.
@@ -2245,7 +2257,46 @@ defmacro("cond", function (/* &rest */) {
 	return null;
 });
 
-// TODO: Create (case) or (switch) macro
+/**
+ * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add Examples
+ * TODO: Add support for 'otherwise
+ * </pre>
+ * 
+ * @name switch
+ * @lisp
+ * @function
+ * @macro
+ * @member lisp.macros
+ */
+defmacro("switch", function (valueExpression /*, &rest */) {
+	assert(arguments.length >= 1, "(switch) requires at least one argument");
+	var value = resolve(valueExpression);
+	var rest = argsToArray(arguments).slice(1);
+	var ret = null;
+	var clause;
+	var key;
+	
+	for (var i = 0; i < rest.length; i++) {
+		clause = rest[i];
+		assert(clause instanceof Array, "(switch) requires an array for each " +
+			"clause (got " + toLisp(clause) + ")");
+		assert(clause.length >= 1, "(switch) requires each clause list have at " +
+			"least one value");
+		key = clause[0];
+		if (equal(value, key)) {
+			var expressions = clause.slice(1);
+			for (var j = 0; j < expressions.length; j++) {
+				ret = resolve(expressions[j]);
+			}
+			break;
+		}
+	}
+	
+	return ret;
+});
 
 /**
  * <pre>
@@ -3197,6 +3248,52 @@ defmacro("char", function (symbol) {
 var _macro_collect; // Defined in /src/lisp/macros.lisp
 
 /**
+* <pre>
+* TODO: Test me more
+* TODO: Document me
+* TODO: Add more examples
+* </pre>
+* 
+* @tested
+* 
+* @name inc
+* @lisp
+* @function
+* @macro
+* @member lisp.macros
+ */
+defmacro("inc", function (varName, amountName) {
+	assert(arguments.length >= 1, "(inc) requires at least 1 argument");
+	
+	var amount = (amountName === undefined) ? 1 : resolve(amountName);
+	var oldValue = lisp.env.get(varName);
+	lisp.env.set(varName, oldValue + amount);
+});
+
+/**
+* <pre>
+* TODO: Test me more
+* TODO: Document me
+* TODO: Add more examples
+* </pre>
+* 
+* @tested
+* 
+* @name dec
+* @lisp
+* @function
+* @macro
+* @member lisp.macros
+ */
+defmacro("dec", function (varName, amountName) {
+	assert(arguments.length >= 1, "(dec) requires at least 1 argument");
+	
+	var amount = (amountName === undefined) ? 1 : resolve(amountName);
+	var oldValue = lisp.env.get(varName);
+	lisp.env.set(varName, oldValue - amount);
+});
+
+/**
  * <p>Functions that are defined for the lisp environment.
  * 
  * @name lisp.functions
@@ -3242,24 +3339,26 @@ defun("jseval", function (expression) {
  * <pre>
  * Parses and evaluates a string as lisp.
  * 
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name eval-string
  * @lisp
  * @function
  * @member lisp.functions
  */
-defun("eval-string", function (str) {
-	assert(arguments.length === 1, "(eval-string) requires 1 argument (got " +
-		arguments.length + ")");
-	assert(typeof(str) === "string", "(eval-string) requires a string as its " +
-		"argument (got " + toLisp(str) + ")");
-	
-	return lisp.eval(str);
-});
+// defun("eval-string", function (str) {
+// 	assert(arguments.length === 1, "(eval-string) requires 1 argument (got " +
+// 		arguments.length + ")");
+// 	assert(typeof(str) === "string", "(eval-string) requires a string as its " +
+// 		"argument (got " + toLisp(str) + ")");
+// 	
+// 	return lisp.eval(str);
+// });
+var _function_eval_string; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -3577,6 +3676,39 @@ defun("function", function (value) {
 	
 	throw new Error("'" + toLisp(value) + "' is not callable");
 });
+
+/**
+ * <pre>
+ * A shortcut for (not (not value)), or (and value).
+ * 
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @tested
+ * 
+ * @name !!
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+var _function_exc_exc; // Defined in /src/lisp/functions.lisp
+
+/**
+ * <pre>
+ * A shortcut for (new Regex (concat rest) flags).
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name !!
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+var _function_regex; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -4033,32 +4165,18 @@ defun("to-lower", function (string) {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name starts-with
  * @lisp
  * @function
  * @member lisp.functions
  */
-defun("starts-with", function (string, pattern) {
-	// Input validation
-	assert(arguments.length === 2, "(starts-with) requires 2 arguments (got " +
-		arguments.length + ")");
-	assert(typeof(string) === "string", "(starts-with) requires a string as " +
-		"it's first argument (got " + toLisp(string) + ")");
-	
-	if (pattern instanceof RegExp) {
-		pattern = pattern.source;
-	}
-	
-	assert(typeof(pattern) === "string", "(starts-with) requires a string or " +
-		"regular expression as it's second argument (got " + toLisp(pattern) + ")");
-	
-	return !!string.match(new RegExp("^" + pattern));
-});
+var _function_starts_with; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -4306,7 +4424,7 @@ defun("1-", function (number) {
  *          (in the vendor section) if print evaluates to true,
  *          otherwise nil.
  * 
- * @param {boolean} print
+ * @param {boolean} doPrint
  *     Whether to print the result, or return it.
  * @param {string} format
  *     The string format to which to apply the given arguments.
@@ -4314,7 +4432,7 @@ defun("1-", function (number) {
  *     The arguments to apply to the given format
  * @rest rest
  */
-defun("format", function (print, format /*, &rest */) {
+defun("format", function (doPrint, format /*, &rest */) {
 	// Input validation
 	assert(arguments.length >= 2, "(format) expects at least 2 arguments (got " +
 		arguments.length + ")");
@@ -4323,7 +4441,7 @@ defun("format", function (print, format /*, &rest */) {
 	
 	var output = sprintf.apply(null, argsToArray(arguments).slice(1));
 	
-	if (print) {
+	if (doPrint) {
 		lisp.log(output);
 		return null;
 	} else {
@@ -4503,17 +4621,16 @@ defun("props", function (object, list) {
  *     >> (items '(one two three))
  *     => (("0" one) ("1" two) ("2" three))
  */
-defun("items", function (object) {
+defun("items", function (value) {
 	// Input validation
 	assert(arguments.length === 1, "(items) requires 1 argument (got " +
 		arguments.length + ")");
-	assert(object instanceof Object, "(items) requires an object as its argument " +
-		"(got " + toLisp(object) + ")");
 	
 	var items = [];
-	for (var key in object) {
-		items.push([key, object[key]]);
+	for (var key in value) {
+		items.push([key, value[key]]);
 	}
+	
 	return items;
 });
 
@@ -4556,7 +4673,6 @@ defun("nth", function (sequence, index) {
  * <pre>
  * Returns all but the first element in the given sequence.
  * 
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
@@ -4566,17 +4682,7 @@ defun("nth", function (sequence, index) {
  * @function
  * @member lisp.functions
  */
-defun("rest", function (sequence) {
-	// Input validation
-	assert(arguments.length === 1, "(rest) requires 1 argument (got " +
-		arguments.length + ")");
-	
-	if (sequence.length === 0) {
-		return null;
-	}
-	
-	return sequence.slice(1);
-});
+var _function_rest; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -4595,17 +4701,7 @@ defun("rest", function (sequence) {
  * @function
  * @member lisp.functions
  */
-defun("first", function (sequence) {
-	// Input validation
-	assert(arguments.length === 1, "(first) requires 1 argument (got " +
-		arguments.length + ")");
-	
-	if (sequence.length === 0) {
-		return null;
-	}
-	
-	return sequence[0];
-});
+var _function_first; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -4624,17 +4720,7 @@ defun("first", function (sequence) {
  * @function
  * @member lisp.functions
  */
-defun("second", function (sequence) {
-	// Input validation
-	assert(arguments.length === 1, "(second) requires 1 argument (got " +
-		arguments.length + ")");
-	
-	if (sequence.length < 2) {
-		return null;
-	}
-	
-	return sequence[1];
-});
+var _function_second; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -4653,17 +4739,7 @@ defun("second", function (sequence) {
  * @function
  * @member lisp.functions
  */
-defun("third", function (sequence) {
-	// Input validation
-	assert(arguments.length === 1, "(third) requires 1 argument (got " +
-		arguments.length + ")");
-	
-	if (sequence.length < 3) {
-		return null;
-	}
-	
-	return sequence[2];
-});
+var _function_third; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>

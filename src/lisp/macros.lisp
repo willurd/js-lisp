@@ -1,3 +1,5 @@
+(setq case switch) ;; Adds an alias to switch for case
+
 (defmacro defclass (name & params)
   "Creates a new class, using lisp.Class, passing in the given
 arguments as a plist to lisp.Class.extend()."

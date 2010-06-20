@@ -90,7 +90,7 @@ end
 task :line, :filename, :num do |t, args|
   # Because the files that actually get run in the browser are compiled
   # files, put together from a bunch of smaller files, the line numbers
-  # that are reported when error occur, and by programs like js lint, are
+  # that are reported when errors occur, and by programs like js lint, are
   # not the line numbers actually needed to easily find the problems in
   # code. This task takes one of the files in the build.yaml file and a
   # line number, and returns the actual file/line that we want.

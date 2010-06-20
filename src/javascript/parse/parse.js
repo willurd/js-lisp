@@ -253,8 +253,8 @@ parse.stringEscape = function (stream) {
 	switch (c)
 	{
 	case "x":
-		var byte = stream.next() + stream.next();
-		return eval('"' + '\\' + c + byte + '"');
+		var hex = stream.next(2);
+		return eval('"' + '\\' + c + hex + '"');
 	default:
 		return eval('"' + '\\' + c + '"');
 	}

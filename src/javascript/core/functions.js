@@ -44,24 +44,26 @@ defun("jseval", function (expression) {
  * <pre>
  * Parses and evaluates a string as lisp.
  * 
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name eval-string
  * @lisp
  * @function
  * @member lisp.functions
  */
-defun("eval-string", function (str) {
-	assert(arguments.length === 1, "(eval-string) requires 1 argument (got " +
-		arguments.length + ")");
-	assert(typeof(str) === "string", "(eval-string) requires a string as its " +
-		"argument (got " + toLisp(str) + ")");
-	
-	return lisp.eval(str);
-});
+// defun("eval-string", function (str) {
+// 	assert(arguments.length === 1, "(eval-string) requires 1 argument (got " +
+// 		arguments.length + ")");
+// 	assert(typeof(str) === "string", "(eval-string) requires a string as its " +
+// 		"argument (got " + toLisp(str) + ")");
+// 	
+// 	return lisp.eval(str);
+// });
+var _function_eval_string; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -379,6 +381,39 @@ defun("function", function (value) {
 	
 	throw new Error("'" + toLisp(value) + "' is not callable");
 });
+
+/**
+ * <pre>
+ * A shortcut for (not (not value)), or (and value).
+ * 
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @tested
+ * 
+ * @name !!
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+var _function_exc_exc; // Defined in /src/lisp/functions.lisp
+
+/**
+ * <pre>
+ * A shortcut for (new Regex (concat rest) flags).
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name !!
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+var _function_regex; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -835,32 +870,18 @@ defun("to-lower", function (string) {
 
 /**
  * <pre>
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
+ * 
+ * @tested
  * 
  * @name starts-with
  * @lisp
  * @function
  * @member lisp.functions
  */
-defun("starts-with", function (string, pattern) {
-	// Input validation
-	assert(arguments.length === 2, "(starts-with) requires 2 arguments (got " +
-		arguments.length + ")");
-	assert(typeof(string) === "string", "(starts-with) requires a string as " +
-		"it's first argument (got " + toLisp(string) + ")");
-	
-	if (pattern instanceof RegExp) {
-		pattern = pattern.source;
-	}
-	
-	assert(typeof(pattern) === "string", "(starts-with) requires a string or " +
-		"regular expression as it's second argument (got " + toLisp(pattern) + ")");
-	
-	return !!string.match(new RegExp("^" + pattern));
-});
+var _function_starts_with; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -1108,7 +1129,7 @@ defun("1-", function (number) {
  *          (in the vendor section) if print evaluates to true,
  *          otherwise nil.
  * 
- * @param {boolean} print
+ * @param {boolean} doPrint
  *     Whether to print the result, or return it.
  * @param {string} format
  *     The string format to which to apply the given arguments.
@@ -1116,7 +1137,7 @@ defun("1-", function (number) {
  *     The arguments to apply to the given format
  * @rest rest
  */
-defun("format", function (print, format /*, &rest */) {
+defun("format", function (doPrint, format /*, &rest */) {
 	// Input validation
 	assert(arguments.length >= 2, "(format) expects at least 2 arguments (got " +
 		arguments.length + ")");
@@ -1125,7 +1146,7 @@ defun("format", function (print, format /*, &rest */) {
 	
 	var output = sprintf.apply(null, argsToArray(arguments).slice(1));
 	
-	if (print) {
+	if (doPrint) {
 		lisp.log(output);
 		return null;
 	} else {
@@ -1305,17 +1326,16 @@ defun("props", function (object, list) {
  *     >> (items '(one two three))
  *     => (("0" one) ("1" two) ("2" three))
  */
-defun("items", function (object) {
+defun("items", function (value) {
 	// Input validation
 	assert(arguments.length === 1, "(items) requires 1 argument (got " +
 		arguments.length + ")");
-	assert(object instanceof Object, "(items) requires an object as its argument " +
-		"(got " + toLisp(object) + ")");
 	
 	var items = [];
-	for (var key in object) {
-		items.push([key, object[key]]);
+	for (var key in value) {
+		items.push([key, value[key]]);
 	}
+	
 	return items;
 });
 
@@ -1358,7 +1378,6 @@ defun("nth", function (sequence, index) {
  * <pre>
  * Returns all but the first element in the given sequence.
  * 
- * TODO: Test me
  * TODO: Document me
  * TODO: Add examples
  * </pre>
@@ -1368,17 +1387,7 @@ defun("nth", function (sequence, index) {
  * @function
  * @member lisp.functions
  */
-defun("rest", function (sequence) {
-	// Input validation
-	assert(arguments.length === 1, "(rest) requires 1 argument (got " +
-		arguments.length + ")");
-	
-	if (sequence.length === 0) {
-		return null;
-	}
-	
-	return sequence.slice(1);
-});
+var _function_rest; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -1397,17 +1406,7 @@ defun("rest", function (sequence) {
  * @function
  * @member lisp.functions
  */
-defun("first", function (sequence) {
-	// Input validation
-	assert(arguments.length === 1, "(first) requires 1 argument (got " +
-		arguments.length + ")");
-	
-	if (sequence.length === 0) {
-		return null;
-	}
-	
-	return sequence[0];
-});
+var _function_first; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -1426,17 +1425,7 @@ defun("first", function (sequence) {
  * @function
  * @member lisp.functions
  */
-defun("second", function (sequence) {
-	// Input validation
-	assert(arguments.length === 1, "(second) requires 1 argument (got " +
-		arguments.length + ")");
-	
-	if (sequence.length < 2) {
-		return null;
-	}
-	
-	return sequence[1];
-});
+var _function_second; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
@@ -1455,17 +1444,7 @@ defun("second", function (sequence) {
  * @function
  * @member lisp.functions
  */
-defun("third", function (sequence) {
-	// Input validation
-	assert(arguments.length === 1, "(third) requires 1 argument (got " +
-		arguments.length + ")");
-	
-	if (sequence.length < 3) {
-		return null;
-	}
-	
-	return sequence[2];
-});
+var _function_third; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
