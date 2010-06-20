@@ -1801,9 +1801,7 @@ defmacro("lambda", function (arglist /*, &rest */) {
 											toLisp(argname) + ". Expected an instance of " +
 											typestr + " (got " + toLisp(value) + ").");
 									}
-								} else if (type === undefined) {
-									// There is no type, do nothing
-								} else {
+								} else if (type !== undefined) {
 									throw new ArgumentError("Invalid type specifier: " + toLisp(type));
 								}
 							}
@@ -1996,7 +1994,7 @@ defmacro("try", function () {
 					}
 					
 					var expressions = catchExpression.slice(2);
-					for (var i = 0; i < expressions.length; i++) {
+					for (i = 0; i < expressions.length; i++) {
 						resolve(expressions[i]);
 					}
 				} finally {
