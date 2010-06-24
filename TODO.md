@@ -112,7 +112,8 @@
       * Each scope is a set of vars that have changed and their old values so the Env can be reset when that scope goes out
     * scope = Scope(parentScope, env)
     * Closures copy scopes (which takes the current values, instead of the old values)
-* Handle empty list: if an sexp has no arguments, it's an empty list
+* Maybe: Build a small cookie api into the platform
+* Maybe: Build a url api, mostly nicer handling of query strings
 * Think about Cons' and how they'll fit in (or if they will...)
 * Test defining a class from scratch (using the prototype property)
 * Think about implementing generic methods
