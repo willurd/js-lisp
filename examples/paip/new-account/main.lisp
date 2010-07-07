@@ -10,8 +10,10 @@
 (setq *default-balance* 0.00)
 (setq *default-interest-rate* 0.06)
 
+;; ~ (new-account)
+
 (defun new-account (name::string &opt balance::number
-	                                  interest-rate::number)
+                                      interest-rate::number)
   "Create a new account that knows the following messages:"
   (||= balance *default-balance*)
   (setq interest-rate (if (is-undefined interest-rate)
@@ -39,11 +41,52 @@
 (defun send (object message & args)
   "Get the function to implement the message,
   and apply the function to the args."
-  (apply (get-method object message) args))
+  (let ((method (get-method object message)))
+    (if method
+        (apply method args)
+      (throw (format nil "object does not respond to message %l" message)))))
+
+;; ~ (define-class)
+
+(defmacro define-class (class inst-vars class-vars & methods)
+  "Define a class for object-oriented programming."
+  ;; Define constructor and generic functions for methods
+  (let ((getter-vars (map #'second (collect (item inst-vars)
+                                     (not (starts-with (to-string (second item)) "&")))))
+        (getter-clauses (map (lambda (a)
+                               (setq a (arg-name-part a))
+                               (list (to-keyword a) () a))
+                             getter-vars)))
+    `(let ,class-vars
+      (defun ,class ,inst-vars
+        (let ((obj (lambda (message)
+                     (case message
+                       ,@(map #'make-clause (array-concat getter-clauses methods)))))
+             (init-method (get-method obj :initialize)))
+          (when (is-function init-method)
+            (init-method))
+          obj)))))
+
+(defmacro make-clause (clause)
+  "Translate a message from define-class into a case clause."
+  `'(,(first clause) (lambda ,(second clause) ,@(rest (rest clause)))))
+
+;; ~ (account) class
+
+(define-class account (name::string &opt balance::number)
+  ((interest-rate *default-interest-rate*))
+  (:initialize () nil)
+  (:withdraw (amt::number) (if (<= amt balance)
+                               (dec balance amt)
+                             :insufficient-funds))
+  (:deposit  (amt::number) (inc balance amt))
+  (:interest () (incf balance (* interest-rate balance))))
 
 ;; ================================================================================
 ;; TESTS
 ;; ================================================================================
+
+(divider "Using (new-account)")
 
 (test "(new-account)"
   :testNoArguments (lambda ()
@@ -94,3 +137,16 @@
       (this.assertEqual (send acct 'balance) 623.45))
     :testName (lambda ()
       (this.assertEqual (send acct 'name) "J. Random Customer"))))
+
+(divider "Using (define-class)")
+
+(let ((acct (account "J. Random Customer" 1000.00)))
+  (test "PAIP example code"
+    :testWithdraw (lambda ()
+      (send acct :withdraw 500.00)
+      (this.assertEqual (send acct :balance) 500))
+    :testDeposit (lambda ()
+      (send acct :deposit 123.45)
+      (this.assertEqual (send acct :balance) 623.45))
+    :testName (lambda ()
+      (this.assertEqual (send acct :name) "J. Random Customer"))))

@@ -6,13 +6,15 @@ return {
 	Macro: Macro,
 	Symbol: Symbol,
 	Keyword: Keyword,
+	Generator: Generator,
 	
 	env: ROOT_ENV,
 	
 	exception: {
 		StreamException: StreamException,
 		StreamEOFException: StreamEOFException,
-		ArgumentError: ArgumentError
+		ArgumentError: ArgumentError,
+		StopIteration: StopIteration
 	},
 	
 	parse: parse,

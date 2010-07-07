@@ -38,6 +38,10 @@ iteration, and collecting into a list every item where the last
         (push set ,item-name)))
     set))
 
+(defun load (path::string)
+  (lisp.load path))
+
+
 (defun eval-string (str::string)
   "Takes a string and evaluates it in the current lisp environment."
   (lisp.eval str))

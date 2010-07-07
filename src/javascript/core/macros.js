@@ -844,6 +844,7 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
  * Executes the rest of the arguments if the first argument
  * is true.
  * 
+ * TODO: Document me
  * TODO: Add examples
  * </pre>
  * 
@@ -856,19 +857,54 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
  * 
  * @returns The return value of the last expression.
  */
-defmacro("when", function () {
+defmacro("when", function (ifExpression /*, &rest */) {
 	// Input validation
-	assert(arguments.length >= 1, "(when) requires at least 1 argument " +
-		"(got " + arguments.length + ")");
+	assert(arguments.length >= 1, "(when) requires at least 1 argument");
 	
-	if (!!resolve(arguments[0])) {
-		var args = argsToArray(arguments).slice(1).map(resolve);
-		return args[args.length-1];
+	var ret = null;
+	
+	if (!!resolve(ifExpression)) {
+		var args = argsToArray(arguments);
+		for (var i = 1; i < args.length; i++) {
+			ret = resolve(args[i]);
+		}
 	}
-	return null;
+	
+	return ret;
 });
 
-// TODO: Create (unless) macro
+/**
+ * <pre>
+ * Executes the rest of the arguments if the first argument
+ * is false.
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name when
+ * @lisp
+ * @function
+ * @member lisp.macros
+ * 
+ * @returns The return value of the last expression.
+ */
+defmacro("unless", function (ifNotExpression /*, &rest */) {
+	// Input validation
+	assert(arguments.length >= 1, "(unless) requires at least 1 argument");
+	
+	var ret = null;
+	
+	if (!resolve(ifNotExpression)) {
+		var args = argsToArray(arguments);
+		for (var i = 1; i < args.length; i++) {
+			ret = resolve(args[i]);
+		}
+	}
+	
+	return ret;
+});
 
 /**
  * <pre>
@@ -1793,4 +1829,66 @@ defmacro("dec", function (varName, amountName) {
 	var amount = (amountName === undefined) ? 1 : resolve(amountName);
 	var oldValue = lisp.env.get(varName);
 	lisp.env.set(varName, oldValue - amount);
+});
+
+var Generator = Class.extend({
+	init: function (callable) {
+		this.callable = callable;
+	},
+	call: function () {
+		return this.callable.call(null);
+	}
+});
+
+var StopIteration = Class.extend(); // ({}) ?
+
+/**
+ * Specifically meant for arrays, strings and generators.
+ */
+defmacro("for", function (arglist /*, &rest */) {
+	assert(arguments.length >= 1, "(for) requires at least 1 argument");
+	
+	var itemName = arglist[0];
+	var iterable = resolve(arglist[1]);
+	var rest = argsToArray(arguments).slice(1);
+	
+	function doIteration (index, item) {
+		withNewEnv(function () {
+			if (rest.length === 0) {
+				return;
+			}
+
+			lisp.env.let(itemName, item);
+			ret = null;
+			for (var i = 0; i < rest.length; i++) {
+				ret = resolve(rest[i]);
+			}
+			return ret;
+		});
+	}
+	
+	var ret = null;
+	
+	if (iterable instanceof Generator) {
+		// The iterable object is a generator
+		try {
+			for (var i = 0; true; i++) {
+				ret = doIteration(i, iterable.call());
+			}
+		} catch (e) {
+			if (!(e instanceof StopIteration)) {
+				throw e;
+			}
+		}
+	} else if (iterable.hasOwnProperty("length")) {
+		// The iterable object is some kind of sequence
+		for (var i = 0; i < iterable.length; i++) {
+			ret = doIteration(i, iterable[i]);
+		}
+	} else { // Don't know how to iterate over this
+		throw new Error("(for) received an object it does not know how to iterate " +
+			"over: " + toLisp(iterable));
+	}
+	
+	return ret;
 });

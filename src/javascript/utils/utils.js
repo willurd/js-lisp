@@ -13,6 +13,14 @@ function assert (assertion, errorString) {
 	}
 }
 
+function withNewEnv (callable) {
+	var tempEnv = lisp.env;
+	lisp.env = new Env(lisp.env);
+	var ret = callable();
+	lisp.env = tempEnv;
+	return ret;
+}
+
 /**
  * The method used for (equal) equality in js-lisp.
  * 

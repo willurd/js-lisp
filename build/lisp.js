@@ -422,6 +422,14 @@ function assert (assertion, errorString) {
 	}
 }
 
+function withNewEnv (callable) {
+	var tempEnv = lisp.env;
+	lisp.env = new Env(lisp.env);
+	var ret = callable();
+	lisp.env = tempEnv;
+	return ret;
+}
+
 /**
  * The method used for (equal) equality in js-lisp.
  * 
@@ -2340,6 +2348,7 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
  * Executes the rest of the arguments if the first argument
  * is true.
  * 
+ * TODO: Document me
  * TODO: Add examples
  * </pre>
  * 
@@ -2352,19 +2361,54 @@ defmacro("if", function (testExpression, ifTrueExpression /*, ... */) {
  * 
  * @returns The return value of the last expression.
  */
-defmacro("when", function () {
+defmacro("when", function (ifExpression /*, &rest */) {
 	// Input validation
-	assert(arguments.length >= 1, "(when) requires at least 1 argument " +
-		"(got " + arguments.length + ")");
+	assert(arguments.length >= 1, "(when) requires at least 1 argument");
 	
-	if (!!resolve(arguments[0])) {
-		var args = argsToArray(arguments).slice(1).map(resolve);
-		return args[args.length-1];
+	var ret = null;
+	
+	if (!!resolve(ifExpression)) {
+		var args = argsToArray(arguments);
+		for (var i = 1; i < args.length; i++) {
+			ret = resolve(args[i]);
+		}
 	}
-	return null;
+	
+	return ret;
 });
 
-// TODO: Create (unless) macro
+/**
+ * <pre>
+ * Executes the rest of the arguments if the first argument
+ * is false.
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name when
+ * @lisp
+ * @function
+ * @member lisp.macros
+ * 
+ * @returns The return value of the last expression.
+ */
+defmacro("unless", function (ifNotExpression /*, &rest */) {
+	// Input validation
+	assert(arguments.length >= 1, "(unless) requires at least 1 argument");
+	
+	var ret = null;
+	
+	if (!resolve(ifNotExpression)) {
+		var args = argsToArray(arguments);
+		for (var i = 1; i < args.length; i++) {
+			ret = resolve(args[i]);
+		}
+	}
+	
+	return ret;
+});
 
 /**
  * <pre>
@@ -3291,6 +3335,68 @@ defmacro("dec", function (varName, amountName) {
 	lisp.env.set(varName, oldValue - amount);
 });
 
+var Generator = Class.extend({
+	init: function (callable) {
+		this.callable = callable;
+	},
+	call: function () {
+		return this.callable.call(null);
+	}
+});
+
+var StopIteration = Class.extend(); // ({}) ?
+
+/**
+ * Specifically meant for arrays, strings and generators.
+ */
+defmacro("for", function (arglist /*, &rest */) {
+	assert(arguments.length >= 1, "(for) requires at least 1 argument");
+	
+	var itemName = arglist[0];
+	var iterable = resolve(arglist[1]);
+	var rest = argsToArray(arguments).slice(1);
+	
+	function doIteration (index, item) {
+		withNewEnv(function () {
+			if (rest.length === 0) {
+				return;
+			}
+
+			lisp.env.let(itemName, item);
+			ret = null;
+			for (var i = 0; i < rest.length; i++) {
+				ret = resolve(rest[i]);
+			}
+			return ret;
+		});
+	}
+	
+	var ret = null;
+	
+	if (iterable instanceof Generator) {
+		// The iterable object is a generator
+		try {
+			for (var i = 0; true; i++) {
+				ret = doIteration(i, iterable.call());
+			}
+		} catch (e) {
+			if (!(e instanceof StopIteration)) {
+				throw e;
+			}
+		}
+	} else if (iterable.hasOwnProperty("length")) {
+		// The iterable object is some kind of sequence
+		for (var i = 0; i < iterable.length; i++) {
+			ret = doIteration(i, iterable[i]);
+		}
+	} else { // Don't know how to iterate over this
+		throw new Error("(for) received an object it does not know how to iterate " +
+			"over: " + toLisp(iterable));
+	}
+	
+	return ret;
+});
+
 /**
  * <p>Functions that are defined for the lisp environment.
  * 
@@ -3881,6 +3987,23 @@ defun("join", function (sep /*, &rest */) {
 
 /**
  * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name list-concat
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("array-concat", function (/* &rest */) {
+	var args = argsToArray(arguments);
+	return args.reduce(function (a, b) { return a.concat(b); });
+});
+
+/**
+ * <pre>
  * Returns the type of the given value (the result of "typeof(value)").
  * 
  * TODO: Add examples
@@ -4002,6 +4125,31 @@ defun("to-symbol", function (value) {
 		arguments.length + ")");
 	
 	return new lisp.Symbol(String(value));
+});
+
+/**
+ * <pre>
+ * Converts the given value to a keyword.
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name to-keyword
+ * @lisp
+ * @function
+ * @member lisp.functions
+ * 
+ * @param {mixed} value
+ *     The value to turn into a keyword.
+ */
+defun("to-keyword", function (value) {
+	// Input validation
+	assert(arguments.length === 1, "(to-keyword) requires 1 argument (got " +
+		arguments.length + ")");
+	
+	return new lisp.Keyword(String(value));
 });
 
 /**
@@ -4427,7 +4575,7 @@ defun("1-", function (number) {
  * @param {string} format
  *     The string format to which to apply the given arguments.
  * @param {[mixed]} rest
- *     The arguments to apply to the given format
+ *     The arguments to apply to the given format.
  * @rest rest
  */
 defun("format", function (doPrint, format /*, &rest */) {
@@ -4845,13 +4993,15 @@ return {
 	Macro: Macro,
 	Symbol: Symbol,
 	Keyword: Keyword,
+	Generator: Generator,
 	
 	env: ROOT_ENV,
 	
 	exception: {
 		StreamException: StreamException,
 		StreamEOFException: StreamEOFException,
-		ArgumentError: ArgumentError
+		ArgumentError: ArgumentError,
+		StopIteration: StopIteration
 	},
 	
 	parse: parse,

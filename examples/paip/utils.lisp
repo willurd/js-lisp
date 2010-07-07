@@ -5,3 +5,10 @@
   `(JSTest.TestCase (object
 	:name ,name
     ,@plist)))
+
+(defmacro divider (name)
+  `(JSTest.Divider ,name))
+
+(defun arg-name-part (argname:lisp.Symbol)
+  (let ((argname (to-string argname)))
+    (to-symbol (first (argname.split ":")))))

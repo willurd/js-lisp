@@ -1,3 +1,7 @@
+(defun load (path::string)
+  (lisp.load path))
+
+
 (defun eval-string (str::string)
   "Takes a string and evaluates it in the current lisp environment."
   (lisp.eval str))

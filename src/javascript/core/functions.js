@@ -588,6 +588,23 @@ defun("join", function (sep /*, &rest */) {
 
 /**
  * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name list-concat
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+defun("array-concat", function (/* &rest */) {
+	var args = argsToArray(arguments);
+	return args.reduce(function (a, b) { return a.concat(b); });
+});
+
+/**
+ * <pre>
  * Returns the type of the given value (the result of "typeof(value)").
  * 
  * TODO: Add examples
@@ -709,6 +726,31 @@ defun("to-symbol", function (value) {
 		arguments.length + ")");
 	
 	return new lisp.Symbol(String(value));
+});
+
+/**
+ * <pre>
+ * Converts the given value to a keyword.
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name to-keyword
+ * @lisp
+ * @function
+ * @member lisp.functions
+ * 
+ * @param {mixed} value
+ *     The value to turn into a keyword.
+ */
+defun("to-keyword", function (value) {
+	// Input validation
+	assert(arguments.length === 1, "(to-keyword) requires 1 argument (got " +
+		arguments.length + ")");
+	
+	return new lisp.Keyword(String(value));
 });
 
 /**
@@ -1134,7 +1176,7 @@ defun("1-", function (number) {
  * @param {string} format
  *     The string format to which to apply the given arguments.
  * @param {[mixed]} rest
- *     The arguments to apply to the given format
+ *     The arguments to apply to the given format.
  * @rest rest
  */
 defun("format", function (doPrint, format /*, &rest */) {
