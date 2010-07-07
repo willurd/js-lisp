@@ -4149,6 +4149,16 @@ defun("to-keyword", function (value) {
 	assert(arguments.length === 1, "(to-keyword) requires 1 argument (got " +
 		arguments.length + ")");
 	
+	try {
+		// Use the "to-keyword" method if it has one.
+		return value['to-keyword']();
+	} catch (e) {}
+	
+	try {
+		// Use the "toKeyword" method if it has one.
+		return value.toKeyword();
+	} catch (e) {}
+	
 	return new lisp.Keyword(String(value));
 });
 
@@ -5091,12 +5101,13 @@ if ((typeof(window) == "undefined") &&
 	(typeof(exports) == "object") && exports) {
 	
 	var sys = require("sys"),
-		fs  = require("fs");
+		fs  = require("fs"),
+		path = require("path");
 	
 	lisp.log = sys.puts;
 	
 	lisp.load = function (filepath) {
-		exports.eval(fs.readFileSync(filepath));
+		exports.eval(path.normalize(fs.readFileSync(filepath)));
 	};
 	
 	// We are probably running in node.js now.

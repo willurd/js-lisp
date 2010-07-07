@@ -7,12 +7,13 @@ if ((typeof(window) == "undefined") &&
 	(typeof(exports) == "object") && exports) {
 	
 	var sys = require("sys"),
-		fs  = require("fs");
+		fs  = require("fs"),
+		path = require("path");
 	
 	lisp.log = sys.puts;
 	
 	lisp.load = function (filepath) {
-		exports.eval(fs.readFileSync(filepath));
+		exports.eval(path.normalize(fs.readFileSync(filepath)));
 	};
 	
 	// We are probably running in node.js now.

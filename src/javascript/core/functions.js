@@ -753,12 +753,12 @@ defun("to-keyword", function (value) {
 	try {
 		// Use the "to-keyword" method if it has one.
 		return value['to-keyword']();
-	} catch () {}
+	} catch (e) {}
 	
 	try {
 		// Use the "toKeyword" method if it has one.
 		return value.toKeyword();
-	} catch () {}
+	} catch (e) {}
 	
 	return new lisp.Keyword(String(value));
 });
