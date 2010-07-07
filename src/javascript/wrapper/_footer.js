@@ -5,6 +5,8 @@ if ((typeof(window) == "undefined") &&
 	(typeof(global) == "object") && global && // Make sure it isn't null
 	(typeof(require) == "function") &&
 	(typeof(exports) == "object") && exports) {
+	// We are probably running in node.js now.
+	// FIXME: Find a better way to tell we're running in node.js
 	
 	var sys = require("sys"),
 		fs  = require("fs"),
@@ -12,12 +14,30 @@ if ((typeof(window) == "undefined") &&
 	
 	lisp.log = sys.puts;
 	
+	function FileNotFound (message) {
+		this.toString = function () {
+			return "FileNotFound: " + message;
+		};
+	}
+
 	lisp.load = function (filepath) {
-		exports.eval(path.normalize(fs.readFileSync(filepath)));
+		for (var i = 0; i < require.paths.length; i++) {
+			var p = path.normalize(path.join(require.paths[i], filepath));
+			var contents = null;
+			try {
+				contents = fs.readFileSync(p);
+			} catch (e) {
+				if (e instanceof FileNotFound) {
+					throw e;
+				}
+			}
+			if (contents != null) {
+				return lisp.eval(contents);
+			}
+		}
+		throw new FileNotFound("File '" + filepath + "' not found");
 	};
 	
-	// We are probably running in node.js now.
-	// FIXME: Find a better way to tell we're running in node.js
 	for (var key in lisp) {
 		if (lisp.hasOwnProperty(key)) {
 			exports[key] = lisp[key];

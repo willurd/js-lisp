@@ -5107,7 +5107,7 @@ if ((typeof(window) == "undefined") &&
 	lisp.log = sys.puts;
 	
 	lisp.load = function (filepath) {
-		exports.eval(path.normalize(fs.readFileSync(filepath)));
+		lisp.eval(path.normalize(fs.readFileSync(filepath)));
 	};
 	
 	// We are probably running in node.js now.

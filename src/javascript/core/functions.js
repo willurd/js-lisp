@@ -937,6 +937,20 @@ var _function_starts_with; // Defined in /src/lisp/functions.lisp
 
 /**
  * <pre>
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name ends-with
+ * @lisp
+ * @function
+ * @member lisp.functions
+ */
+var _function_ends_with; // Defined in /src/lisp/functions.lisp
+
+/**
+ * <pre>
  * Reduces the given arguments on the / operator.
  * 
  * TODO: Add examples
