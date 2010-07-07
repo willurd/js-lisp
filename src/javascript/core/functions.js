@@ -750,6 +750,16 @@ defun("to-keyword", function (value) {
 	assert(arguments.length === 1, "(to-keyword) requires 1 argument (got " +
 		arguments.length + ")");
 	
+	try {
+		// Use the "to-keyword" method if it has one.
+		return value['to-keyword']();
+	} catch () {}
+	
+	try {
+		// Use the "toKeyword" method if it has one.
+		return value.toKeyword();
+	} catch () {}
+	
 	return new lisp.Keyword(String(value));
 });
 
