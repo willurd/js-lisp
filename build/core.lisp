@@ -68,6 +68,14 @@ regex as its second argument (got %l)" pattern))
   (!! (str.match (regex flags "^" pattern))))
 
 
+(defun ends-with (str::string pattern &opt flags::string)
+  (when (instanceof pattern RegExp)
+    (setq pattern pattern.source))
+  (assert (is-string pattern) (format nil "ends-with expects a string or \
+regex as its second argument (got %l)" pattern))
+  (!! (str.match (regex flags pattern "$"))))
+
+
 (defun rest (seq)
   (if (== sequence.length 0)
       nil
