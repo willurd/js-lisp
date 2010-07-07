@@ -20,9 +20,10 @@ if ((typeof(window) == "undefined") &&
 		};
 	}
 
-	lisp.load = function (filepath) {
-		for (var i = 0; i < require.paths.length; i++) {
-			var p = path.normalize(path.join(require.paths[i], filepath));
+	lisp.load = function (filepath, paths) {
+		paths = paths || require.paths;
+		for (var i = 0; i < paths.length; i++) {
+			var p = path.normalize(path.join(paths[i], filepath));
 			var contents = null;
 			try {
 				contents = fs.readFileSync(p);
