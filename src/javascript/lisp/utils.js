@@ -32,8 +32,7 @@ function resolve (value) {
 }
 
 /**
- * Recursively resolves all (resolve) expressions an
- * unevaluated expression.
+ * Recursively resolves all (resolve) expressions.
  */
 function checkResolve (expression) {
 	if (expression instanceof Array) {
@@ -56,9 +55,6 @@ function checkExplode (expression, parent, index) {
 			var list = resolve(expression[1]);
 			if (!(list instanceof Array)) {
 				list = [list]; // Be lenient if someone is trying to "explode" a non-list
-			}
-			if (list.length === 0) {
-				return index;
 			}
 			// Insert the expressions elements into the parent
 			var end = parent.slice(index+1);
