@@ -339,7 +339,7 @@ defun("list", function (/* &rest */) {
  */
 defun("object", function (/* &rest */) {
 	// Input validation
-	assert(arguments.length % 2 === 0, "(object) expects and even number of " +
+	assert(arguments.length % 2 === 0, "(object) expects an even number of " +
 		"arguments (got " + arguments.length + ")");
 	
 	var args = argsToArray(arguments);
