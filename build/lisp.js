@@ -3394,6 +3394,71 @@ defmacro("for", function (arglist /*, &rest */) {
 });
 
 /**
+ * Emulates the goto functionality of languages like c. Takes
+ * a list of lists, each one starting with a label and containing
+ * an arbitrary number of expressions. Evalualtes the expressions
+ * in order, except when (goto :label) is called.
+ * 
+ * FIXME: This macro works but is large in gross.
+ */
+defmacro("labels", function (/* &rest */) {
+	if (arguments.length === 0) {
+		return null;
+	}
+	
+	var sys = require("sys");
+	var args = argsToArray(arguments);
+	
+	var labels = args.map(function (arg) {
+		assert(arg.length >= 1, "(labels) label must have at least a label");
+		return {
+			label: arg[0],
+			expressions: arg.slice(1)
+		};
+	});
+	
+	var exprIndex = -1;
+	var labelIndex = 0;
+	var expressions = labels[labelIndex].expressions;
+	
+	var gotoFunc = function (label) {
+		exprIndex = -1;
+		if (label === null) {
+			// (goto nil) is how you return from a (labels) expression.
+			labelIndex = labels.length;
+			return;
+		}
+		for (labelIndex = 0; labelIndex < labels.length; labelIndex++) {
+			if (equal(labels[labelIndex].label, label)) {
+				expressions = labels[labelIndex].expressions;
+				return;
+			}
+		}
+		throw new Error(toLisp(label) + " is not a valid label");
+	}
+	
+	withNewEnv(function () {
+		lisp.env.let("goto", gotoFunc);
+		
+		while (exprIndex < expressions.length &&
+		       labelIndex < labels.length) {
+			exprIndex++;
+			resolve(expressions[exprIndex]);
+			if (exprIndex >= expressions.length) {
+				exprIndex = -1;
+				labelIndex++;
+				if (!labels[labelIndex]) {
+					break;
+				}
+				expressions = labels[labelIndex].expressions;
+			}
+		}
+	});
+	
+	return null;
+});
+
+/**
  * <p>Functions that are defined for the lisp environment.
  * 
  * @name lisp.functions
@@ -3734,7 +3799,7 @@ defun("list", function (/* &rest */) {
  */
 defun("object", function (/* &rest */) {
 	// Input validation
-	assert(arguments.length % 2 === 0, "(object) expects and even number of " +
+	assert(arguments.length % 2 === 0, "(object) expects an even number of " +
 		"arguments (got " + arguments.length + ")");
 	
 	var args = argsToArray(arguments);
