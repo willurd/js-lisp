@@ -7,9 +7,19 @@
   (lisp.eval str))
 
 
+(defun doc (callable)
+  "Returns the documentation of a given function or macro."
+  (when (or (is-function callable)
+            (is-macro callable))
+    (getkey callable :documentation)))
+
+
 (defun !! (value)
   "An alias for (not (not value)) or (and value)."
   (and value))
+
+
+(setq ! #'not) ;; Alias, just because
 
 
 (defun regex (flags & rest)
@@ -82,3 +92,37 @@ and a function as your second (or undefined, because it's optional)."
 ;   (assert (is-array array)
 ;           (format nil "(sort) requires an Array as its argument (got %l)" array))
 ;   (sort! (array.concat) compareFunc))
+
+
+(defun xrange (a::number &opt b::number step::number)
+  "Returns a generator that returns a number each time it is
+called, starting with `a', ending when it is greater than `b',
+and incrementing by `step'."
+  ;; Sanatize the input
+  (when (is-undefined b)
+    (setq b a)
+    (setq a 0))
+  (||= step 1)
+  ;; Return the generator
+  (let ((last  a))
+    (generator ()
+      (let ((ret last))
+        (setq last (+ last step))
+        (if (> ret b)
+            (stop-iteration)
+          ret)))))
+
+
+(defun is-even (num::number)
+  "Returns true if the given number is even."
+  (== 0 (% num 2)))
+
+
+(defun round (num::number)
+  "A shortcut for Math.round."
+  (Math.round num))
+
+
+(defun random ()
+  "A shortcut for Math.random."
+  (Math.random))

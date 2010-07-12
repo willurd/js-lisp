@@ -1,5 +1,6 @@
 (setq case switch) ;; Adds an alias to switch for case
 
+
 (defmacro defclass (name & params)
   "Creates a new class, using lisp.Class, passing in the given
 arguments as a plist to lisp.Class.extend()."
@@ -9,19 +10,30 @@ arguments as a plist to lisp.Class.extend()."
     (params.shift))
   `(setq ,name (lisp.Class.extend (object ,@params))))
 
-; (defmacro dolist ((var lst) & body)
-;   (let ((indexname (gensym))
-;         (count (length lst)))
-;     (print indexname)
-;     `(do ((,indexname 0 (1+ ,indexname))
-;           (,var (nth ,indexname ,lst)))
-;          ((>= ,indexname ,count))
-;       ,@body)))
-; 
-; (defmacro dotimes ((var count) & body)
-;   `(do ((,var 0 (1+ ,var)))
-;        ((>= ,var ,count))
-;     ,@body))
+
+(defmacro defobject (name & props)
+  "Creates an object from the given arguments (after name) as
+a plist."
+  ;; Check for the existence of a doc string
+  (when (and (== (% (length props) 2) 1)
+             (is-string (first props)))
+    (props.shift))
+  `(setq ,name (object ,@props)))
+
+
+(defmacro dotimes ((name count) & body)
+  `(do ((,name 0 (1+ ,name)))
+       ((>= ,name ,count))
+    ,@body))
+
+
+(defmacro dolist ((name lst) & body)
+  (let ((indexname (gensym)))
+    `(do ((,indexname 0 (1+ ,indexname))
+          (,name (nth ,lst ,indexname)))
+         ((>= ,indexname (length ,lst)))
+      ,@body)))
+
 
 (defmacro collect ((item-name lst) & body)
   "Creates a list of (key value) pairs from `object', iterates over
@@ -29,7 +41,7 @@ each one, evaluating all of the expressions in `body' for every
 iteration, and collecting into a list every item where the last
 `body' expression evaluates to true."
   ;; Input validation
-  (let ((basemsg "(collect) expects arguments in the form: ((item-name lst) &body)."))
+  (let ((basemsg "(collect) expects arguments in the form: ((item-name lst) & body)."))
     (assert (is-symbol item-name)
             (format nil "%s item-name must be a symbol (got %s)" basemsg item-name)))
   `(let ((set (list)))
@@ -37,6 +49,15 @@ iteration, and collecting into a list every item where the last
       (when (progn ,@body)
         (push set ,item-name)))
     set))
+
+
+(defmacro generator (arglist & body)
+  "A shortcut for defining a new generator. The new generator
+closes over a shortcut function for throwing a StopIteration."
+  `(let ((stop-iteration (lambda ()
+            (throw (new lisp.exception.StopIteration)))))
+     (new lisp.Generator (lambda ,arglist
+       ,@body))))
 
 (defun load (path::string)
   (lisp.load path))
@@ -47,9 +68,19 @@ iteration, and collecting into a list every item where the last
   (lisp.eval str))
 
 
+(defun doc (callable)
+  "Returns the documentation of a given function or macro."
+  (when (or (is-function callable)
+            (is-macro callable))
+    (getkey callable :documentation)))
+
+
 (defun !! (value)
   "An alias for (not (not value)) or (and value)."
   (and value))
+
+
+(setq ! #'not) ;; Alias, just because
 
 
 (defun regex (flags & rest)
@@ -122,4 +153,38 @@ and a function as your second (or undefined, because it's optional)."
 ;   (assert (is-array array)
 ;           (format nil "(sort) requires an Array as its argument (got %l)" array))
 ;   (sort! (array.concat) compareFunc))
+
+
+(defun xrange (a::number &opt b::number step::number)
+  "Returns a generator that returns a number each time it is
+called, starting with `a', ending when it is greater than `b',
+and incrementing by `step'."
+  ;; Sanatize the input
+  (when (is-undefined b)
+    (setq b a)
+    (setq a 0))
+  (||= step 1)
+  ;; Return the generator
+  (let ((last  a))
+    (generator ()
+      (let ((ret last))
+        (setq last (+ last step))
+        (if (> ret b)
+            (stop-iteration)
+          ret)))))
+
+
+(defun is-even (num::number)
+  "Returns true if the given number is even."
+  (== 0 (% num 2)))
+
+
+(defun round (num::number)
+  "A shortcut for Math.round."
+  (Math.round num))
+
+
+(defun random ()
+  "A shortcut for Math.random."
+  (Math.random))
 

@@ -21,5 +21,8 @@ lisp.js:
     - src/javascript/wrapper/_footer.js
 
 core.lisp:
-    - src/lisp/macros.lisp
-    - src/lisp/functions.lisp
+    - src/lisp/core/macros.lisp
+    - src/lisp/core/functions.lisp
+
+lib/path.lisp:
+    - src/lisp/lib/path.lisp

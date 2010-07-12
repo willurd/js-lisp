@@ -30,6 +30,7 @@ task :build do
       outfilename = File.join(BUILD_DIRECTORY, outfilename)
       File.delete(outfilename) if File.exists?(outfilename)
       puts "Writing #{outfilename}"
+      system("mkdir -p #{File.dirname(outfilename)}")
       File.open(outfilename, 'w') do |outfile|
         list.each do |filename|
           puts "  - writing #{filename} to #{outfilename}"

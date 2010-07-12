@@ -10,26 +10,27 @@ function usage () {
 	process.exit(1);
 }
 
+function loadLispCore () {
+	lisp.load("../../build/core.lisp");
+	lisp.load("../../build/lib/path.lisp");
+}
+
 if (process.argv.length > 3) {
 	sys.puts("Too many arguments");
 	usage();
 } else if (process.argv.length === 3) {
+	// Load the given script.
 	var filename = process.argv[2];
-	lisp.load(f("../../build/core.lisp"));
+	loadLispCore();
 	lisp.load(filename);
 } else {
 	var stdin = process.openStdin();
 	
-	function f (p) {
-		return path.join(__dirname, p);
-	}
-	
 	// Setup the lisp environment
 	lisp.env.set("lisp", lisp);
-	lisp.env.set("this", repl);
-	lisp.load(f("../../build/core.lisp"));
-	lisp.load(f("utils.lisp"));
-	lisp.load(f("repl.lisp"));
+	loadLispCore();
+	lisp.load("utils.lisp");
+	lisp.load("repl.lisp");
 	
 	// Print the welcome message
 	sys.puts("Welcome to the js-lisp REPL\n" +

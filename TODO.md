@@ -17,11 +17,8 @@
 * Write <<=, >>=, &=, |=
 * Add macros: (every), (some), (notany), (notevery)
   * They all take the form (name #'predicate sequence)
-* Write macro: (unless) (opposite of (when))
-* Write macros: (incf), (decf)
 * Add default values for &opt arguments
 * Do &key stuff
-* Write the generic (do) macro
 * Write the (reduce) function (or macro?)
 * Add regex literals /.../[a-zA-Z]+
 * Rewrite the parser to handle macro expansion
@@ -96,7 +93,7 @@
   * Greasemonkey
 * Add macro: (prop <object> <prop.dot.path>)
   * Example: (prop ($ this) some.func)
-  * Or Add macro: (get "string.dot.path" [object])
+  * Or add macro: (get "string.dot.path" [object])
     Examples:
     - (get "aVar")
     - (let ((prop "some.prop"))

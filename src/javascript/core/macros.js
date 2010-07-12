@@ -170,6 +170,11 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 	// FIXEME: This is a way better way of "unquoting" an expression:
 	//         http://www.gigamonkeys.com/book/macros-defining-your-own.html#generating-the-expansion
 	
+	var documentation = null;
+	if (args.length >= 3 && typeof(args[2]) === "string") {
+		documentation = args[2];
+	}
+	
 	return (function (env, args) {
 		var macro = new Macro(function () {
 			if (args.length < 3) {
@@ -195,6 +200,7 @@ defmacro("defmacro", function (name, arglist /*, &rest */) {
 			
 			return ret;
 		});
+		macro.documentation = documentation;
 		lisp.env.set(name, macro);
 		return macro;
 	})(env, args);
@@ -242,8 +248,13 @@ defmacro("lambda", function (arglist /*, &rest */) {
 	
 	return (function (env, args) {
 		var body = args.slice(1);
+		var documentation = null;
 		
-		return function () {
+		if (body.length >= 1 && typeof(body[0]) === "string") {
+			documentation = body[0];
+		}
+		
+		var func = function () {
 			var largs = argsToArray(arguments);
 			var tempEnv = lisp.env;
 			var ret = null;
@@ -336,6 +347,9 @@ defmacro("lambda", function (arglist /*, &rest */) {
 			
 			return ret;
 		};
+		
+		func.documentation = documentation;
+		return func;
 	})(env, args);
 });
 
@@ -363,8 +377,10 @@ defmacro("defun", function (name, arglist /*, ... */) {
 		"a list of symbols as its second expression (got " + toLisp(arglist) + ")");
 	
 	var body = argsToArray(arguments).slice(2);
-	var lambda = [_S("lambda"), arglist].concat(body);
-	return resolve([_S("setq"), name, lambda]);
+	var lambda = resolve([_S("lambda"), arglist].concat(body));
+	
+	lisp.env.set(name, lambda);
+	return lambda;
 });
 
 /**
@@ -1618,6 +1634,62 @@ defmacro("is-macro", function () {
 });
 
 /**
+ * 
+ */
+defmacro("do", function (vardefs, end /*, &rest */) {
+	// (do (variable-definition*)
+	//     (end-test-form result-form*)
+	//   statement*)
+	// variable-definition = (var init-form step-form)
+	var body = argsToArray(arguments).slice(2);
+	
+	assert(vardefs instanceof Array, "(do) requires a list as " +
+		"its first argument (got " + toLisp(vardefs) + ")");
+	
+	for (var i = 0; i < vardefs.length; i++) {
+		var def = vardefs[i];
+		assert(def instanceof Array, "(do) requires lists as " +
+			"variable definitions (got " + toLisp(def) + ")");
+		assert(def.length >= 2 && def.length <= 3, "(do) variable " +
+			"definitions must have 2 or 3 elements (got " +
+			toLisp(def) + ")");
+	}
+	
+	assert(end instanceof Array, "(do) requires a list as its " +
+		"second argument (got " + toLisp(end) + ")");
+	assert(end.length >= 1, "(do) requires its 'end' expression " +
+		"to have at least 1 element (the 'test' expression)");
+	
+	return withNewEnv(function () {
+		for (var i = 0; i < vardefs.length; i++) {
+			var def = vardefs[i];
+			lisp.env.let(def[0], resolve(def[1])); // 0 = name, 1 = init form
+		}
+		
+		while (!resolve(end[0])) { // 0 = end test
+			// Evaluate the body expressions.
+			for (var i = 0; i < body.length; i++) {
+				resolve(body[i]);
+			}
+			
+			// Evaluate the step forms.
+			for (var i = 0; i < vardefs.length; i++) {
+				var def = vardefs[i];
+				var step = def.length === 2 ? def[1] : def[2]; // 2 = step form
+				lisp.env.set(def[0], resolve(step));
+			}
+		}
+		
+		var resultForms = end.slice(1);
+		var ret = null;
+		for (var i = 0; i < resultForms.length; i++) {
+			ret = resolve(resultForms[i]);
+		}
+		return ret;
+	});
+});
+
+/**
  * <pre>
  * An expression for basic iteration over a list.
  * 
@@ -1831,6 +1903,7 @@ defmacro("dec", function (varName, amountName) {
 	lisp.env.set(varName, oldValue - amount);
 });
 
+// FIXME: Put this somewhere else.
 var Generator = Class.extend({
 	init: function (callable) {
 		this.callable = callable;
@@ -1840,6 +1913,7 @@ var Generator = Class.extend({
 	}
 });
 
+// FIXME: Put this somewhere else.
 var StopIteration = Class.extend(); // ({}) ?
 
 /**
@@ -1906,7 +1980,6 @@ defmacro("labels", function (/* &rest */) {
 		return null;
 	}
 	
-	var sys = require("sys");
 	var args = argsToArray(arguments);
 	
 	var labels = args.map(function (arg) {

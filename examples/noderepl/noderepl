@@ -1,2 +1,2 @@
 #!/bin/bash
-node run.js $@
+rlwrap node run.js $@
