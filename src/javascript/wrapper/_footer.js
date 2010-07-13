@@ -34,7 +34,7 @@ if ((typeof(window) == "undefined") &&
 					throw e;
 				}
 			}
-			if (contents != null) {
+			if (contents) {
 				return lisp.eval(contents);
 			}
 		}

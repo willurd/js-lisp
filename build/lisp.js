@@ -2399,7 +2399,7 @@ defmacro("when", function (ifExpression /*, &rest */) {
  * TODO: Add examples
  * </pre>
  * 
- * @name when
+ * @name unless
  * @lisp
  * @function
  * @member lisp.macros
@@ -3142,12 +3142,14 @@ defmacro("do", function (vardefs, end /*, &rest */) {
 	//   statement*)
 	// variable-definition = (var init-form step-form)
 	var body = argsToArray(arguments).slice(2);
+	var i;
+	var def;
 	
 	assert(vardefs instanceof Array, "(do) requires a list as " +
 		"its first argument (got " + toLisp(vardefs) + ")");
 	
-	for (var i = 0; i < vardefs.length; i++) {
-		var def = vardefs[i];
+	for (i = 0; i < vardefs.length; i++) {
+		def = vardefs[i];
 		assert(def instanceof Array, "(do) requires lists as " +
 			"variable definitions (got " + toLisp(def) + ")");
 		assert(def.length >= 2 && def.length <= 3, "(do) variable " +
@@ -3161,20 +3163,20 @@ defmacro("do", function (vardefs, end /*, &rest */) {
 		"to have at least 1 element (the 'test' expression)");
 	
 	return withNewEnv(function () {
-		for (var i = 0; i < vardefs.length; i++) {
-			var def = vardefs[i];
+		for (i = 0; i < vardefs.length; i++) {
+			def = vardefs[i];
 			lisp.env.let(def[0], resolve(def[1])); // 0 = name, 1 = init form
 		}
 		
 		while (!resolve(end[0])) { // 0 = end test
 			// Evaluate the body expressions.
-			for (var i = 0; i < body.length; i++) {
+			for (i = 0; i < body.length; i++) {
 				resolve(body[i]);
 			}
 			
 			// Evaluate the step forms.
-			for (var i = 0; i < vardefs.length; i++) {
-				var def = vardefs[i];
+			for (i = 0; i < vardefs.length; i++) {
+				def = vardefs[i];
 				var step = def.length === 2 ? def[1] : def[2]; // 2 = step form
 				lisp.env.set(def[0], resolve(step));
 			}
@@ -3182,7 +3184,7 @@ defmacro("do", function (vardefs, end /*, &rest */) {
 		
 		var resultForms = end.slice(1);
 		var ret = null;
-		for (var i = 0; i < resultForms.length; i++) {
+		for (i = 0; i < resultForms.length; i++) {
 			ret = resolve(resultForms[i]);
 		}
 		return ret;
@@ -3252,7 +3254,6 @@ defmacro("dolist", function (arglist /*, ... */) {
  * <pre>
  * TODO: Test me
  * TODO: Document me
- * TODO: Add examples
  * </pre>
  * 
  * @name foreach
@@ -3270,6 +3271,15 @@ defmacro("dolist", function (arglist /*, ... */) {
  *     two
  *     three
  *     => nil
+ * 
+ * @example Explode the item
+ *     >> (let ((obj (object :one 1 :two 2 :three 3)))
+ *          (foreach ((key value) obj)
+ *            (format t "%l: %l" key value)))
+ *     "one": 1
+ *     "two": 2
+ *     "three": 3
+ *     => nil
  */
 defmacro("foreach", function (arglist /*, &rest */) {
 	// Input validation
@@ -3279,12 +3289,14 @@ defmacro("foreach", function (arglist /*, &rest */) {
 	assert(arglist.length === 2, "(foreach) got invalid argument list. " +
 		"Requires 2 arguments (got " + arglist.length + ")");
 	
-	var itemName = arglist[0];
-	var object   = resolve(arglist[1]);
+	var item   = arglist[0];
+	var object = resolve(arglist[1]);
 	
-	assert(itemName instanceof Symbol, "(foreach) got invalid argument " +
-		"list. First argument must be a symbol (got " +
-		toLisp(itemName) + ")");
+	assert(item instanceof Symbol ||
+		   (item instanceof Array && item.length === 2 &&
+	        item[0] instanceof Symbol && item[1] instanceof Symbol),
+		"(foreach) got invalid argument list. First argument must " +
+		"be a symbol or list with 2 symbols (got " + toLisp(item) + ")");
 	assert(object instanceof Object, "(foreach) got invalid argument list. " +
 		"Second argument must be an object (got " + toLisp(object) + ")");
 	
@@ -3293,12 +3305,28 @@ defmacro("foreach", function (arglist /*, &rest */) {
 	var tempEnv = lisp.env;
 	var ret = null;
 	
+	var itemName;
+	var keyName;
+	var valName;
+	
+	if (item instanceof Array) {
+		keyName = item[0];
+		valName = item[1];
+	} else {
+		itemName = item;
+	}
+	
 	try {
 		lisp.env = new Env(lisp.env);
 		var value;
 		for (var key in object) {
 			value = object[key];
-			lisp.env.let(itemName, [key, value]);
+			if (itemName) {
+				lisp.env.let(itemName, [key, value]);
+			} else {
+				lisp.env.let(keyName, key);
+				lisp.env.let(valName, value);
+			}
 			for (var i = 0; i < body.length; i++) {
 				ret = resolve(body[i]);
 			}
@@ -3421,7 +3449,20 @@ var Generator = Class.extend({
 var StopIteration = Class.extend(); // ({}) ?
 
 /**
- * Specifically meant for arrays, strings and generators.
+ * <pre>
+ * Iteration for arrays, strings and generators (and other
+ * sequences as well).
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name for
+ * @lisp
+ * @function
+ * @macro
+ * @member lisp.macros
  */
 defmacro("for", function (arglist /*, &rest */) {
 	assert(arguments.length >= 1, "(for) requires at least 1 argument");
@@ -3429,11 +3470,13 @@ defmacro("for", function (arglist /*, &rest */) {
 	var itemName = arglist[0];
 	var iterable = resolve(arglist[1]);
 	var rest = argsToArray(arguments).slice(1);
+	var i;
+	var ret;
 	
 	function doIteration (index, item) {
 		withNewEnv(function () {
 			if (rest.length === 0) {
-				return;
+				return null;
 			}
 
 			lisp.env.let(itemName, item);
@@ -3445,12 +3488,12 @@ defmacro("for", function (arglist /*, &rest */) {
 		});
 	}
 	
-	var ret = null;
+	ret = null;
 	
 	if (iterable instanceof Generator) {
 		// The iterable object is a generator
 		try {
-			for (var i = 0; true; i++) {
+			for (i = 0; true; i++) {
 				ret = doIteration(i, iterable.call());
 			}
 		} catch (e) {
@@ -3460,7 +3503,7 @@ defmacro("for", function (arglist /*, &rest */) {
 		}
 	} else if (iterable.hasOwnProperty("length")) {
 		// The iterable object is some kind of sequence
-		for (var i = 0; i < iterable.length; i++) {
+		for (i = 0; i < iterable.length; i++) {
 			ret = doIteration(i, iterable[i]);
 		}
 	} else { // Don't know how to iterate over this
@@ -3472,12 +3515,44 @@ defmacro("for", function (arglist /*, &rest */) {
 });
 
 /**
+ * <pre>
  * Emulates the goto functionality of languages like c. Takes
  * a list of lists, each one starting with a label and containing
  * an arbitrary number of expressions. Evalualtes the expressions
  * in order, except when (goto :label) is called.
  * 
  * FIXME: This macro works but is large in gross.
+ * 
+ * TODO: Test me
+ * TODO: Document me
+ * TODO: Add examples
+ * </pre>
+ * 
+ * @name labels
+ * @lisp
+ * @function
+ * @macro
+ * @member lisp.macros
+ * 
+ * @example Basic (slightly contrived) usage
+ *     >> (let ((i))
+ *     ..   (labels
+ *     ..     (:one ;; Setup
+ *     ..       (setq i -1))
+ *     ..     (:two ;; Increment
+ *     ..       (inc i))
+ *     ..     (:three ;; Test
+ *     ..       (print i)
+ *     ..       (when (< i 3)
+ *     ..         (goto :two)))
+ *     ..     (:four ;; Fin
+ *     ..       (format t "Done at %l" i))))
+ *     0
+ *     1
+ *     2
+ *     3
+ *     Done at 3
+ *     => nil
  */
 defmacro("labels", function (/* &rest */) {
 	if (arguments.length === 0) {
@@ -3512,7 +3587,7 @@ defmacro("labels", function (/* &rest */) {
 			}
 		}
 		throw new Error(toLisp(label) + " is not a valid label");
-	}
+	};
 	
 	withNewEnv(function () {
 		lisp.env.let("goto", gotoFunc);
@@ -5280,7 +5355,7 @@ if ((typeof(window) == "undefined") &&
 					throw e;
 				}
 			}
-			if (contents != null) {
+			if (contents) {
 				return lisp.eval(contents);
 			}
 		}
