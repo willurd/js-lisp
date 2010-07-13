@@ -1,0 +1,6 @@
+((:title "Lyle Lovett" :artist "Lyle Lovett" :rating 9 :ripped t)
+ (:title "Give Us a Break" :artist "Limpopo" :rating 10 :ripped t)
+ (:title "Rockin' the Suburbs" :artist "Ben Folds" :rating 6 :ripped f)
+ (:title "Home" :artist "Dixie Chicks" :rating 9 :ripped t)
+ (:title "Fly" :artist "Dixie Chicks" :rating 8 :ripped t)
+ (:title "Roses" :artist "Kathy Mattea" :rating 9 :ripped f))

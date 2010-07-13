@@ -1877,7 +1877,9 @@ defmacro("inc", function (varName, amountName) {
 	
 	var amount = (amountName === undefined) ? 1 : resolve(amountName);
 	var oldValue = lisp.env.get(varName);
-	lisp.env.set(varName, oldValue + amount);
+	var newValue = oldValue + amount;
+	lisp.env.set(varName, newValue);
+	return newValue;
 });
 
 /**
@@ -1900,7 +1902,9 @@ defmacro("dec", function (varName, amountName) {
 	
 	var amount = (amountName === undefined) ? 1 : resolve(amountName);
 	var oldValue = lisp.env.get(varName);
-	lisp.env.set(varName, oldValue - amount);
+	var newValue = oldValue - amount;
+	lisp.env.set(varName, newValue);
+	return newValue;
 });
 
 // FIXME: Put this somewhere else.
