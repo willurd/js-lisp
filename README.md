@@ -48,13 +48,13 @@ The REPL is located at /examples/repl/ (follow the steps under the section "How 
 
 Here are a few shots of the REPL, and js-lisp, in action:
 
-![](http://github.com/willurd/js-lisp/raw/master/docs/readme/repl1.png)
+![](https://github.com/willurd/js-lisp/raw/master/docs/readme/repl1.png)
 
-![](http://github.com/willurd/js-lisp/raw/master/docs/readme/repl2.png)
+![](https://github.com/willurd/js-lisp/raw/master/docs/readme/repl2.png)
 
-![](http://github.com/willurd/js-lisp/raw/master/docs/readme/repl3.png)
+![](https://github.com/willurd/js-lisp/raw/master/docs/readme/repl3.png)
 
-![](http://github.com/willurd/js-lisp/raw/master/docs/readme/repl4.png)
+![](https://github.com/willurd/js-lisp/raw/master/docs/readme/repl4.png)
 
 ### Command line REPL
 
