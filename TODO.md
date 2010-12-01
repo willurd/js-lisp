@@ -7,9 +7,9 @@
   * Support for more browsers
   * A website
 
-* Finish testing (and preferably documenting) the functionality that already exists.
-* Maybe: Rewrite (cond) with (defmacro)
-* Maybe: Write = as a shortcut for (setq ...)
+
+## Development
+
 * Write !! as a shortcut for (not (not ...))
 * Write ! as an alias for (not ...)
 * Write +=, -=, /=, *=, %=, &&= (and-equal?)
@@ -20,12 +20,11 @@
 * Add default values for &opt arguments
 * Do &key stuff
 * Write the (reduce) function (or macro?)
-* Add regex literals /.../[a-zA-Z]+
+* Add regex literals (/.../[a-zA-Z]+)
 * Rewrite the parser to handle macro expansion
 * Think about adding the concept of generators
   * (yield 'some 'values) throws a lisp.exception.YieldException
 * Create all of the rest of the functions/macros that have TODOs in the project ((case) or (switch), etc)
-* Think of ways to break the current (defmacro) implementation because I don't trust it.
 * Start thinking of all of the \*features* that can be set. For example:
   * What OS you're on: (:os-windows, :linux, :macos, etc)
   * What OS flavor you're running: (:os-flavor-xp, :os-flavor-ubuntu, :os-flavor-leopard, etc)
@@ -48,7 +47,6 @@
 * Think about a (formatcl) function that uses CL's format language (the spec: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/node200.html)
 * Put an online book or tutorial/example set into the roadmap (in the distant future). Also, make a roadmap.
 * Put a website into the roadmap (for the not-so-distant future).
-* Fix backticks, unquotes (commas), and list expanders (@).
 * Create SpecialForm and convert all relevant "macros" to special forms. Update Macro to return expanded code on .expand(), and resolved code on .call() and .apply().
 * Make the browser REPL evaluate expressions each on their own line if it receives more than one
 * Add a transcript to the REPL (just use controller.history)
@@ -59,8 +57,6 @@
   * Take a look at the CL, scheme, elisp, and closure specs for ideas. OR just conform to one language. OR make an implementation per language
   * Start putting together a library of lisp methods and macros
   * Good reference: http://www.cs.cmu.edu/Groups/AI/html/cltl/clm/
-* Testing
-  * Test return values of sexps (including null when there is no return)
 * Write better/more documentation for current functions/macros
 * Write function: (load) (loads and evaluates a lisp file inline, synchronously)
 * Think about the fact that 'nil' is actually the empty list (right now it's 'null')
@@ -87,10 +83,6 @@
   * This webpage should link off to the test runner(s) and all examples
   * As a demonstration, all the interactions of this page should be written in lisp
 * Think about how to get line numbers from lisp scripts for debugging
-* Make browser extensions:
-  * Chrome
-  * Firefox (using Jetpack)
-  * Greasemonkey
 * Add macro: (prop <object> <prop.dot.path>)
   * Example: (prop ($ this) some.func)
   * Or add macro: (get "string.dot.path" [object])
@@ -109,8 +101,6 @@
       * Each scope is a set of vars that have changed and their old values so the Env can be reset when that scope goes out
     * scope = Scope(parentScope, env)
     * Closures copy scopes (which takes the current values, instead of the old values)
-* Maybe: Build a small cookie api into the platform
-* Maybe: Build a url api, mostly nicer handling of query strings
 * Think about Cons' and how they'll fit in (or if they will...)
 * Test defining a class from scratch (using the prototype property)
 * Think about implementing generic methods
@@ -118,3 +108,28 @@
 * Think about beginning to tackle (loop)
 * Think about writing a mini app/game/widget/whatever in 100% lisp (or maybe just using jQuery?)
 * Find some better ways to do documentation. Latex? Automatically-generated latex files from jsdoc perhaps? Convert the latex to PDF _and_ HTML?
+
+
+## Testing
+
+* Finish testing (and preferably documenting) the functionality that already exists.
+* Add these tests: http://norvig.com/lispytest.py (modify the lisp syntax accordingly)
+* Think of ways to break the current (defmacro) implementation because I don't trust it.
+* Test return values of sexps (including null when there is no return)
+
+
+## Bug fixing
+
+* Fix backticks, unquotes (commas), and list expanders (@).
+
+
+## Maybe
+
+* Maybe: Rewrite (cond) with (defmacro)
+* Maybe: Write = as a shortcut for (setq ...)
+* Build a cookie api into the platform
+* Build a url api, mostly nicer handling of query strings
+* Make browser extensions:
+  * Chrome
+  * Firefox (using Jetpack)
+  * Greasemonkey
