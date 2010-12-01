@@ -86,9 +86,13 @@ The options are to make a lisp just for JavaScript, as Clojure has done for Java
 
 ## Which files do I use?
 
-Unless you want to make modifications to js-lisp, the file you care about is:
+Unless you want to make modifications to js-lisp, the files you care about are:
 
-* /build/lisp.js
+* [/build/lisp.js][build]
+* [/build/core.lisp][core]
+
+[build]: https://github.com/willurd/js-lisp/raw/master/build/lisp.js
+[core]: https://github.com/willurd/js-lisp/raw/master/build/core.lisp
 
 ## How do I view the tests and html documentation?
 
